@@ -24,5 +24,19 @@ class DatabaseSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'admin@sports.gov.bf'],
+            [
+                'name' => 'Administrateur Principal',
+                'password' => bcrypt('Admin@2026'),
+                'role' => 'admin',
+                'status' => 'active',
+            ]
+        );
+
+        if (\App\Models\CanvasAxe::count() === 0) {
+            $this->call(CanvasStructureSeeder::class);
+        }
     }
 }

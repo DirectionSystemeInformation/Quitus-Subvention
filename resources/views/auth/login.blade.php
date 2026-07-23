@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-login.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
 </head>
 <body class="auth-page">
     @php
@@ -83,7 +84,7 @@
             </div>
 
             @if (session('status'))
-                <p class="strength-text" style="color: var(--gain, #6b8e6b); margin-bottom: 16px;">{{ session('status') }}</p>
+                <div id="flashStatus" data-message="{{ session('status') }}" data-type="success" style="display:none;"></div>
             @endif
 
             @if ($errors->has('email') && !$registerHasErrors)
@@ -134,6 +135,7 @@
                             <span class="checkbox-label">Se souvenir de moi</span>
                         </label>
                     </div>
+                    <a href="{{ route('password.request') }}" style="font-size: 13px;">Mot de passe oublié ?</a>
                 </div>
 
                 <button type="submit" class="submit-btn">Se connecter</button>

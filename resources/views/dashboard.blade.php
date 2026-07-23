@@ -7,31 +7,66 @@
 @endpush
 
 @section('content')
+    @php
+        $user = auth()->user();
+        $programmeYear = now()->year + 1;
+        $rapportYear = now()->year;
+        $programmeReport = $user->reports->first(fn ($r) => $r->type === 'programme_budgetise' && $r->year === $programmeYear);
+        $rapportReport = $user->reports->first(fn ($r) => $r->type === 'rapport_activite' && $r->year === $rapportYear);
+
+        $rapportStatus = $rapportReport->status ?? 'manquant';
+        $programmeStatus = $programmeReport->status ?? 'manquant';
+
+        $stepClass = fn ($status) => match ($status) {
+            'valide' => 'is-valide',
+            'rejete' => 'is-rejete',
+            'soumis' => 'is-soumis',
+            default => 'is-manquant',
+        };
+
+        $stepIcon = fn ($status) => match ($status) {
+            'valide' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+            'rejete' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+            'soumis' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+            default => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/></svg>',
+        };
+    @endphp
+
     <div class="page-header">
-        <h1>Bonjour, {{ auth()->user()->federation_name }}</h1>
-        <p>Dépôt du rapport d'activité et du projet de programme budgétisé pour l'année N+1</p>
+        <h1>Bonjour, {{ $user->federation_name }}</h1>
+        <p>Rapport d'activité {{ $rapportYear }} et programme budgétisé {{ $programmeYear }} à soumettre à la DSHN</p>
     </div>
 
-    @if (session('status'))
-        <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--gain, #6b8e6b);">
-            {{ session('status') }}
+    <div class="dossier-stepper">
+        <div class="dossier-step {{ $stepClass($rapportStatus) }}">
+            <div class="dossier-step-icon">{!! $stepIcon($rapportStatus) !!}</div>
+            <div class="dossier-step-body">
+                <span class="dossier-step-label">Rapport d'activité ({{ $rapportYear }})</span>
+                <x-status-badge :status="$rapportStatus" />
+            </div>
         </div>
+        <div class="dossier-step-connector {{ $rapportStatus === 'valide' ? 'is-filled' : '' }}"></div>
+        <div class="dossier-step {{ $stepClass($programmeStatus) }}">
+            <div class="dossier-step-icon">{!! $stepIcon($programmeStatus) !!}</div>
+            <div class="dossier-step-body">
+                <span class="dossier-step-label">Programme budgétisé ({{ $programmeYear }})</span>
+                <x-status-badge :status="$programmeStatus" />
+            </div>
+        </div>
+    </div>
+    @if ($rapportStatus === 'valide' && $programmeStatus === 'valide')
+        <p class="strength-text" style="margin: -16px 0 24px; color: var(--gain);">Les deux documents de l'année sont validés — votre dossier est complet pour la suite de la procédure.</p>
     @endif
-
-    @php $user = auth()->user(); @endphp
 
     <div class="market-stats" style="margin-bottom: 24px;">
         <div class="market-stat">
             <div class="market-stat-label">Statut du compte</div>
             <div class="market-stat-value" style="font-size: 20px;">
-                @if ($user->status === 'active')
-                    Actif
-                @elseif ($user->status === 'pending')
-                    En attente
-                @else
-                    Rejeté
-                @endif
+                <x-status-badge :status="$user->status" />
             </div>
+            @if ($user->status === 'rejected' && $user->rejection_reason)
+                <div class="market-stat-change" style="color: var(--loss, #c27878); margin-top: 8px;">Motif : {{ $user->rejection_reason }}</div>
+            @endif
         </div>
         <div class="market-stat">
             <div class="market-stat-label">Rapports d'activité déposés</div>
@@ -47,59 +82,84 @@
         <!-- Programme d'activités budgétisé -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Programme d'activités budgétisé (N+1)</h2>
+                <h2 class="card-title">Programme d'activités budgétisé ({{ $programmeYear }})</h2>
             </div>
-            <p class="strength-text">Formulaire structuré reproduisant le canevas officiel de la DSHN.</p>
+            <p class="strength-text">Projet d'activités et de budget pour l'année {{ $programmeYear }}, à soumettre pour validation.</p>
             <div class="btn-group">
-                <a href="{{ route('programme-budgetise.create') }}" class="btn primary">Remplir / modifier le programme</a>
+                @if ($programmeReport && $programmeReport->status === 'valide')
+                    <a href="{{ route('activity-form.show', $programmeReport) }}" class="btn primary">Voir le programme validé</a>
+                @else
+                    <a href="{{ route('programme-budgetise.create') }}" class="btn primary">Remplir / modifier le programme</a>
+                @endif
             </div>
         </div>
 
         <!-- Rapport d'activité -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Rapport d'activité (année en cours)</h2>
+                <h2 class="card-title">Rapport d'activité ({{ $rapportYear }})</h2>
             </div>
-            <p class="strength-text">Formulaire structuré reproduisant le canevas officiel de la DSHN.</p>
+            <p class="strength-text">Bilan des activités menées durant l'année {{ $rapportYear }}, à soumettre pour validation.</p>
             <div class="btn-group">
-                <a href="{{ route('rapport-activite.create') }}" class="btn primary">Remplir / modifier le rapport</a>
+                @if ($rapportReport && $rapportReport->status === 'valide')
+                    <a href="{{ route('activity-form.show', $rapportReport) }}" class="btn primary">Voir le rapport validé</a>
+                @else
+                    <a href="{{ route('rapport-activite.create') }}" class="btn primary">Remplir / modifier le rapport</a>
+                @endif
             </div>
         </div>
     </div>
 
-    <!-- Historique des dépôts -->
+    <!-- Historique par année -->
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title">Mes documents déposés</h2>
+            <h2 class="card-title">Historique par année</h2>
         </div>
 
-        @if ($user->reports->isEmpty())
+        @php $reportsByYear = $user->reports->groupBy('year')->sortKeysDesc(); @endphp
+
+        @if ($reportsByYear->isEmpty())
             <p class="strength-text">Aucun document déposé pour le moment.</p>
         @else
-            <div class="transaction-list">
-                @foreach ($user->reports->sortByDesc('created_at') as $report)
-                    <div class="transaction-item">
-                        <div class="transaction-icon transfer">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                <polyline points="14 2 14 8 20 8"/>
-                            </svg>
-                        </div>
-                        <div class="transaction-details">
-                            <a href="{{ route('activity-form.show', $report) }}" class="transaction-title" style="color: var(--accent-copper, #b87333);">{{ $report->typeLabel() }} ({{ $report->year }})</a>
-                            <span class="transaction-date">{{ $report->created_at->format('d/m/Y H:i') }}</span>
-                        </div>
-                        <div class="transaction-amount">
-                            @if ($report->status === 'valide')
-                                <span style="color: var(--gain, #6b8e6b);">Validé</span>
-                            @elseif ($report->status === 'rejete')
-                                <span style="color: var(--loss, #c27878);">Rejeté</span>
-                            @else
-                                <span>Soumis</span>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
+            <div class="table-responsive">
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>Année</th>
+                        <th>Rapport d'activité</th>
+                        <th>Programme budgétisé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($reportsByYear as $year => $reportsForYear)
+                        @php
+                            $rapportForYear = $reportsForYear->firstWhere('type', 'rapport_activite');
+                            $programmeForYear = $reportsForYear->firstWhere('type', 'programme_budgetise');
+                        @endphp
+                        <tr>
+                            <td>{{ $year }}</td>
+                            <td>
+                                @if ($rapportForYear)
+                                    <a href="{{ route('activity-form.show', $rapportForYear) }}" style="text-decoration:none;">
+                                        <x-status-badge :status="$rapportForYear->status" />
+                                    </a>
+                                @else
+                                    <x-status-badge status="manquant" />
+                                @endif
+                            </td>
+                            <td>
+                                @if ($programmeForYear)
+                                    <a href="{{ route('activity-form.show', $programmeForYear) }}" style="text-decoration:none;">
+                                        <x-status-badge :status="$programmeForYear->status" />
+                                    </a>
+                                @else
+                                    <x-status-badge status="manquant" />
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
             </div>
         @endif
     </div>

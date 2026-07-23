@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,8 +40,12 @@ class AuthController extends Controller
         }
 
         if ($user->role === 'federation' && $user->status === 'rejected') {
+            $reason = $user->rejection_reason
+                ? " Motif : {$user->rejection_reason}."
+                : '';
+
             throw ValidationException::withMessages([
-                'email' => "Votre demande de compte a été rejetée. Veuillez contacter la Direction du Sport de Haut Niveau.",
+                'email' => "Votre demande de compte a été rejetée.{$reason} Veuillez contacter la Direction du Sport de Haut Niveau.",
             ]);
         }
 
@@ -48,7 +53,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(
-            $user->role === 'dshn' ? route('dshn.federations.index') : route('dashboard')
+            $user->isAdmin() ? route('admin.dashboard') : ($user->isDshn() ? route('dshn.dashboard') : route('dashboard'))
         );
     }
 
@@ -61,7 +66,7 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $data['name'],
             'federation_name' => $data['federation_name'],
             'email' => $data['email'],
@@ -69,6 +74,13 @@ class AuthController extends Controller
             'role' => 'federation',
             'status' => 'pending',
         ]);
+
+        ActivityLog::record(
+            'created',
+            "La fédération {$user->federation_name} a demandé la création de son compte",
+            $user->id,
+            $user->federation_name
+        );
 
         return redirect()->route('login')->with(
             'status',

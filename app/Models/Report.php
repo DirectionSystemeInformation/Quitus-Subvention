@@ -13,6 +13,7 @@ class Report extends Model
         'file_path',
         'original_filename',
         'status',
+        'rejection_reason',
     ];
 
     public function user()

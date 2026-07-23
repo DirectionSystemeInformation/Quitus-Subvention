@@ -20,66 +20,70 @@
 @section('content')
     <div class="page-header">
         <h1>{{ $title }} {{ $report->year }}</h1>
-        <p>Fédération : {{ $report->user->federation_name }} — statut :
-            @if ($report->status === 'valide') <span style="color: var(--gain, #6b8e6b);">Validé</span>
-            @elseif ($report->status === 'rejete') <span style="color: var(--loss, #c27878);">Rejeté</span>
-            @else <span>Soumis</span>
-            @endif
-        </p>
+        <p style="display:flex; align-items:center; gap:8px;">Fédération : {{ $report->user->federation_name }} — statut : <x-status-badge :status="$report->status" /></p>
+        @if ($report->status === 'rejete' && $report->rejection_reason)
+            <p style="color: var(--loss, #c27878); margin-top: 8px;">Motif du rejet : {{ $report->rejection_reason }}</p>
+        @endif
     </div>
 
-    @php $total = 0; @endphp
+    @if ($axeGroups->isEmpty())
+        <div class="card">
+            <p class="strength-text">Aucune ligne renseignée.</p>
+        </div>
+    @else
+        @php $total = $report->budgetLines->sum('montant'); @endphp
 
-    @foreach ($axes as $axe)
-        <table class="pb-table">
-            <thead>
-                <tr class="pb-axe-row">
-                    <td colspan="6">{{ $axe['label'] }}</td>
-                </tr>
-                <tr>
-                    <th class="pb-col-num">N°</th>
-                    <th>Désignation de l'activité</th>
-                    <th class="pb-col-montant">Montant</th>
-                    <th class="pb-col-contrib">Contribution des partenaires</th>
-                    <th class="pb-col-date">Date</th>
-                    <th>Observations</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($axe['sous_axes'] as $sousAxe)
-                    <tr class="pb-sousaxe-row">
-                        <td colspan="6">{{ $sousAxe['code'] }}- {{ $sousAxe['label'] }}</td>
+        @foreach ($axeGroups as $axeGroup)
+            <div class="table-responsive">
+            <table class="pb-table">
+                <thead>
+                    <tr class="pb-axe-row">
+                        <td colspan="6">{{ $axeGroup['label'] }}</td>
                     </tr>
-                    @for ($i = 1; $i <= $sousAxe['lignes']; $i++)
-                        @php
-                            $line = $lines->get($sousAxe['code'].'|'.$i);
-                            $total += $line->montant ?? 0;
-                        @endphp
-                        <tr>
-                            <td class="pb-col-num">{{ $i }}</td>
-                            <td>{{ $line->designation ?? '' }}</td>
-                            <td class="pb-col-montant">{{ $line && $line->montant !== null ? number_format($line->montant, 0, ',', ' ') : '' }}</td>
-                            <td class="pb-col-contrib">{{ $line->contribution_partenaires ?? '' }}</td>
-                            <td class="pb-col-date">{{ optional($line?->date)->format('d/m/Y') }}</td>
-                            <td>{{ $line->observations ?? '' }}</td>
+                    <tr>
+                        <th class="pb-col-num">N°</th>
+                        <th>Désignation de l'activité</th>
+                        <th class="pb-col-montant">Montant</th>
+                        <th class="pb-col-contrib">Contribution des partenaires</th>
+                        <th class="pb-col-date">Date</th>
+                        <th>Observations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($axeGroup['sous_axes'] as $sousAxe)
+                        <tr class="pb-sousaxe-row">
+                            <td colspan="6">{{ $sousAxe['sous_axe_code'] }}- {{ $sousAxe['sous_axe_label'] }}</td>
                         </tr>
-                    @endfor
-                @endforeach
+                        @foreach ($sousAxe['lines'] as $line)
+                            <tr>
+                                <td class="pb-col-num">{{ $line->numero_ligne }}</td>
+                                <td>{{ $line->designation }}</td>
+                                <td class="pb-col-montant">{{ $line->montant !== null ? number_format($line->montant, 0, ',', ' ') : '' }}</td>
+                                <td class="pb-col-contrib">{{ $line->contribution_partenaires }}</td>
+                                <td class="pb-col-date">{{ optional($line->date)->format('d/m/Y') }}</td>
+                                <td>{{ $line->observations }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+            </div>
+        @endforeach
+
+        <div class="table-responsive">
+        <table class="pb-table">
+            <tbody>
+                <tr class="pb-total-row">
+                    <td colspan="2">TOTAL GENERAL</td>
+                    <td class="pb-col-montant">{{ number_format($total, 0, ',', ' ') }}</td>
+                    <td colspan="3"></td>
+                </tr>
             </tbody>
         </table>
-    @endforeach
+        </div>
+    @endif
 
-    <table class="pb-table">
-        <tbody>
-            <tr class="pb-total-row">
-                <td colspan="2">TOTAL GENERAL</td>
-                <td class="pb-col-montant">{{ number_format($total, 0, ',', ' ') }}</td>
-                <td colspan="3"></td>
-            </tr>
-        </tbody>
-    </table>
-
-    @if (auth()->user()->isFederation())
+    @if (auth()->user()->isFederation() && $report->status !== 'valide')
         <div class="btn-group">
             <a href="{{ route(str_replace('_', '-', $type).'.create', ['annee' => $report->year]) }}" class="btn primary">Modifier</a>
         </div>
@@ -88,16 +92,13 @@
     @if (auth()->user()->isDshn())
         <div class="btn-group">
             @if ($report->status !== 'valide')
-                <form method="POST" action="{{ route('dshn.reports.validate', $report) }}">
+                <form method="POST" action="{{ role_route('reports.validate', $report) }}">
                     @csrf
                     <button type="submit" class="btn primary">Valider</button>
                 </form>
             @endif
             @if ($report->status !== 'rejete')
-                <form method="POST" action="{{ route('dshn.reports.reject', $report) }}">
-                    @csrf
-                    <button type="submit" class="btn danger">Rejeter</button>
-                </form>
+                <button type="button" class="btn danger js-reject-reason" data-action="{{ role_route('reports.reject', $report) }}">Rejeter</button>
             @endif
         </div>
     @endif

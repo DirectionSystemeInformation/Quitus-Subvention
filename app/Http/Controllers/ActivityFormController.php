@@ -14,6 +14,36 @@ class ActivityFormController extends Controller
         'rapport_activite' => "Rapport d'activité",
     ];
 
+    public function index(Request $request)
+    {
+        $type = $request->query('type', 'rapport_activite');
+
+        abort_unless(array_key_exists($type, self::TITLES), 404);
+
+        $computedDefaultYear = $type === 'programme_budgetise' ? now()->year + 1 : now()->year;
+
+        $reports = Auth::user()->reports()
+            ->where('type', $type)
+            ->orderByDesc('year')
+            ->get();
+
+        $selectedYear = (int) $request->query('annee', $computedDefaultYear);
+        $selectedReport = $reports->firstWhere('year', $selectedYear);
+
+        $minYear = min($computedDefaultYear - 5, $reports->min('year') ?? $computedDefaultYear);
+        $maxYear = max($computedDefaultYear + 2, $reports->max('year') ?? $computedDefaultYear);
+        $availableYears = collect(range($maxYear, $minYear));
+
+        return view('activity-form.index', [
+            'type' => $type,
+            'title' => self::TITLES[$type],
+            'selectedYear' => $selectedYear,
+            'selectedReport' => $selectedReport,
+            'availableYears' => $availableYears,
+            'reports' => $reports,
+        ]);
+    }
+
     public function create(Request $request, string $type)
     {
         abort_unless(array_key_exists($type, self::TITLES), 404);
@@ -25,6 +55,11 @@ class ActivityFormController extends Controller
             ->where('year', $year)
             ->with('budgetLines')
             ->first();
+
+        if ($report && $report->status === 'valide') {
+            return redirect()->route('activity-form.show', $report)
+                ->with('status', 'Ce document a déjà été validé et ne peut plus être modifié.');
+        }
 
         $existingLines = collect();
         if ($report) {
@@ -48,12 +83,34 @@ class ActivityFormController extends Controller
         $data = $request->validate([
             'year' => ['required', 'integer', 'min:2000', 'max:2100'],
             'lignes' => ['nullable', 'array'],
-            'lignes.*.designation' => ['nullable', 'string', 'max:255'],
-            'lignes.*.montant' => ['nullable', 'numeric', 'min:0'],
-            'lignes.*.contribution_partenaires' => ['nullable', 'string', 'max:255'],
-            'lignes.*.date' => ['nullable', 'date'],
-            'lignes.*.observations' => ['nullable', 'string', 'max:255'],
+            'lignes.*' => ['array', 'max:100'],
+            'lignes.*.*.designation' => ['nullable', 'string', 'max:255'],
+            'lignes.*.*.montant' => ['nullable', 'numeric', 'min:0'],
+            'lignes.*.*.contribution_partenaires' => ['nullable', 'string', 'max:255'],
+            'lignes.*.*.date' => ['nullable', 'date'],
+            'lignes.*.*.observations' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $existing = Auth::user()->reports()
+            ->where('type', $type)
+            ->where('year', $data['year'])
+            ->first();
+
+        if ($existing && $existing->status === 'valide') {
+            return redirect()->route('activity-form.show', $existing)
+                ->with('status', 'Ce document a déjà été validé et ne peut plus être modifié.');
+        }
+
+        // Métadonnées du canevas en vigueur, indexées par code de sous-axe.
+        $sousAxeIndex = collect(ActivityCanvasStructure::axes())
+            ->flatMap(fn ($axe) => collect($axe['sous_axes'])->map(fn ($sousAxe) => [
+                'code' => $sousAxe['code'],
+                'canvas_sous_axe_id' => $sousAxe['id'],
+                'axe' => $axe['code'],
+                'axe_label' => $axe['label'],
+                'sous_axe_label' => $sousAxe['label'],
+            ]))
+            ->keyBy('code');
 
         $report = Auth::user()->reports()->updateOrCreate(
             ['type' => $type, 'year' => $data['year']],
@@ -62,25 +119,34 @@ class ActivityFormController extends Controller
 
         $report->budgetLines()->delete();
 
-        foreach (ActivityCanvasStructure::lignes() as $ligne) {
-            $key = $ligne['sous_axe_code'].'-'.$ligne['numero_ligne'];
-            $input = $data['lignes'][$key] ?? [];
+        foreach ($data['lignes'] ?? [] as $sousAxeCode => $rows) {
+            $meta = $sousAxeIndex->get($sousAxeCode);
 
-            if (empty(array_filter($input))) {
+            // Sous-axe supprimé du canevas entre l'affichage du formulaire et la soumission.
+            if (! $meta) {
                 continue;
             }
 
-            $report->budgetLines()->create([
-                'axe' => $ligne['axe'],
-                'sous_axe_code' => $ligne['sous_axe_code'],
-                'sous_axe_label' => $ligne['sous_axe_label'],
-                'numero_ligne' => $ligne['numero_ligne'],
-                'designation' => $input['designation'] ?? null,
-                'montant' => $input['montant'] ?? null,
-                'contribution_partenaires' => $input['contribution_partenaires'] ?? null,
-                'date' => $input['date'] ?? null,
-                'observations' => $input['observations'] ?? null,
-            ]);
+            $numero = 1;
+            foreach ($rows as $input) {
+                if (empty(array_filter($input))) {
+                    continue;
+                }
+
+                $report->budgetLines()->create([
+                    'canvas_sous_axe_id' => $meta['canvas_sous_axe_id'],
+                    'axe' => $meta['axe'],
+                    'axe_label' => $meta['axe_label'],
+                    'sous_axe_code' => $sousAxeCode,
+                    'sous_axe_label' => $meta['sous_axe_label'],
+                    'numero_ligne' => $numero++,
+                    'designation' => $input['designation'] ?? null,
+                    'montant' => $input['montant'] ?? null,
+                    'contribution_partenaires' => $input['contribution_partenaires'] ?? null,
+                    'date' => $input['date'] ?? null,
+                    'observations' => $input['observations'] ?? null,
+                ]);
+            }
         }
 
         return redirect()->route('dashboard')->with('status', self::TITLES[$type].' soumis avec succès.');
@@ -97,12 +163,33 @@ class ActivityFormController extends Controller
 
         $report->load('budgetLines', 'user');
 
+        // Regroupement à partir des données propres au rapport (snapshot au moment
+        // de la soumission), indépendant de la version actuelle du canevas.
+        $sousAxeGroups = $report->budgetLines
+            ->sortBy('numero_ligne')
+            ->groupBy('sous_axe_code')
+            ->map(fn ($lines, $sousAxeCode) => [
+                'axe' => $lines->first()->axe,
+                'axe_label' => $lines->first()->axe_label,
+                'sous_axe_code' => $sousAxeCode,
+                'sous_axe_label' => $lines->first()->sous_axe_label,
+                'lines' => $lines->values(),
+            ])
+            ->sortBy(fn ($group) => $group['axe'].'|'.$group['sous_axe_code']);
+
+        $axeGroups = $sousAxeGroups
+            ->groupBy('axe_label')
+            ->map(fn ($groups, $axeLabel) => [
+                'label' => $axeLabel,
+                'sous_axes' => $groups->values(),
+            ])
+            ->values();
+
         return view('activity-form.show', [
             'type' => $report->type,
             'title' => self::TITLES[$report->type],
-            'axes' => ActivityCanvasStructure::axes(),
             'report' => $report,
-            'lines' => $report->budgetLines->keyBy(fn ($l) => $l->sous_axe_code.'|'.$l->numero_ligne),
+            'axeGroups' => $axeGroups,
         ]);
     }
 }

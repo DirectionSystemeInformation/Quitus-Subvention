@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'status',
         'federation_name',
+        'rejection_reason',
     ];
 
     /**
@@ -57,7 +58,12 @@ class User extends Authenticatable
 
     public function isDshn(): bool
     {
-        return $this->role === 'dshn';
+        return in_array($this->role, ['dshn', 'admin'], true);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 
     public function isActive(): bool
@@ -68,5 +74,10 @@ class User extends Authenticatable
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
 }

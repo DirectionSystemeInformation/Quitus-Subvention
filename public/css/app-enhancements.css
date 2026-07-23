@@ -1,0 +1,369 @@
+/* ==========================================================================
+   App Enhancements — animations, glassmorphism, toasts, micro-interactions
+   ========================================================================== */
+
+/* ========================================
+   Reveal animations
+======================================== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+    animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal { animation: none; }
+}
+
+/* ========================================
+   Card & Button micro-interactions
+======================================== */
+.card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+    border-color: rgba(184, 115, 51, 0.35);
+}
+
+.btn, .security-btn, .canevas-icon-btn, .user-icon-btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn:active, .security-btn:active {
+    transform: scale(0.96);
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes rippleAnim {
+    to {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.form-input, .form-select {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.form-input:focus, .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
+}
+
+.nav-item {
+    transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease, padding-left 0.25s ease;
+}
+
+.nav-item:hover {
+    transform: translateX(3px);
+}
+
+.nav-item.active {
+    animation: navActiveIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes navActiveIn {
+    from { transform: translateX(-6px); opacity: 0.6; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ========================================
+   Glassmorphism
+======================================== */
+.card {
+    background-color: rgba(44, 44, 46, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="light"] .card {
+    background-color: rgba(255, 255, 255, 0.72);
+}
+
+.modal-box {
+    background: rgba(44, 44, 46, 0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-theme="light"] .modal-box {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-overlay {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: overlayIn 0.25s ease both;
+}
+
+@keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ========================================
+   Toast Notifications
+======================================== */
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: rgba(44, 44, 46, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border, #333);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    color: var(--text-primary, #f5f0e8);
+    font-size: 14px;
+}
+
+[data-theme="light"] .toast {
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.toast.toast-out {
+    animation: toastOut 0.3s ease both;
+}
+
+.toast.success { border-left: 3px solid var(--gain, #6b8e6b); }
+.toast.error { border-left: 3px solid var(--loss, #c27878); }
+
+.toast-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary, #a8a8a8);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    margin-left: auto;
+    padding: 0;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(40px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast, .modal-box, .modal-overlay, .nav-item.active { animation: none; }
+}
+
+/* ========================================
+   Animated Progress Bar
+======================================== */
+.pb-progress-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--bg-secondary, rgba(255,255,255,0.08));
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.pb-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent-gradient);
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ========================================
+   Dossier Stepper (federation dashboard)
+======================================== */
+.dossier-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 16px;
+    background: var(--bg-card, var(--bg-secondary));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+}
+
+.dossier-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.dossier-step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid var(--border);
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
+}
+
+.dossier-step-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.dossier-step.is-valide .dossier-step-icon {
+    border-color: var(--gain);
+    color: var(--gain);
+    background: rgba(107, 142, 107, 0.12);
+}
+
+.dossier-step.is-rejete .dossier-step-icon {
+    border-color: var(--loss);
+    color: var(--loss);
+    background: rgba(194, 120, 120, 0.12);
+}
+
+.dossier-step.is-soumis .dossier-step-icon {
+    border-color: var(--accent-copper);
+    color: var(--accent-copper);
+    background: rgba(184, 115, 51, 0.12);
+}
+
+.dossier-step-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.dossier-step-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dossier-step-connector {
+    flex: 0 1 60px;
+    height: 2px;
+    background: var(--border);
+    margin: 0 16px;
+    border-radius: 2px;
+    transition: background 0.4s ease;
+}
+
+.dossier-step-connector.is-filled {
+    background: var(--gain);
+}
+
+@media (max-width: 768px) {
+    .dossier-stepper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .dossier-step-connector {
+        display: none;
+    }
+}
+
+/* ========================================
+   Year Selector (documents page)
+======================================== */
+.year-select-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.year-select-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.year-select {
+    width: auto;
+    min-width: 100px;
+    padding: 10px 38px 10px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    border: 1.5px solid var(--accent-copper);
+    border-radius: 10px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b87333' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.year-select:hover {
+    border-color: var(--accent-copper-light);
+}
+
+.year-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.2);
+}
+
+@media (max-width: 600px) {
+    .card-header:has(.year-select-form) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}

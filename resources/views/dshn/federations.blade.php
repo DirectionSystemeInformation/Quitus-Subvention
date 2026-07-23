@@ -4,6 +4,17 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
+    <style>
+        .fed-icon-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 8px;
+            background: var(--bg-secondary, rgba(255,255,255,0.06)); border: 1px solid var(--border, #333);
+            color: var(--text-primary); cursor: pointer; flex-shrink: 0;
+        }
+        .fed-icon-btn:hover { background: var(--bg-card-hover); }
+        .fed-icon-btn.danger { color: var(--loss, #c27878); }
+        .fed-icon-btn svg { width: 16px; height: 16px; }
+    </style>
 @endpush
 
 @section('content')
@@ -11,12 +22,6 @@
         <h1>Fédérations</h1>
         <p>Validation des demandes de création de compte et suivi des fédérations enregistrées</p>
     </div>
-
-    @if (session('status'))
-        <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--gain, #6b8e6b);">
-            {{ session('status') }}
-        </div>
-    @endif
 
     @php
         $pending = $federations->where('status', 'pending');
@@ -42,10 +47,18 @@
         <div class="card" style="margin-bottom: 24px;">
             <div class="card-header">
                 <h2 class="card-title">Demandes en attente</h2>
+                <button type="submit" form="bulkValidateForm" class="btn primary" id="bulkValidateBtn" disabled>Valider la sélection (<span id="bulkSelectedCount">0</span>)</button>
             </div>
+
+            <form method="POST" action="{{ role_route('federations.bulk-validate') }}" id="bulkValidateForm">
+                @csrf
+            </form>
+
+            <div class="table-responsive">
             <table class="market-table">
                 <thead>
                     <tr>
+                        <th style="width:32px;"><input type="checkbox" id="selectAllPending"></th>
                         <th>Fédération</th>
                         <th>Responsable</th>
                         <th>Email</th>
@@ -56,34 +69,35 @@
                 <tbody>
                     @foreach ($pending as $federation)
                         <tr>
+                            <td><input type="checkbox" name="ids[]" value="{{ $federation->id }}" form="bulkValidateForm" class="js-pending-checkbox"></td>
                             <td>{{ $federation->federation_name }}</td>
                             <td>{{ $federation->name }}</td>
                             <td>{{ $federation->email }}</td>
                             <td>{{ $federation->created_at->format('d/m/Y') }}</td>
                             <td>
-                                <div style="display:flex;gap:8px;">
-                                    <form method="POST" action="{{ route('dshn.federations.validate', $federation) }}">
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <form method="POST" action="{{ role_route('federations.validate', $federation) }}">
                                         @csrf
                                         <button type="submit" class="security-btn primary">Valider</button>
                                     </form>
-                                    <form method="POST" action="{{ route('dshn.federations.reject', $federation) }}">
-                                        @csrf
-                                        <button type="submit" class="security-btn">Rejeter</button>
-                                    </form>
+                                    <button type="button" class="security-btn js-reject-reason" data-action="{{ role_route('federations.reject', $federation) }}">Rejeter</button>
                                 </div>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
     @endif
 
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Toutes les fédérations</h2>
+            <input type="search" class="form-input js-table-search" data-target="federations-table" placeholder="Rechercher..." style="max-width: 260px;">
         </div>
-        <table class="market-table">
+        <div class="table-responsive">
+        <table class="market-table" id="federations-table">
             <thead>
                 <tr>
                     <th>Fédération</th>
@@ -91,29 +105,152 @@
                     <th>Email</th>
                     <th>Statut</th>
                     <th>Documents déposés</th>
+                    @if (auth()->user()->isDshn())
+                        <th></th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
                 @forelse ($others as $federation)
-                    <tr>
+                    <tr data-search-row>
                         <td>{{ $federation->federation_name }}</td>
                         <td>{{ $federation->name }}</td>
                         <td>{{ $federation->email }}</td>
-                        <td>
-                            @if ($federation->status === 'active')
-                                <span style="color: var(--gain, #6b8e6b);">Actif</span>
-                            @else
-                                <span style="color: var(--loss, #c27878);">Rejeté</span>
-                            @endif
-                        </td>
+                        <td><x-status-badge :status="$federation->status" /></td>
                         <td>{{ $federation->reports()->count() }}</td>
+                        @if (auth()->user()->isDshn())
+                            <td>
+                                <div style="display:flex; gap:6px;">
+                                    <button type="button" class="fed-icon-btn js-edit-federation"
+                                        data-id="{{ $federation->id }}"
+                                        data-name="{{ $federation->name }}"
+                                        data-federation-name="{{ $federation->federation_name }}"
+                                        data-email="{{ $federation->email }}"
+                                        data-status="{{ $federation->status }}"
+                                        data-action="{{ role_route('federations.update', $federation) }}"
+                                        title="Modifier">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </button>
+                                    <form method="POST" action="{{ role_route('federations.destroy', $federation) }}" data-confirm="Supprimer le compte de {{ $federation->federation_name }} ?">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="fed-icon-btn danger" title="Supprimer">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">Aucune autre fédération enregistrée.</td>
+                        <td colspan="6">Aucune autre fédération enregistrée.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
+        </div>
+        <p class="strength-text js-table-empty" data-target="federations-table" style="display:none;">Aucun résultat.</p>
     </div>
+
+    @if (auth()->user()->isDshn())
+        <div class="modal-overlay" id="editFederationModal">
+            <div class="modal-box">
+                <h3>Modifier la fédération</h3>
+                <form method="POST" id="editFederationForm">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-group">
+                        <label class="form-label">Nom de la fédération</label>
+                        <input type="text" name="federation_name" id="editFedFederationName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Responsable</label>
+                        <input type="text" name="name" id="editFedName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" id="editFedEmail" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Statut</label>
+                        <select name="status" id="editFedStatus" class="form-select">
+                            <option value="pending">En attente</option>
+                            <option value="active">Actif</option>
+                            <option value="rejected">Rejeté</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nouveau mot de passe (optionnel)</label>
+                        <input type="password" name="password" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirmer le mot de passe</label>
+                        <input type="password" name="password_confirmation" class="form-input">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn" id="editFederationCancel">Annuler</button>
+                        <button type="submit" class="btn primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            const modal = document.getElementById('editFederationModal');
+            if (!modal) return;
+
+            const form = document.getElementById('editFederationForm');
+
+            document.querySelectorAll('.js-edit-federation').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    form.action = btn.dataset.action;
+                    document.getElementById('editFedFederationName').value = btn.dataset.federationName;
+                    document.getElementById('editFedName').value = btn.dataset.name;
+                    document.getElementById('editFedEmail').value = btn.dataset.email;
+                    document.getElementById('editFedStatus').value = btn.dataset.status;
+                    modal.classList.add('active');
+                });
+            });
+
+            document.getElementById('editFederationCancel').addEventListener('click', function () {
+                modal.classList.remove('active');
+            });
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+        })();
+
+        (function () {
+            const selectAll = document.getElementById('selectAllPending');
+            if (!selectAll) return;
+
+            const checkboxes = document.querySelectorAll('.js-pending-checkbox');
+            const bulkBtn = document.getElementById('bulkValidateBtn');
+            const countEl = document.getElementById('bulkSelectedCount');
+
+            function updateBulkState() {
+                const checked = document.querySelectorAll('.js-pending-checkbox:checked').length;
+                countEl.textContent = checked;
+                bulkBtn.disabled = checked === 0;
+            }
+
+            selectAll.addEventListener('change', function () {
+                checkboxes.forEach(function (cb) { cb.checked = selectAll.checked; });
+                updateBulkState();
+            });
+
+            checkboxes.forEach(function (cb) {
+                cb.addEventListener('change', function () {
+                    if (!cb.checked) selectAll.checked = false;
+                    updateBulkState();
+                });
+            });
+        })();
+    </script>
+@endpush

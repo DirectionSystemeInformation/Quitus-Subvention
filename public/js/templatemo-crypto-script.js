@@ -301,6 +301,218 @@ https://templatemo.com/tm-609-crypto-vault
     }
 
     /* ========================================
+       Confirmation Modal (replaces window.confirm)
+    ======================================== */
+    function initConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        if (!modal) return;
+
+        const messageEl = document.getElementById('confirmModalMessage');
+        const confirmBtn = document.getElementById('confirmModalConfirm');
+        const cancelBtn = document.getElementById('confirmModalCancel');
+        let pendingForm = null;
+
+        function closeModal() {
+            modal.classList.remove('active');
+            pendingForm = null;
+        }
+
+        document.querySelectorAll('form[data-confirm]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                if (form.dataset.confirmed === 'true') {
+                    return;
+                }
+                e.preventDefault();
+                pendingForm = form;
+                messageEl.textContent = form.dataset.confirm;
+                modal.classList.add('active');
+            });
+        });
+
+        confirmBtn.addEventListener('click', function() {
+            if (pendingForm) {
+                pendingForm.dataset.confirmed = 'true';
+                pendingForm.submit();
+            }
+            closeModal();
+        });
+
+        cancelBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    /* ========================================
+       Reject Reason Modal
+    ======================================== */
+    function initRejectReasonModal() {
+        const modal = document.getElementById('rejectReasonModal');
+        if (!modal) return;
+
+        const form = document.getElementById('rejectReasonForm');
+        const reasonInput = document.getElementById('rejectReasonInput');
+        const cancelBtn = document.getElementById('rejectReasonCancel');
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        document.querySelectorAll('.js-reject-reason').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                form.action = btn.dataset.action;
+                reasonInput.value = '';
+                modal.classList.add('active');
+                setTimeout(function() { reasonInput.focus(); }, 50);
+            });
+        });
+
+        cancelBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    /* ========================================
+       Reveal Animations
+    ======================================== */
+    function initRevealAnimations() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const targets = document.querySelectorAll('.card, .market-stat');
+        targets.forEach(function(el, index) {
+            el.classList.add('reveal');
+            el.style.animationDelay = Math.min(index * 60, 480) + 'ms';
+        });
+    }
+
+    /* ========================================
+       Animated Counters
+    ======================================== */
+    function initAnimatedCounters() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        document.querySelectorAll('.market-stat-value').forEach(function(el) {
+            const raw = el.textContent.trim();
+            if (!/^[0-9][0-9\s]*$/.test(raw)) return;
+
+            const target = parseInt(raw.replace(/\s/g, ''), 10);
+            if (isNaN(target)) return;
+
+            const duration = 700;
+            const start = performance.now();
+
+            function step(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(eased * target).toLocaleString('fr-FR');
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.textContent = target.toLocaleString('fr-FR');
+                }
+            }
+
+            requestAnimationFrame(step);
+        });
+    }
+
+    /* ========================================
+       Ripple Effect
+    ======================================== */
+    function initRippleEffect() {
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn, .security-btn, .canevas-icon-btn, .user-icon-btn');
+            if (!btn) return;
+
+            const rect = btn.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            const size = Math.max(rect.width, rect.height);
+            ripple.className = 'ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            btn.appendChild(ripple);
+            setTimeout(function() { ripple.remove(); }, 600);
+        });
+    }
+
+    /* ========================================
+       Toast Notifications
+    ======================================== */
+    function showToast(message, type) {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + (type || 'success');
+
+        const iconPath = type === 'error'
+            ? '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+            : '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
+
+        toast.innerHTML =
+            '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + iconPath + '</svg>' +
+            '<span>' + message + '</span>' +
+            '<button type="button" class="toast-close">&times;</button>';
+
+        container.appendChild(toast);
+
+        function remove() {
+            toast.classList.add('toast-out');
+            setTimeout(function() { toast.remove(); }, 300);
+        }
+
+        toast.querySelector('.toast-close').addEventListener('click', remove);
+        setTimeout(remove, 5000);
+    }
+
+    function initToasts() {
+        const flash = document.getElementById('flashStatus');
+        if (flash && flash.dataset.message) {
+            showToast(flash.dataset.message, flash.dataset.type || 'success');
+        }
+
+        document.querySelectorAll('#flashErrors li').forEach(function(li) {
+            showToast(li.textContent, 'error');
+        });
+    }
+
+    /* ========================================
+       Generic Table Search
+    ======================================== */
+    function initTableSearch() {
+        document.querySelectorAll('.js-table-search').forEach(function(input) {
+            const container = document.getElementById(input.dataset.target);
+            if (!container) return;
+
+            const emptyMessage = document.querySelector('.js-table-empty[data-target="' + input.dataset.target + '"]');
+            const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
+
+            input.addEventListener('input', function() {
+                const query = input.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                rows.forEach(function(row) {
+                    const matches = !query || row.textContent.toLowerCase().includes(query);
+                    row.style.display = matches ? '' : 'none';
+                    if (matches) visibleCount++;
+                });
+
+                if (emptyMessage) {
+                    emptyMessage.style.display = visibleCount === 0 ? '' : 'none';
+                }
+            });
+        });
+    }
+
+    /* ========================================
        Auth Tabs (Login Page)
     ======================================== */
     function initAuthTabs() {
@@ -370,6 +582,13 @@ https://templatemo.com/tm-609-crypto-vault
         initPasswordToggle();
         initPasswordStrength();
         initAuthTabs();
+        initTableSearch();
+        initConfirmModal();
+        initRejectReasonModal();
+        initRevealAnimations();
+        initAnimatedCounters();
+        initRippleEffect();
+        initToasts();
     }
 
     // Run on DOM ready

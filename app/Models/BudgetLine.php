@@ -8,7 +8,9 @@ class BudgetLine extends Model
 {
     protected $fillable = [
         'report_id',
+        'canvas_sous_axe_id',
         'axe',
+        'axe_label',
         'sous_axe_code',
         'sous_axe_label',
         'numero_ligne',

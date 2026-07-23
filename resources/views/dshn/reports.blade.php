@@ -12,21 +12,19 @@
         <p>Rapports d'activité et projets de programmes budgétisés déposés par les fédérations</p>
     </div>
 
-    @if (session('status'))
-        <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--gain, #6b8e6b);">
-            {{ session('status') }}
-        </div>
-    @endif
-
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Documents déposés</h2>
+            @if ($reports->isNotEmpty())
+                <input type="search" class="form-input js-table-search" data-target="reports-table" placeholder="Rechercher..." style="max-width: 260px;">
+            @endif
         </div>
 
         @if ($reports->isEmpty())
             <p class="strength-text">Aucun document déposé pour le moment.</p>
         @else
-            <table class="market-table">
+            <div class="table-responsive">
+            <table class="market-table" id="reports-table">
                 <thead>
                     <tr>
                         <th>Fédération</th>
@@ -39,34 +37,23 @@
                 </thead>
                 <tbody>
                     @foreach ($reports as $report)
-                        <tr>
+                        <tr data-search-row>
                             <td>{{ $report->user->federation_name }}</td>
                             <td>{{ $report->typeLabel() }}</td>
                             <td>{{ $report->year }}</td>
                             <td>{{ $report->created_at->format('d/m/Y H:i') }}</td>
+                            <td><x-status-badge :status="$report->status" /></td>
                             <td>
-                                @if ($report->status === 'valide')
-                                    <span style="color: var(--gain, #6b8e6b);">Validé</span>
-                                @elseif ($report->status === 'rejete')
-                                    <span style="color: var(--loss, #c27878);">Rejeté</span>
-                                @else
-                                    <span>Soumis</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div style="display:flex;gap:8px;">
+                                <div style="display:flex;gap:8px;align-items:center;">
                                     <a href="{{ route('activity-form.show', $report) }}" class="security-btn">Voir le détail</a>
                                     @if ($report->status !== 'valide')
-                                        <form method="POST" action="{{ route('dshn.reports.validate', $report) }}">
+                                        <form method="POST" action="{{ role_route('reports.validate', $report) }}">
                                             @csrf
                                             <button type="submit" class="security-btn primary">Valider</button>
                                         </form>
                                     @endif
                                     @if ($report->status !== 'rejete')
-                                        <form method="POST" action="{{ route('dshn.reports.reject', $report) }}">
-                                            @csrf
-                                            <button type="submit" class="security-btn">Rejeter</button>
-                                        </form>
+                                        <button type="button" class="security-btn js-reject-reason" data-action="{{ role_route('reports.reject', $report) }}">Rejeter</button>
                                     @endif
                                 </div>
                             </td>
@@ -74,6 +61,8 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
+            <p class="strength-text js-table-empty" data-target="reports-table" style="display:none;">Aucun résultat.</p>
         @endif
     </div>
 @endsection
