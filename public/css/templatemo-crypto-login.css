@@ -119,31 +119,6 @@ body.auth-page {
     position: relative;
 }
 
-.theme-toggle-btn {
-    position: absolute;
-    top: 32px;
-    right: 32px;
-    width: 46px;
-    height: 46px;
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.theme-toggle-btn:hover {
-    background-color: var(--bg-card-hover);
-    border-color: var(--accent-copper);
-}
-
-.theme-toggle-btn svg {
-    stroke: var(--text-secondary);
-}
-
 .auth-form-wrapper {
     width: 100%;
     max-width: 420px;
@@ -224,7 +199,7 @@ body.auth-page {
 }
 
 .auth-form .form-input:focus {
-    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
+    box-shadow: 0 0 0 3px rgba(18, 152, 80, 0.15);
 }
 
 .input-icon {
@@ -269,29 +244,18 @@ body.auth-page {
     cursor: pointer;
 }
 
-.checkbox {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
-.checkbox.checked {
-    background: var(--accent-gradient);
-    border-color: var(--accent-copper);
-}
-
-.checkbox svg {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.checkbox.checked svg {
-    opacity: 1;
+.checkbox-wrapper input[type="checkbox"]:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: var(--radius-xs);
 }
 
 .checkbox-label {
@@ -332,7 +296,7 @@ body.auth-page {
 .submit-btn:hover {
     background: var(--accent-gradient-hover);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(184, 115, 51, 0.3);
+    box-shadow: 0 8px 24px rgba(18, 152, 80, 0.3);
 }
 
 /* ========================================
@@ -513,11 +477,6 @@ body.auth-page {
 
     .auth-form-container {
         padding: 40px 24px 80px;
-    }
-
-    .theme-toggle-btn {
-        top: 16px;
-        right: 16px;
     }
 }
 

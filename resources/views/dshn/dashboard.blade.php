@@ -42,11 +42,11 @@
                 <a href="{{ role_route('federations.index') }}" class="view-all">Voir tout</a>
             </div>
             @if ($recentPending->isEmpty())
-                <p class="strength-text">Aucune demande en attente.</p>
+                <x-empty-state icon="users" title="Aucune demande en attente." :compact="true" />
             @else
                 <div class="transaction-list">
                     @foreach ($recentPending as $federation)
-                        <div class="transaction-item">
+                        <a href="{{ role_route('federations.show', $federation) }}" class="transaction-item" style="text-decoration:none; color:inherit;">
                             <div class="transaction-icon transfer">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -60,7 +60,7 @@
                             <div class="transaction-amount">
                                 <x-status-badge :status="$federation->status" />
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @endif
@@ -72,7 +72,7 @@
                 <a href="{{ role_route('reports.index') }}" class="view-all">Voir tout</a>
             </div>
             @if ($recentReports->isEmpty())
-                <p class="strength-text">Aucun rapport en attente de traitement.</p>
+                <x-empty-state icon="inbox" title="Aucun rapport en attente de traitement." :compact="true" />
             @else
                 <div class="transaction-list">
                     @foreach ($recentReports as $report)

@@ -16,12 +16,20 @@
         <div class="card-header">
             <h2 class="card-title">Documents déposés</h2>
             @if ($reports->isNotEmpty())
-                <input type="search" class="form-input js-table-search" data-target="reports-table" placeholder="Rechercher..." style="max-width: 260px;">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <select class="form-select js-table-status-filter" data-target="reports-table" style="max-width: 170px;">
+                        <option value="">Tous les statuts</option>
+                        <option value="soumis">Soumis</option>
+                        <option value="valide">Validé</option>
+                        <option value="rejete">Rejeté</option>
+                    </select>
+                    <input type="search" class="form-input js-table-search" data-target="reports-table" placeholder="Rechercher..." style="max-width: 260px;">
+                </div>
             @endif
         </div>
 
         @if ($reports->isEmpty())
-            <p class="strength-text">Aucun document déposé pour le moment.</p>
+            <x-empty-state icon="inbox" title="Aucun document déposé pour le moment." />
         @else
             <div class="table-responsive">
             <table class="market-table" id="reports-table">
@@ -37,7 +45,7 @@
                 </thead>
                 <tbody>
                     @foreach ($reports as $report)
-                        <tr data-search-row>
+                        <tr data-search-row data-status="{{ $report->status }}">
                             <td>{{ $report->user->federation_name }}</td>
                             <td>{{ $report->typeLabel() }}</td>
                             <td>{{ $report->year }}</td>
@@ -62,7 +70,7 @@
                 </tbody>
             </table>
             </div>
-            <p class="strength-text js-table-empty" data-target="reports-table" style="display:none;">Aucun résultat.</p>
+            <x-empty-state icon="search" title="Aucun résultat." :compact="true" class="js-table-empty" data-target="reports-table" style="display:none;" />
         @endif
     </div>
 @endsection

@@ -8,7 +8,7 @@
         .pb-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
         .pb-table th, .pb-table td { border: 1px solid var(--border, #333); padding: 8px; font-size: 13px; }
         .pb-table th { background: var(--bg-secondary, rgba(255,255,255,0.04)); text-align: left; }
-        .pb-axe-row td { background: var(--accent-copper, #b87333); color: #1c1c1e; font-weight: 700; }
+        .pb-axe-row td { background: var(--color-primary, #129850); color: #1c1c1e; font-weight: 700; }
         .pb-sousaxe-row td { background: var(--bg-secondary, rgba(255,255,255,0.06)); font-weight: 600; }
         .pb-total-row td { font-weight: 700; background: var(--bg-secondary, rgba(255,255,255,0.06)); }
         .pb-col-num { width: 40px; text-align: center; }
@@ -22,13 +22,13 @@
         <h1>{{ $title }} {{ $report->year }}</h1>
         <p style="display:flex; align-items:center; gap:8px;">Fédération : {{ $report->user->federation_name }} — statut : <x-status-badge :status="$report->status" /></p>
         @if ($report->status === 'rejete' && $report->rejection_reason)
-            <p style="color: var(--loss, #c27878); margin-top: 8px;">Motif du rejet : {{ $report->rejection_reason }}</p>
+            <p style="color: var(--color-danger, #E5484D); margin-top: 8px;">Motif du rejet : {{ $report->rejection_reason }}</p>
         @endif
     </div>
 
     @if ($axeGroups->isEmpty())
         <div class="card">
-            <p class="strength-text">Aucune ligne renseignée.</p>
+            <x-empty-state icon="list" title="Aucune ligne renseignée." />
         </div>
     @else
         @php $total = $report->budgetLines->sum('montant'); @endphp

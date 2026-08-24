@@ -30,6 +30,9 @@
             'soumis' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
             default => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/></svg>',
         };
+
+        $campaign = \App\Models\Campaign::where('annee_n1', $programmeYear)->first();
+        $allocation = $campaign?->allocations()->where('user_id', $user->id)->first();
     @endphp
 
     <div class="page-header">
@@ -58,6 +61,42 @@
         <p class="strength-text" style="margin: -16px 0 24px; color: var(--gain);">Les deux documents de l'année sont validés — votre dossier est complet pour la suite de la procédure.</p>
     @endif
 
+    @if ($allocation && $allocation->quitus_delivered_at)
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2 class="card-title">Quitus de déblocage de subvention {{ $programmeYear }}</h2>
+            </div>
+            <p class="strength-text">Votre quitus a été délivré le {{ $allocation->quitus_delivered_at->format('d/m/Y') }} pour un montant de {{ number_format((float) $allocation->montant_final, 0, ',', ' ') }} FCFA.</p>
+            <div class="btn-group">
+                <a href="{{ route('campagnes.quitus.download', [$campaign, $user]) }}" class="btn primary">Télécharger le quitus</a>
+            </div>
+        </div>
+    @elseif ($campaign && $campaign->etape >= 11 && $allocation)
+        @php
+            $reamenageReport = $user->reports->first(fn ($r) => $r->type === 'programme_reamenage' && $r->year === $programmeYear);
+        @endphp
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2 class="card-title">Programme d'activités budgétisé réaménagé {{ $programmeYear }}</h2>
+            </div>
+            @if ($reamenageReport)
+                <p class="strength-text">Statut : <x-status-badge :status="$reamenageReport->status" /></p>
+                @if ($reamenageReport->status === 'rejete' && $reamenageReport->rejection_reason)
+                    <p class="strength-text" style="color: var(--color-danger, #E5484D);">Motif : {{ $reamenageReport->rejection_reason }}</p>
+                @endif
+            @else
+                <p class="strength-text">Suite à l'arbitrage budgétaire, veuillez soumettre votre programme d'activités réaménagé selon le montant qui vous a été alloué.</p>
+            @endif
+            <div class="btn-group">
+                @if ($reamenageReport && $reamenageReport->status === 'valide')
+                    <a href="{{ route('activity-form.show', $reamenageReport) }}" class="btn primary">Voir le programme réaménagé validé</a>
+                @else
+                    <a href="{{ route('programme-reamenage.create') }}" class="btn primary">Remplir / modifier le programme réaménagé</a>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <div class="market-stats" style="margin-bottom: 24px;">
         <div class="market-stat">
             <div class="market-stat-label">Statut du compte</div>
@@ -65,7 +104,7 @@
                 <x-status-badge :status="$user->status" />
             </div>
             @if ($user->status === 'rejected' && $user->rejection_reason)
-                <div class="market-stat-change" style="color: var(--loss, #c27878); margin-top: 8px;">Motif : {{ $user->rejection_reason }}</div>
+                <div class="market-stat-change" style="color: var(--color-danger, #E5484D); margin-top: 8px;">Motif : {{ $user->rejection_reason }}</div>
             @endif
         </div>
         <div class="market-stat">
@@ -119,7 +158,7 @@
         @php $reportsByYear = $user->reports->groupBy('year')->sortKeysDesc(); @endphp
 
         @if ($reportsByYear->isEmpty())
-            <p class="strength-text">Aucun document déposé pour le moment.</p>
+            <x-empty-state icon="inbox" title="Aucun document déposé pour le moment." />
         @else
             <div class="table-responsive">
             <table class="market-table">

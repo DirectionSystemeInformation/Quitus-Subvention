@@ -13,10 +13,10 @@
             background: var(--bg-secondary, rgba(255,255,255,0.08));
         }
         .log-icon svg { width: 16px; height: 16px; }
-        .log-icon.created { color: var(--gain, #6b8e6b); }
-        .log-icon.validated { color: var(--gain, #6b8e6b); }
-        .log-icon.updated { color: var(--accent-copper, #b87333); }
-        .log-icon.rejected, .log-icon.deleted { color: var(--loss, #c27878); }
+        .log-icon.created { color: var(--color-success, #5CBE8D); }
+        .log-icon.validated { color: var(--color-success, #5CBE8D); }
+        .log-icon.updated { color: var(--color-primary, #129850); }
+        .log-icon.rejected, .log-icon.deleted { color: var(--color-danger, #E5484D); }
         .log-desc { font-size: 14px; }
         .log-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
     </style>
@@ -30,7 +30,7 @@
 
     <div class="card">
         @if ($logs->isEmpty())
-            <p class="strength-text">Aucune action enregistrée pour le moment.</p>
+            <x-empty-state icon="clock" title="Aucune action enregistrée pour le moment." />
         @else
             @foreach ($logs as $log)
                 @php

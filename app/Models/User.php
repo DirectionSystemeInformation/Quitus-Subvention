@@ -69,6 +69,26 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isDg(): bool
+    {
+        return $this->role === 'dg';
+    }
+
+    public function isComiteArbitrage(): bool
+    {
+        return $this->role === 'comite_arbitrage';
+    }
+
+    public function isMinistre(): bool
+    {
+        return $this->role === 'ministre';
+    }
+
+    public function isCampaignActor(): bool
+    {
+        return $this->isDshn() || $this->isDg() || $this->isComiteArbitrage() || $this->isMinistre();
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

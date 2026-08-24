@@ -225,7 +225,7 @@ https://templatemo.com/tm-609-crypto-vault
 .stat-icon {
     width: 48px;
     height: 48px;
-    background-color: rgba(184, 115, 51, 0.15);
+    background-color: rgba(18, 152, 80, 0.15);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -413,7 +413,7 @@ https://templatemo.com/tm-609-crypto-vault
 .legend-dot.btc { background-color: #f7931a; }
 .legend-dot.eth { background-color: #627eea; }
 .legend-dot.usdt { background-color: #26a17b; }
-.legend-dot.other { background-color: #b87333; }
+.legend-dot.other { background-color: #129850; }
 
 /* Gauge */
 .gauge-container {
@@ -537,7 +537,7 @@ https://templatemo.com/tm-609-crypto-vault
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    background-color: rgba(184, 115, 51, 0.15);
+    background-color: rgba(18, 152, 80, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -640,7 +640,7 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .transaction-icon.transfer {
-    background-color: rgba(184, 115, 51, 0.2);
+    background-color: rgba(18, 152, 80, 0.2);
     color: var(--accent-copper);
 }
 

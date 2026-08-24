@@ -12,6 +12,7 @@ class ActivityFormController extends Controller
     private const TITLES = [
         'programme_budgetise' => "Programme d'activités budgétisé",
         'rapport_activite' => "Rapport d'activité",
+        'programme_reamenage' => "Programme d'activités budgétisé réaménagé",
     ];
 
     public function index(Request $request)
@@ -20,7 +21,7 @@ class ActivityFormController extends Controller
 
         abort_unless(array_key_exists($type, self::TITLES), 404);
 
-        $computedDefaultYear = $type === 'programme_budgetise' ? now()->year + 1 : now()->year;
+        $computedDefaultYear = in_array($type, ['programme_budgetise', 'programme_reamenage'], true) ? now()->year + 1 : now()->year;
 
         $reports = Auth::user()->reports()
             ->where('type', $type)
@@ -48,7 +49,7 @@ class ActivityFormController extends Controller
     {
         abort_unless(array_key_exists($type, self::TITLES), 404);
 
-        $year = (int) $request->query('annee', $type === 'programme_budgetise' ? now()->year + 1 : now()->year);
+        $year = (int) $request->query('annee', in_array($type, ['programme_budgetise', 'programme_reamenage'], true) ? now()->year + 1 : now()->year);
 
         $report = Auth::user()->reports()
             ->where('type', $type)

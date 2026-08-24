@@ -47,7 +47,7 @@ https://templatemo.com/tm-609-crypto-vault
 .balance-icon {
     width: 48px;
     height: 48px;
-    background-color: rgba(184, 115, 51, 0.15);
+    background-color: rgba(18, 152, 80, 0.15);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -412,7 +412,7 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .transaction-icon.stake {
-    background-color: rgba(184, 115, 51, 0.2);
+    background-color: rgba(18, 152, 80, 0.2);
 }
 
 .transaction-info {
@@ -461,7 +461,7 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .transaction-status.pending {
-    background-color: rgba(184, 115, 51, 0.2);
+    background-color: rgba(18, 152, 80, 0.2);
     color: var(--accent-copper);
 }
 
@@ -477,15 +477,21 @@ https://templatemo.com/tm-609-crypto-vault
 
 .market-stat {
     background-color: var(--bg-card);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
     border: 1px solid var(--border);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.market-stat:hover {
+    border-color: var(--color-primary-light);
+    transform: translateY(-2px);
 }
 
 .market-stat-label {
     font-size: 13px;
     color: var(--text-muted);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
 }
 
 .market-stat-value {
@@ -496,15 +502,15 @@ https://templatemo.com/tm-609-crypto-vault
 
 .market-stat-change {
     font-size: 13px;
-    margin-top: 4px;
+    margin-top: var(--space-1);
 }
 
 .market-stat-change.positive {
-    color: var(--gain);
+    color: var(--color-success);
 }
 
 .market-stat-change.negative {
-    color: var(--loss);
+    color: var(--color-danger);
 }
 
 /* ========================================
@@ -693,7 +699,7 @@ https://templatemo.com/tm-609-crypto-vault
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    background-color: rgba(184, 115, 51, 0.15);
+    background-color: rgba(18, 152, 80, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -932,7 +938,7 @@ https://templatemo.com/tm-609-crypto-vault
 .security-icon {
     width: 48px;
     height: 48px;
-    background-color: rgba(184, 115, 51, 0.15);
+    background-color: rgba(18, 152, 80, 0.15);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -964,7 +970,7 @@ https://templatemo.com/tm-609-crypto-vault
 
 .security-btn {
     padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 600;
     font-family: inherit;
@@ -977,11 +983,11 @@ https://templatemo.com/tm-609-crypto-vault
 
 .security-btn:hover {
     background-color: var(--bg-card-hover);
-    border-color: var(--accent-copper);
+    border-color: var(--color-primary);
 }
 
 .security-btn.primary {
-    background: var(--accent-gradient);
+    background: var(--color-primary-gradient);
     border: none;
     color: #1c1c1e;
 }
@@ -1124,4 +1130,188 @@ https://templatemo.com/tm-609-crypto-vault
         flex-direction: column;
         text-align: center;
     }
+}
+
+/* ========================================
+   Icon Button (shared: fédérations, comptes, canevas)
+======================================== */
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary, rgba(255,255,255,0.06));
+    border: 1px solid var(--border, #333);
+    color: var(--text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--color-primary);
+}
+
+.icon-btn.danger {
+    color: var(--color-danger);
+}
+
+.icon-btn.danger:hover {
+    border-color: var(--color-danger);
+    background: rgba(229, 72, 77, 0.1);
+}
+
+.icon-btn.is-loading {
+    cursor: not-allowed;
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.icon-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* ========================================
+   Pagination
+======================================== */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: var(--space-4);
+}
+
+.pagination-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background-color: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+a.pagination-item:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--bg-card-hover);
+}
+
+.pagination-item.active {
+    background: var(--color-primary-gradient);
+    border-color: transparent;
+    color: #1c1c1e;
+}
+
+.pagination-item.disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination-nav svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ========================================
+   Breadcrumb
+======================================== */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--text-muted);
+}
+
+.breadcrumb-current {
+    color: var(--text-muted);
+}
+
+/* ========================================
+   Empty State
+======================================== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+    color: var(--text-secondary);
+}
+
+.empty-state-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    margin-bottom: var(--space-4);
+    flex-shrink: 0;
+}
+
+.empty-state-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.empty-state-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 320px;
+}
+
+.empty-state-compact {
+    flex-direction: row;
+    justify-content: center;
+    padding: var(--space-4);
+    gap: var(--space-3);
+}
+
+.empty-state-compact .empty-state-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0;
+}
+
+.empty-state-compact .empty-state-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+.empty-state-compact .empty-state-title {
+    font-size: 13px;
 }

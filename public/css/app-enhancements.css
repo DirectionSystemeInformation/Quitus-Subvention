@@ -28,16 +28,16 @@
 .card:hover {
     transform: translateY(-3px);
     box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
-    border-color: rgba(184, 115, 51, 0.35);
+    border-color: rgba(18, 152, 80, 0.35);
 }
 
-.btn, .security-btn, .canevas-icon-btn, .user-icon-btn {
+.btn, .security-btn, .icon-btn {
     position: relative;
     overflow: hidden;
     transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-.btn:active, .security-btn:active {
+.btn:active, .security-btn:active, .icon-btn:active {
     transform: scale(0.96);
 }
 
@@ -62,7 +62,7 @@
 }
 
 .form-input:focus, .form-select:focus {
-    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
+    box-shadow: 0 0 0 3px rgba(18, 152, 80, 0.15);
 }
 
 .nav-item {
@@ -86,25 +86,17 @@
    Glassmorphism
 ======================================== */
 .card {
-    background-color: rgba(44, 44, 46, 0.72);
+    background-color: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
 
-[data-theme="light"] .card {
-    background-color: rgba(255, 255, 255, 0.72);
-}
-
 .modal-box {
-    background: rgba(44, 44, 46, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-[data-theme="light"] .modal-box {
-    background: rgba(255, 255, 255, 0.85);
 }
 
 @keyframes modalIn {
@@ -143,7 +135,7 @@
     gap: 12px;
     padding: 16px 18px;
     border-radius: 12px;
-    background: rgba(44, 44, 46, 0.9);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border, #333);
@@ -151,10 +143,6 @@
     animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
     color: var(--text-primary, #f5f0e8);
     font-size: 14px;
-}
-
-[data-theme="light"] .toast {
-    background: rgba(255, 255, 255, 0.92);
 }
 
 .toast.toast-out {
@@ -257,21 +245,21 @@
 }
 
 .dossier-step.is-valide .dossier-step-icon {
-    border-color: var(--gain);
-    color: var(--gain);
-    background: rgba(107, 142, 107, 0.12);
+    border-color: var(--color-success);
+    color: var(--color-success);
+    background: rgba(92, 190, 141, 0.12);
 }
 
 .dossier-step.is-rejete .dossier-step-icon {
-    border-color: var(--loss);
-    color: var(--loss);
-    background: rgba(194, 120, 120, 0.12);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+    background: rgba(229, 72, 77, 0.12);
 }
 
 .dossier-step.is-soumis .dossier-step-icon {
-    border-color: var(--accent-copper);
-    color: var(--accent-copper);
-    background: rgba(184, 115, 51, 0.12);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(18, 152, 80, 0.12);
 }
 
 .dossier-step-body {
@@ -299,7 +287,7 @@
 }
 
 .dossier-step-connector.is-filled {
-    background: var(--gain);
+    background: var(--color-success);
 }
 
 @media (max-width: 768px) {
@@ -345,7 +333,7 @@
     color: var(--text-primary);
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b87333' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23129850' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -357,7 +345,7 @@
 
 .year-select:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.2);
+    box-shadow: 0 0 0 3px rgba(18, 152, 80, 0.2);
 }
 
 @media (max-width: 600px) {

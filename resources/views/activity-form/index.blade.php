@@ -36,7 +36,7 @@
         <div style="display:flex; align-items:center; gap:16px; flex-wrap: wrap; margin-bottom: 16px;">
             <x-status-badge :status="$selectedReport->status ?? 'manquant'" />
             @if ($selectedReport && $selectedReport->status === 'rejete' && $selectedReport->rejection_reason)
-                <span class="strength-text" style="color: var(--loss, #c27878);">Motif : {{ $selectedReport->rejection_reason }}</span>
+                <span class="strength-text" style="color: var(--color-danger, #E5484D);">Motif : {{ $selectedReport->rejection_reason }}</span>
             @endif
         </div>
 

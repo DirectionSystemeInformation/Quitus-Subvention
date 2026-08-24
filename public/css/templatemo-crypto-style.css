@@ -24,49 +24,43 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 /* ========================================
-   CSS Variables - Dark Theme (Default)
+   CSS Variables
 ======================================== */
-:root, [data-theme="dark"] {
-    --bg-primary: #1c1c1e;
-    --bg-secondary: #232325;
-    --bg-card: #2c2c2e;
-    --bg-card-hover: #343436;
-    --accent-copper: #b87333;
-    --accent-copper-light: #c9845a;
-    --accent-gradient: linear-gradient(135deg, #b87333 0%, #d4945a 50%, #c9845a 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #c9845a 0%, #daa57a 50%, #d4945a 100%);
-    --text-primary: #f5f0e8;
-    --text-secondary: #a8a8a8;
-    --text-muted: #6e6e6e;
-    --gain: #6b8e6b;
-    --loss: #c27878;
-    --border: #3a3a3c;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --chart-grid: rgba(255, 255, 255, 0.05);
-    --overlay: rgba(0, 0, 0, 0.5);
-}
-
-/* ========================================
-   CSS Variables - Light Theme
-======================================== */
-[data-theme="light"] {
+:root {
     --bg-primary: #f5f5f7;
     --bg-secondary: #ffffff;
     --bg-card: #ffffff;
     --bg-card-hover: #f0f0f2;
-    --accent-copper: #d4945a;
-    --accent-copper-light: #e8b88a;
-    --accent-gradient: linear-gradient(135deg, #d4945a 0%, #e8b88a 50%, #f0c89a 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #e8b88a 0%, #f0c89a 50%, #f5d4a8 100%);
+    --color-primary: #1DAA5E;
+    --color-primary-light: #6FCB9B;
+    --color-primary-gradient: linear-gradient(135deg, #129850 0%, #1DAA5E 45%, #6FCB9B 100%);
+    --color-primary-gradient-hover: linear-gradient(135deg, #1DAA5E 0%, #4FBF83 50%, #8ED8B0 100%);
+    --color-success: #1DAA5E;
+    --color-danger: #D92D2D;
+    --color-danger-hover: #B92424;
+    --color-accent-gold: #FCD116;
+    --color-accent-gold-soft: rgba(252, 209, 22, 0.15);
+    --focus-ring: 0 0 0 3px rgba(29, 170, 94, 0.3), 0 0 0 1px var(--color-primary);
+
+    /* alias rétro-compat (utilisés par les pages DSHN/admin non redesignées) */
+    --accent-copper: var(--color-primary);
+    --accent-copper-light: var(--color-primary-light);
+    --accent-gradient: var(--color-primary-gradient);
+    --accent-gradient-hover: var(--color-primary-gradient-hover);
+    --gain: var(--color-success);
+    --loss: var(--color-danger);
+
     --text-primary: #1c1c1e;
     --text-secondary: #6e6e6e;
     --text-muted: #9a9a9a;
-    --gain: #5a9a5a;
-    --loss: #c76b6b;
     --border: #e0e0e2;
     --shadow: rgba(0, 0, 0, 0.08);
     --chart-grid: rgba(0, 0, 0, 0.05);
     --overlay: rgba(0, 0, 0, 0.5);
+
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px;
+    --radius-xs: 4px; --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-xl: 20px; --radius-full: 999px;
 }
 
 /* ========================================
@@ -227,7 +221,7 @@ body {
     font-weight: 700;
     font-size: 20px;
     color: #1c1c1e;
-    box-shadow: 0 4px 12px rgba(184, 115, 51, 0.25);
+    box-shadow: 0 4px 12px rgba(18, 152, 80, 0.25);
     flex-shrink: 0;
 }
 
@@ -282,7 +276,7 @@ body {
     background: var(--accent-gradient);
     color: #1c1c1e;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(184, 115, 51, 0.3);
+    box-shadow: 0 4px 12px rgba(18, 152, 80, 0.3);
 }
 
 .nav-item.active:hover {
@@ -299,6 +293,27 @@ body {
     opacity: 1;
 }
 
+.nav-badge {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-danger);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nav-item.active .nav-badge {
+    background: rgba(28, 28, 30, 0.25);
+    color: #1c1c1e;
+}
+
 /* ========================================
    Sidebar Footer
 ======================================== */
@@ -309,52 +324,6 @@ body {
     background-color: var(--bg-secondary);
 }
 
-.theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-}
-
-.theme-toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    color: var(--text-secondary);
-    font-size: 16px;
-}
-
-.theme-switch {
-    position: relative;
-    width: 52px;
-    height: 28px;
-    background-color: var(--border);
-    border-radius: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.theme-switch::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 22px;
-    height: 22px;
-    background-color: var(--text-primary);
-    border-radius: 50%;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-[data-theme="light"] .theme-switch {
-    background: var(--accent-gradient);
-}
-
-[data-theme="light"] .theme-switch::after {
-    transform: translateX(24px);
-    background-color: #ffffff;
-}
 
 .logout-btn {
     display: flex;
@@ -374,7 +343,7 @@ body {
 }
 
 .logout-btn:hover {
-    background-color: rgba(194, 120, 120, 0.15);
+    background-color: rgba(229, 72, 77, 0.12);
 }
 
 .logout-btn svg {
@@ -442,6 +411,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-bottom: 24px;
 }
 
@@ -461,7 +432,7 @@ body {
 ======================================== */
 .btn {
     padding: 14px 28px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 16px;
     font-weight: 600;
     font-family: inherit;
@@ -487,6 +458,40 @@ body {
     transform: translateY(-2px);
 }
 
+.btn.is-loading,
+.security-btn.is-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: not-allowed;
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.icon-btn.is-loading svg {
+    display: none;
+}
+
+.btn-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    animation: btnSpin 0.6s linear infinite;
+}
+
+@keyframes btnSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-spinner { animation: none; }
+}
+
 /* ========================================
    Status Badges
 ======================================== */
@@ -495,33 +500,29 @@ body {
     align-items: center;
     gap: 6px;
     padding: 4px 12px;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
 }
 
-.status-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
+.status-badge-icon {
+    flex-shrink: 0;
 }
 
 .status-badge.status-gain {
-    background: rgba(107, 142, 107, 0.15);
-    color: var(--gain, #6b8e6b);
+    background: rgba(92, 190, 141, 0.15);
+    color: var(--color-success);
 }
 
 .status-badge.status-loss {
-    background: rgba(194, 120, 120, 0.15);
-    color: var(--loss, #c27878);
+    background: rgba(229, 72, 77, 0.12);
+    color: var(--color-danger);
 }
 
 .status-badge.status-neutral {
-    background: rgba(184, 115, 51, 0.15);
-    color: var(--accent-copper, #b87333);
+    background: rgba(18, 152, 80, 0.15);
+    color: var(--color-primary);
 }
 
 .status-badge.status-muted {
@@ -578,21 +579,14 @@ body {
 }
 
 .btn.danger {
-    border-color: var(--loss, #c27878);
-    color: var(--loss, #c27878);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
 }
 
 .btn.danger:hover {
-    background: rgba(194, 120, 120, 0.1);
-}
-
-.btn.danger {
-    color: var(--loss);
-    border-color: var(--loss);
-}
-
-.btn.danger:hover {
-    background-color: rgba(194, 120, 120, 0.15);
+    background-color: rgba(229, 72, 77, 0.12);
+    border-color: var(--color-danger-hover);
+    color: var(--color-danger-hover);
 }
 
 .btn-group {
@@ -641,7 +635,17 @@ body {
 
 .form-input:focus {
     outline: none;
-    border-color: var(--accent-copper);
+    border-color: var(--color-primary);
+}
+
+.form-input:focus-visible,
+.form-select:focus-visible,
+.btn:focus-visible,
+.security-btn:focus-visible,
+.nav-item:focus-visible,
+.auth-tab:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .form-input::placeholder {
@@ -666,7 +670,7 @@ body {
 
 .form-select:focus {
     outline: none;
-    border-color: var(--accent-copper);
+    border-color: var(--color-primary);
 }
 
 /* ========================================

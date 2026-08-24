@@ -1,15 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }}</title>
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,6 +20,10 @@
             justify-content: space-between;
             padding: 20px 48px;
             border-bottom: 1px solid var(--border);
+            background-color: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .landing-nav-brand {
@@ -78,6 +76,20 @@
             z-index: 1;
         }
 
+        .landing-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            background: var(--color-accent-gold-soft);
+            border: 1px solid rgba(252, 209, 22, 0.4);
+            color: var(--color-accent-gold);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
         .landing-hero h1 {
             font-size: 40px;
             font-weight: 700;
@@ -85,6 +97,20 @@
             max-width: 700px;
             margin: 0 auto 20px;
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .landing-hero h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 3px;
+            border-radius: var(--radius-full);
+            background: var(--color-accent-gold);
         }
 
         .landing-hero p {
@@ -129,6 +155,16 @@
 
         .landing-step {
             text-align: center;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-7) var(--space-6);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .landing-step:hover {
+            border-color: var(--color-primary-light);
+            transform: translateY(-3px);
         }
 
         .landing-step-number {
@@ -183,6 +219,7 @@
         <div class="landing-hero-slide" style="--slide-image: url('{{ asset('img/hero-3.jpg') }}');"></div>
 
         <div class="landing-hero-content">
+            <span class="landing-hero-badge">Portail officiel — Ministère des Sports, de la Jeunesse et de l'Emploi</span>
             <h1>Quitus de déblocage de subvention pour les fédérations sportives et de loisirs</h1>
             <p>Déposez en ligne votre rapport d'activité et votre programme d'activités budgétisé, et suivez le traitement de votre dossier par la Direction du Sport de Haut Niveau.</p>
             <div class="btn-group">

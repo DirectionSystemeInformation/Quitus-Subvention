@@ -22,6 +22,24 @@ class FederationController extends Controller
         return view('dshn.federations', compact('federations'));
     }
 
+    public function show(User $federation)
+    {
+        abort_unless($federation->role === 'federation', 404);
+
+        $reports = $federation->reports()->orderByDesc('year')->orderBy('type')->get();
+
+        $stats = [
+            'total' => $reports->count(),
+            'valide' => $reports->where('status', 'valide')->count(),
+            'soumis' => $reports->where('status', 'soumis')->count(),
+            'rejete' => $reports->where('status', 'rejete')->count(),
+        ];
+
+        $logs = ActivityLog::where('subject_id', $federation->id)->latest()->take(20)->get();
+
+        return view('dshn.federation-show', compact('federation', 'reports', 'stats', 'logs'));
+    }
+
     public function validate_(User $federation)
     {
         abort_unless($federation->role === 'federation', 404);

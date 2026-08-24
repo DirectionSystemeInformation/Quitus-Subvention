@@ -18,71 +18,6 @@ https://templatemo.com/tm-609-crypto-vault
     'use strict';
 
     /* ========================================
-       Theme Toggle
-    ======================================== */
-    function initThemeToggle() {
-        const themeSwitch = document.getElementById('themeSwitch');
-        const themeToggleBtn = document.getElementById('themeToggle');
-        const html = document.documentElement;
-        
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        
-        // Dashboard theme switch (sidebar)
-        if (themeSwitch) {
-            themeSwitch.addEventListener('click', function() {
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                // Update dark mode toggle in settings if exists
-                updateDarkModeToggle();
-            });
-        }
-        
-        // Login page theme toggle button
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', function() {
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-            });
-        }
-    }
-
-    /* ========================================
-       Dark Mode Toggle (Settings Page)
-    ======================================== */
-    function updateDarkModeToggle() {
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const html = document.documentElement;
-        
-        if (darkModeToggle) {
-            if (html.getAttribute('data-theme') === 'dark') {
-                darkModeToggle.classList.add('active');
-            } else {
-                darkModeToggle.classList.remove('active');
-            }
-        }
-    }
-
-    function initDarkModeToggle() {
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const themeSwitch = document.getElementById('themeSwitch');
-        
-        updateDarkModeToggle();
-        
-        if (darkModeToggle && themeSwitch) {
-            darkModeToggle.addEventListener('click', function() {
-                themeSwitch.click();
-            });
-        }
-    }
-
-    /* ========================================
        Mobile Menu
     ======================================== */
     function initMobileMenu() {
@@ -241,20 +176,6 @@ https://templatemo.com/tm-609-crypto-vault
     }
 
     /* ========================================
-       Checkbox Toggle
-    ======================================== */
-    function initCheckboxes() {
-        document.querySelectorAll('.checkbox-wrapper').forEach(function(wrapper) {
-            wrapper.addEventListener('click', function() {
-                const checkbox = wrapper.querySelector('.checkbox');
-                if (checkbox) {
-                    checkbox.classList.toggle('checked');
-                }
-            });
-        });
-    }
-
-    /* ========================================
        Password Toggle
     ======================================== */
     function initPasswordToggle() {
@@ -332,7 +253,7 @@ https://templatemo.com/tm-609-crypto-vault
         confirmBtn.addEventListener('click', function() {
             if (pendingForm) {
                 pendingForm.dataset.confirmed = 'true';
-                pendingForm.submit();
+                pendingForm.requestSubmit();
             }
             closeModal();
         });
@@ -424,7 +345,7 @@ https://templatemo.com/tm-609-crypto-vault
     ======================================== */
     function initRippleEffect() {
         document.addEventListener('click', function(e) {
-            const btn = e.target.closest('.btn, .security-btn, .canevas-icon-btn, .user-icon-btn');
+            const btn = e.target.closest('.btn, .security-btn, .icon-btn');
             if (!btn) return;
 
             const rect = btn.getBoundingClientRect();
@@ -488,19 +409,29 @@ https://templatemo.com/tm-609-crypto-vault
        Generic Table Search
     ======================================== */
     function initTableSearch() {
-        document.querySelectorAll('.js-table-search').forEach(function(input) {
-            const container = document.getElementById(input.dataset.target);
+        const targets = new Set();
+        document.querySelectorAll('.js-table-search, .js-table-status-filter').forEach(function(el) {
+            targets.add(el.dataset.target);
+        });
+
+        targets.forEach(function(targetId) {
+            const container = document.getElementById(targetId);
             if (!container) return;
 
-            const emptyMessage = document.querySelector('.js-table-empty[data-target="' + input.dataset.target + '"]');
+            const searchInput = document.querySelector('.js-table-search[data-target="' + targetId + '"]');
+            const statusFilter = document.querySelector('.js-table-status-filter[data-target="' + targetId + '"]');
+            const emptyMessage = document.querySelector('.js-table-empty[data-target="' + targetId + '"]');
             const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
 
-            input.addEventListener('input', function() {
-                const query = input.value.trim().toLowerCase();
+            function applyFilters() {
+                const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+                const status = statusFilter ? statusFilter.value : '';
                 let visibleCount = 0;
 
                 rows.forEach(function(row) {
-                    const matches = !query || row.textContent.toLowerCase().includes(query);
+                    const matchesQuery = !query || row.textContent.toLowerCase().includes(query);
+                    const matchesStatus = !status || row.dataset.status === status;
+                    const matches = matchesQuery && matchesStatus;
                     row.style.display = matches ? '' : 'none';
                     if (matches) visibleCount++;
                 });
@@ -508,7 +439,30 @@ https://templatemo.com/tm-609-crypto-vault
                 if (emptyMessage) {
                     emptyMessage.style.display = visibleCount === 0 ? '' : 'none';
                 }
-            });
+            }
+
+            if (searchInput) searchInput.addEventListener('input', applyFilters);
+            if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+        });
+    }
+
+    /* ========================================
+       Button Loading State
+    ======================================== */
+    function initButtonLoadingState() {
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (form.hasAttribute('data-confirm') && form.dataset.confirmed !== 'true') return;
+
+            const btn = e.submitter || form.querySelector('button[type="submit"]');
+            if (!btn || btn.disabled || btn.classList.contains('is-loading')) return;
+
+            btn.classList.add('is-loading');
+            btn.disabled = true;
+            const spinner = document.createElement('span');
+            spinner.className = 'btn-spinner';
+            btn.prepend(spinner);
         });
     }
 
@@ -569,8 +523,6 @@ https://templatemo.com/tm-609-crypto-vault
        Initialize All
     ======================================== */
     function init() {
-        initThemeToggle();
-        initDarkModeToggle();
         initMobileMenu();
         initToggleSwitches();
         initCopyButtons();
@@ -578,11 +530,11 @@ https://templatemo.com/tm-609-crypto-vault
         initFilterTabs();
         initStarButtons();
         initSearch();
-        initCheckboxes();
         initPasswordToggle();
         initPasswordStrength();
         initAuthTabs();
         initTableSearch();
+        initButtonLoadingState();
         initConfirmModal();
         initRejectReasonModal();
         initRevealAnimations();

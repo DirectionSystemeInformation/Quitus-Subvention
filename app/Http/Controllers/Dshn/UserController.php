@@ -13,9 +13,19 @@ use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
+    private const ROLES = ['dshn', 'admin', 'dg', 'comite_arbitrage', 'ministre'];
+
+    private const ROLE_LABELS = [
+        'dshn' => 'agent DSHN',
+        'admin' => 'administrateur',
+        'dg' => 'Directeur Général',
+        'comite_arbitrage' => "Comité d'arbitrage budgétaire",
+        'ministre' => 'Ministre',
+    ];
+
     public function index()
     {
-        $users = User::whereIn('role', ['dshn', 'admin'])->orderBy('name')->get();
+        $users = User::whereIn('role', self::ROLES)->orderBy('name')->get();
 
         return view('dshn.users', compact('users'));
     }
@@ -25,7 +35,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'role' => ['required', Rule::in(['dshn', 'admin'])],
+            'role' => ['required', Rule::in(self::ROLES)],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
@@ -39,7 +49,7 @@ class UserController extends Controller
 
         ActivityLog::record(
             'created',
-            "a créé le compte {$user->name} (" . ($data['role'] === 'admin' ? 'administrateur' : 'agent DSHN') . ')',
+            "a créé le compte {$user->name} (".self::ROLE_LABELS[$data['role']].')',
             $user->id,
             $user->name
         );
@@ -49,12 +59,12 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        abort_unless(in_array($user->role, ['dshn', 'admin'], true), 404);
+        abort_unless(in_array($user->role, self::ROLES, true), 404);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'role' => ['required', Rule::in(['dshn', 'admin'])],
+            'role' => ['required', Rule::in(self::ROLES)],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
@@ -92,7 +102,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        abort_unless(in_array($user->role, ['dshn', 'admin'], true), 404);
+        abort_unless(in_array($user->role, self::ROLES, true), 404);
 
         if ($user->id === Auth::id()) {
             return back()->withErrors(['user' => 'Vous ne pouvez pas supprimer votre propre compte.']);

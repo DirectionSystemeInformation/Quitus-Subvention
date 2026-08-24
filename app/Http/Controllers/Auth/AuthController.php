@@ -54,9 +54,12 @@ class AuthController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->intended(
-            $user->isAdmin() ? route('admin.dashboard') : ($user->isDshn() ? route('dshn.dashboard') : route('dashboard'))
-        );
+        return redirect()->intended(route(match (true) {
+            $user->isAdmin() => 'admin.dashboard',
+            $user->isDshn() => 'dshn.dashboard',
+            $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
+            default => 'dashboard',
+        }));
     }
 
     public function register(Request $request)

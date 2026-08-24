@@ -8,19 +8,19 @@
         .pb-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
         .pb-table th, .pb-table td { border: 1px solid var(--border, #333); padding: 8px; font-size: 13px; }
         .pb-table th { background: var(--bg-secondary, rgba(255,255,255,0.04)); text-align: left; }
-        .pb-axe-row td { background: var(--accent-copper, #b87333); color: #1c1c1e; font-weight: 700; }
+        .pb-axe-row td { background: var(--color-primary, #129850); color: #1c1c1e; font-weight: 700; }
         .pb-sousaxe-row td { background: var(--bg-secondary, rgba(255,255,255,0.06)); font-weight: 600; }
         .pb-table input { width: 100%; background: transparent; border: none; color: inherit; font-size: 13px; padding: 4px; }
-        .pb-table input:focus { outline: 1px solid var(--accent-copper, #b87333); background: rgba(184,115,51,0.08); }
+        .pb-table input:focus { outline: 1px solid var(--color-primary, #129850); background: rgba(18,152,80,0.08); }
         .pb-num { width: 100%; }
         .pb-col-num { width: 40px; text-align: center; }
         .pb-col-montant, .pb-col-contrib { width: 130px; }
         .pb-col-date { width: 130px; }
         .pb-col-actions { width: 36px; text-align: center; }
         .pb-add-row td { background: transparent; padding: 6px 8px; }
-        .pb-add-btn { background: none; border: none; color: var(--accent-copper, #b87333); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px 0; }
+        .pb-add-btn { background: none; border: none; color: var(--color-primary, #129850); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px 0; }
         .pb-add-btn:hover { text-decoration: underline; }
-        .pb-remove-btn { background: none; border: none; color: var(--loss, #c27878); font-size: 16px; cursor: pointer; line-height: 1; padding: 4px; }
+        .pb-remove-btn { background: none; border: none; color: var(--color-danger, #E5484D); font-size: 16px; cursor: pointer; line-height: 1; padding: 4px; }
         .pb-remove-btn:hover { opacity: 0.7; }
         .pb-summary-bar {
             display: flex; gap: 40px; align-items: center;

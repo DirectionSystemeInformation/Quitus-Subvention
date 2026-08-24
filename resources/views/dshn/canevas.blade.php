@@ -16,15 +16,6 @@
         .canevas-label-input { flex: 1; min-height: 42px; resize: vertical; font-family: inherit; font-size: 14px; line-height: 1.4; padding: 10px 12px; }
 
         .canevas-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
-        .canevas-icon-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px; border-radius: 8px;
-            background: var(--bg-secondary, rgba(255,255,255,0.06)); border: 1px solid var(--border, #333);
-            color: var(--text-primary); cursor: pointer; flex-shrink: 0;
-        }
-        .canevas-icon-btn:hover { background: var(--bg-card-hover); }
-        .canevas-icon-btn.danger { color: var(--loss, #c27878); }
-        .canevas-icon-btn svg { width: 18px; height: 18px; }
 
         .canevas-add-form { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border, #333); }
     </style>
@@ -50,13 +41,13 @@
                     <input type="text" name="code" class="form-input canevas-code-input" value="{{ $axe->code }}" required>
                     <textarea name="label" class="form-input canevas-label-input" required rows="2">{{ $axe->label }}</textarea>
                     <div class="canevas-item-actions">
-                        <button type="submit" class="canevas-icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
+                        <button type="submit" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
                     </div>
                 </form>
                 <form method="POST" action="{{ role_route('canevas.axes.destroy', $axe) }}" data-confirm="Supprimer l'axe {{ $axe->code }} et tous ses sous-axes ?">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="canevas-icon-btn danger" title="Supprimer l'axe">{!! $trashIcon !!}</button>
+                    <button type="submit" class="icon-btn danger" title="Supprimer l'axe">{!! $trashIcon !!}</button>
                 </form>
             </div>
 
@@ -68,13 +59,13 @@
                         <input type="text" name="code" class="form-input canevas-code-input" value="{{ $sousAxe->code }}" required>
                         <textarea name="label" class="form-input canevas-label-input" required rows="2">{{ $sousAxe->label }}</textarea>
                         <div class="canevas-item-actions">
-                            <button type="submit" class="canevas-icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
+                            <button type="submit" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
                         </div>
                     </form>
                     <form method="POST" action="{{ role_route('canevas.sous-axes.destroy', $sousAxe) }}" data-confirm="Supprimer le sous-axe {{ $sousAxe->code }} ?">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="canevas-icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
+                        <button type="submit" class="icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
                     </form>
                 </div>
             @endforeach

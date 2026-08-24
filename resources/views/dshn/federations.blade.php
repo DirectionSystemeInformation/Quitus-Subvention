@@ -4,17 +4,6 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
-    <style>
-        .fed-icon-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 34px; height: 34px; border-radius: 8px;
-            background: var(--bg-secondary, rgba(255,255,255,0.06)); border: 1px solid var(--border, #333);
-            color: var(--text-primary); cursor: pointer; flex-shrink: 0;
-        }
-        .fed-icon-btn:hover { background: var(--bg-card-hover); }
-        .fed-icon-btn.danger { color: var(--loss, #c27878); }
-        .fed-icon-btn svg { width: 16px; height: 16px; }
-    </style>
 @endpush
 
 @section('content')
@@ -94,7 +83,15 @@
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Toutes les fédérations</h2>
-            <input type="search" class="form-input js-table-search" data-target="federations-table" placeholder="Rechercher..." style="max-width: 260px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <select class="form-select js-table-status-filter" data-target="federations-table" style="max-width: 170px;">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending">En attente</option>
+                    <option value="active">Actif</option>
+                    <option value="rejected">Rejeté</option>
+                </select>
+                <input type="search" class="form-input js-table-search" data-target="federations-table" placeholder="Rechercher..." style="max-width: 260px;">
+            </div>
         </div>
         <div class="table-responsive">
         <table class="market-table" id="federations-table">
@@ -121,7 +118,7 @@
                         @if (auth()->user()->isDshn())
                             <td>
                                 <div style="display:flex; gap:6px;">
-                                    <button type="button" class="fed-icon-btn js-edit-federation"
+                                    <button type="button" class="icon-btn js-edit-federation"
                                         data-id="{{ $federation->id }}"
                                         data-federation-name="{{ $federation->federation_name }}"
                                         data-arrete-numero="{{ $federation->arrete_numero }}"
@@ -135,7 +132,7 @@
                                     <form method="POST" action="{{ role_route('federations.destroy', $federation) }}" data-confirm="Supprimer le compte de {{ $federation->federation_name }} ?">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="fed-icon-btn danger" title="Supprimer">
+                                        <button type="submit" class="icon-btn danger" title="Supprimer">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                                         </button>
                                     </form>
@@ -145,13 +142,13 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">Aucune autre fédération enregistrée.</td>
+                        <td colspan="6"><x-empty-state icon="users" title="Aucune autre fédération enregistrée." /></td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
         </div>
-        <p class="strength-text js-table-empty" data-target="federations-table" style="display:none;">Aucun résultat.</p>
+        <x-empty-state icon="search" title="Aucun résultat." :compact="true" class="js-table-empty" data-target="federations-table" style="display:none;" />
     </div>
 
     @if (auth()->user()->isDshn())

@@ -10,15 +10,6 @@
         .user-item form.user-edit-form { display: flex; gap: 10px; align-items: flex-start; flex: 1; flex-wrap: wrap; }
         .user-edit-form input, .user-edit-form select { min-width: 160px; }
         .user-edit-form input[type="password"] { min-width: 160px; }
-        .user-icon-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px; border-radius: 8px;
-            background: var(--bg-secondary, rgba(255,255,255,0.06)); border: 1px solid var(--border, #333);
-            color: var(--text-primary); cursor: pointer; flex-shrink: 0;
-        }
-        .user-icon-btn:hover { background: var(--bg-card-hover); }
-        .user-icon-btn.danger { color: var(--loss, #c27878); }
-        .user-icon-btn svg { width: 18px; height: 18px; }
         .user-add-form { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border, #333); flex-wrap: wrap; }
     </style>
 @endpush
@@ -53,19 +44,22 @@
                     <select name="role" class="form-select">
                         <option value="dshn" {{ $user->role === 'dshn' ? 'selected' : '' }}>Agent DSHN</option>
                         <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrateur</option>
+                        <option value="dg" {{ $user->role === 'dg' ? 'selected' : '' }}>Directeur Général</option>
+                        <option value="comite_arbitrage" {{ $user->role === 'comite_arbitrage' ? 'selected' : '' }}>Comité d'arbitrage budgétaire</option>
+                        <option value="ministre" {{ $user->role === 'ministre' ? 'selected' : '' }}>Ministre</option>
                     </select>
                     <input type="password" name="password" class="form-input" placeholder="Nouveau mot de passe (optionnel)">
                     <input type="password" name="password_confirmation" class="form-input" placeholder="Confirmer">
-                    <button type="submit" class="user-icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
+                    <button type="submit" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
                 </form>
                     <form method="POST" action="{{ role_route('users.destroy', $user) }}" data-confirm="Supprimer le compte de {{ $user->name }} ?">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="user-icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
+                        <button type="submit" class="icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
                     </form>
                 </div>
             @endforeach
-            <p class="strength-text js-table-empty" data-target="users-list" style="display:none;">Aucun résultat.</p>
+            <x-empty-state icon="search" title="Aucun résultat." :compact="true" class="js-table-empty" data-target="users-list" style="display:none;" />
         </div>
 
         <form method="POST" action="{{ role_route('users.store') }}" class="user-add-form">
@@ -75,6 +69,9 @@
             <select name="role" class="form-select">
                 <option value="dshn">Agent DSHN</option>
                 <option value="admin">Administrateur</option>
+                <option value="dg">Directeur Général</option>
+                <option value="comite_arbitrage">Comité d'arbitrage budgétaire</option>
+                <option value="ministre">Ministre</option>
             </select>
             <input type="password" name="password" class="form-input" placeholder="Mot de passe" required>
             <input type="password" name="password_confirmation" class="form-input" placeholder="Confirmer" required>

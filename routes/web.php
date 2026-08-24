@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityFormController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Dshn\ActivityLogController;
+use App\Http\Controllers\Dshn\CampaignController;
 use App\Http\Controllers\Dshn\CanevasController;
 use App\Http\Controllers\Dshn\DashboardController as DshnDashboardController;
 use App\Http\Controllers\Dshn\FederationController;
@@ -17,9 +18,12 @@ Route::get('/', function () {
     if (AuthFacade::check()) {
         $user = AuthFacade::user();
 
-        return redirect()->route(
-            $user->isAdmin() ? 'admin.dashboard' : ($user->isDshn() ? 'dshn.dashboard' : 'dashboard')
-        );
+        return redirect()->route(match (true) {
+            $user->isAdmin() => 'admin.dashboard',
+            $user->isDshn() => 'dshn.dashboard',
+            $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
+            default => 'dashboard',
+        });
     }
 
     return view('landing');
@@ -60,6 +64,13 @@ Route::middleware(['auth', 'role:federation'])->group(function () {
     Route::post('/rapport-activite', [ActivityFormController::class, 'store'])
         ->defaults('type', 'rapport_activite')
         ->name('rapport-activite.store');
+
+    Route::get('/programme-reamenage/remplir', [ActivityFormController::class, 'create'])
+        ->defaults('type', 'programme_reamenage')
+        ->name('programme-reamenage.create');
+    Route::post('/programme-reamenage', [ActivityFormController::class, 'store'])
+        ->defaults('type', 'programme_reamenage')
+        ->name('programme-reamenage.store');
 });
 
 Route::get('/mes-documents/{report}', [ActivityFormController::class, 'show'])
@@ -78,6 +89,7 @@ $backOfficeRoutes = function () {
     Route::get('/', [DshnDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/federations', [FederationController::class, 'index'])->name('federations.index');
+    Route::get('/federations/{federation}', [FederationController::class, 'show'])->name('federations.show');
     Route::post('/federations/{federation}/valider', [FederationController::class, 'validate_'])->name('federations.validate');
     Route::post('/federations/valider-plusieurs', [FederationController::class, 'bulkValidate'])->name('federations.bulk-validate');
     Route::post('/federations/{federation}/rejeter', [FederationController::class, 'reject'])->name('federations.reject');
@@ -110,3 +122,35 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/comptes/{user}', [DshnUserController::class, 'update'])->name('users.update');
     Route::delete('/comptes/{user}', [DshnUserController::class, 'destroy'])->name('users.destroy');
 });
+
+// Circuit de répartition budgétaire (étapes 3 à 12 du workflow officiel) — partagé
+// entre DSHN/admin et les 3 acteurs du circuit d'arbitrage (DG, Comité, Ministre) ;
+// chaque action vérifie en plus le rôle exact attendu dans le contrôleur.
+Route::middleware(['auth', 'role:dshn,admin,dg,comite_arbitrage,ministre'])
+    ->prefix('campagnes')->name('campagnes.')
+    ->group(function () {
+        Route::get('/', [CampaignController::class, 'index'])->name('index');
+        Route::post('/', [CampaignController::class, 'store'])->name('store');
+        Route::get('/{campaign}', [CampaignController::class, 'show'])->name('show');
+
+        Route::post('/{campaign}/traitement', [CampaignController::class, 'advanceToPonderation'])->name('traitement');
+        Route::post('/{campaign}/ponderation', [CampaignController::class, 'updatePonderation'])->name('ponderation.update');
+        Route::post('/{campaign}/ponderation/confirmer', [CampaignController::class, 'confirmPonderation'])->name('ponderation.confirm');
+        Route::post('/{campaign}/categorisation/confirmer', [CampaignController::class, 'advanceToRepartition'])->name('categorisation.confirm');
+        Route::post('/{campaign}/repartition', [CampaignController::class, 'updateRepartition'])->name('repartition.update');
+        Route::post('/{campaign}/soumettre-dg', [CampaignController::class, 'submitToDg'])->name('submit-dg');
+
+        Route::post('/{campaign}/dg/valider', [CampaignController::class, 'dgValidate'])->name('dg.validate');
+        Route::post('/{campaign}/dg/rejeter', [CampaignController::class, 'dgReject'])->name('dg.reject');
+
+        Route::post('/{campaign}/arbitrage', [CampaignController::class, 'updateArbitrage'])->name('arbitrage.update');
+        Route::post('/{campaign}/arbitrage/finaliser', [CampaignController::class, 'finalizeArbitrage'])->name('arbitrage.finalize');
+
+        Route::post('/{campaign}/ministre/valider', [CampaignController::class, 'ministreValidate'])->name('ministre.validate');
+        Route::post('/{campaign}/ministre/rejeter', [CampaignController::class, 'ministreReject'])->name('ministre.reject');
+
+        Route::post('/{campaign}/session', [CampaignController::class, 'organizeSession'])->name('session.organize');
+
+        Route::post('/{campaign}/federations/{federation}/quitus', [CampaignController::class, 'deliverQuitus'])->name('quitus.deliver');
+        Route::get('/{campaign}/federations/{federation}/quitus', [CampaignController::class, 'downloadQuitus'])->name('quitus.download');
+    });
