@@ -25,6 +25,8 @@ class User extends Authenticatable
         'role',
         'status',
         'federation_name',
+        'arrete_numero',
+        'arrete_date',
         'rejection_reason',
     ];
 
@@ -48,6 +50,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'arrete_date' => 'date',
         ];
     }
 

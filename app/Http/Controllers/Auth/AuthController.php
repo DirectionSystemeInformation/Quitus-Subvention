@@ -21,21 +21,23 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'identifiant' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $credentials['identifiant'])
+            ->orWhere('arrete_numero', $credentials['identifiant'])
+            ->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => "Ces identifiants ne correspondent à aucun compte.",
+                'identifiant' => "Ces identifiants ne correspondent à aucun compte.",
             ]);
         }
 
         if ($user->role === 'federation' && $user->status === 'pending') {
             throw ValidationException::withMessages([
-                'email' => "Votre compte est en attente de validation par la DSHN. Vous serez notifié une fois votre compte activé.",
+                'identifiant' => "Votre compte est en attente de validation par la DSHN. Vous serez notifié une fois votre compte activé.",
             ]);
         }
 
@@ -45,7 +47,7 @@ class AuthController extends Controller
                 : '';
 
             throw ValidationException::withMessages([
-                'email' => "Votre demande de compte a été rejetée.{$reason} Veuillez contacter la Direction du Sport de Haut Niveau.",
+                'identifiant' => "Votre demande de compte a été rejetée.{$reason} Veuillez contacter la Direction du Sport de Haut Niveau.",
             ]);
         }
 
@@ -60,15 +62,18 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
             'federation_name' => ['required', 'string', 'max:255'],
+            'arrete_numero' => ['required', 'string', 'max:255', 'unique:users,arrete_numero'],
+            'arrete_date' => ['required', 'date'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
         $user = User::create([
-            'name' => $data['name'],
+            'name' => $data['federation_name'],
             'federation_name' => $data['federation_name'],
+            'arrete_numero' => $data['arrete_numero'],
+            'arrete_date' => $data['arrete_date'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => 'federation',
