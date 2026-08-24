@@ -60,7 +60,7 @@
                     <tr>
                         <th style="width:32px;"><input type="checkbox" id="selectAllPending"></th>
                         <th>Fédération</th>
-                        <th>Responsable</th>
+                        <th>N° arrêté</th>
                         <th>Email</th>
                         <th>Demandée le</th>
                         <th></th>
@@ -71,7 +71,7 @@
                         <tr>
                             <td><input type="checkbox" name="ids[]" value="{{ $federation->id }}" form="bulkValidateForm" class="js-pending-checkbox"></td>
                             <td>{{ $federation->federation_name }}</td>
-                            <td>{{ $federation->name }}</td>
+                            <td>{{ $federation->arrete_numero }}</td>
                             <td>{{ $federation->email }}</td>
                             <td>{{ $federation->created_at->format('d/m/Y') }}</td>
                             <td>
@@ -101,7 +101,7 @@
             <thead>
                 <tr>
                     <th>Fédération</th>
-                    <th>Responsable</th>
+                    <th>N° arrêté</th>
                     <th>Email</th>
                     <th>Statut</th>
                     <th>Documents déposés</th>
@@ -114,7 +114,7 @@
                 @forelse ($others as $federation)
                     <tr data-search-row>
                         <td>{{ $federation->federation_name }}</td>
-                        <td>{{ $federation->name }}</td>
+                        <td>{{ $federation->arrete_numero }}</td>
                         <td>{{ $federation->email }}</td>
                         <td><x-status-badge :status="$federation->status" /></td>
                         <td>{{ $federation->reports()->count() }}</td>
@@ -123,8 +123,9 @@
                                 <div style="display:flex; gap:6px;">
                                     <button type="button" class="fed-icon-btn js-edit-federation"
                                         data-id="{{ $federation->id }}"
-                                        data-name="{{ $federation->name }}"
                                         data-federation-name="{{ $federation->federation_name }}"
+                                        data-arrete-numero="{{ $federation->arrete_numero }}"
+                                        data-arrete-date="{{ optional($federation->arrete_date)->format('Y-m-d') }}"
                                         data-email="{{ $federation->email }}"
                                         data-status="{{ $federation->status }}"
                                         data-action="{{ role_route('federations.update', $federation) }}"
@@ -161,12 +162,16 @@
                     @csrf
                     @method('PUT')
                     <div class="form-group">
-                        <label class="form-label">Nom de la fédération</label>
+                        <label class="form-label">Dénomination de la fédération</label>
                         <input type="text" name="federation_name" id="editFedFederationName" class="form-input" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Responsable</label>
-                        <input type="text" name="name" id="editFedName" class="form-input" required>
+                        <label class="form-label">Numéro de l'arrêté de validation</label>
+                        <input type="text" name="arrete_numero" id="editFedArreteNumero" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date de l'arrêté de validation</label>
+                        <input type="date" name="arrete_date" id="editFedArreteDate" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
@@ -210,7 +215,8 @@
                 btn.addEventListener('click', function () {
                     form.action = btn.dataset.action;
                     document.getElementById('editFedFederationName').value = btn.dataset.federationName;
-                    document.getElementById('editFedName').value = btn.dataset.name;
+                    document.getElementById('editFedArreteNumero').value = btn.dataset.arreteNumero;
+                    document.getElementById('editFedArreteDate').value = btn.dataset.arreteDate;
                     document.getElementById('editFedEmail').value = btn.dataset.email;
                     document.getElementById('editFedStatus').value = btn.dataset.status;
                     modal.classList.add('active');

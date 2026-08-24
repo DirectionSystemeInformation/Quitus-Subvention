@@ -21,8 +21,10 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [$user->isFederation() ? 'nullable' : 'required', 'string', 'max:255'],
             'federation_name' => [$user->isFederation() ? 'required' : 'nullable', 'string', 'max:255'],
+            'arrete_numero' => [$user->isFederation() ? 'required' : 'nullable', 'string', 'max:255', Rule::unique('users', 'arrete_numero')->ignore($user->id)],
+            'arrete_date' => [$user->isFederation() ? 'required' : 'nullable', 'date'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'current_password' => ['nullable', 'required_with:password'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
@@ -38,11 +40,15 @@ class ProfileController extends Controller
             $user->password = Hash::make($data['password']);
         }
 
-        $user->name = $data['name'];
         $user->email = $data['email'];
 
         if ($user->isFederation()) {
             $user->federation_name = $data['federation_name'];
+            $user->name = $data['federation_name'];
+            $user->arrete_numero = $data['arrete_numero'];
+            $user->arrete_date = $data['arrete_date'];
+        } else {
+            $user->name = $data['name'];
         }
 
         $user->save();

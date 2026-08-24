@@ -93,22 +93,26 @@ class FederationController extends Controller
         abort_unless($federation->role === 'federation', 404);
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
             'federation_name' => ['required', 'string', 'max:255'],
+            'arrete_numero' => ['required', 'string', 'max:255', Rule::unique('users', 'arrete_numero')->ignore($federation->id)],
+            'arrete_date' => ['required', 'date'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($federation->id)],
             'status' => ['required', Rule::in(['pending', 'active', 'rejected'])],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
         $changes = [];
-        if ($federation->name !== $data['name']) $changes[] = 'nom du responsable';
-        if ($federation->federation_name !== $data['federation_name']) $changes[] = 'nom de la fédération';
+        if ($federation->federation_name !== $data['federation_name']) $changes[] = 'dénomination de la fédération';
+        if ($federation->arrete_numero !== $data['arrete_numero']) $changes[] = "numéro de l'arrêté";
+        if (optional($federation->arrete_date)->format('Y-m-d') !== $data['arrete_date']) $changes[] = "date de l'arrêté";
         if ($federation->email !== $data['email']) $changes[] = 'email';
         if ($federation->status !== $data['status']) $changes[] = 'statut';
         if (! empty($data['password'])) $changes[] = 'mot de passe';
 
-        $federation->name = $data['name'];
+        $federation->name = $data['federation_name'];
         $federation->federation_name = $data['federation_name'];
+        $federation->arrete_numero = $data['arrete_numero'];
+        $federation->arrete_date = $data['arrete_date'];
         $federation->email = $data['email'];
         $federation->status = $data['status'];
 

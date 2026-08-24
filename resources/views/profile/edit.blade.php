@@ -23,15 +23,25 @@
 
             @if ($user->isFederation())
                 <div class="form-group">
-                    <label class="form-label">Nom de la fédération</label>
+                    <label class="form-label">Dénomination de la fédération</label>
                     <input type="text" name="federation_name" class="form-input" value="{{ old('federation_name', $user->federation_name) }}" required>
                 </div>
-            @endif
 
-            <div class="form-group">
-                <label class="form-label">Nom du responsable</label>
-                <input type="text" name="name" class="form-input" value="{{ old('name', $user->name) }}" required>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Numéro de l'arrêté de validation du MSJE</label>
+                    <input type="text" name="arrete_numero" class="form-input" value="{{ old('arrete_numero', $user->arrete_numero) }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date de l'arrêté de validation</label>
+                    <input type="date" name="arrete_date" class="form-input" value="{{ old('arrete_date', optional($user->arrete_date)->format('Y-m-d')) }}" required>
+                </div>
+            @else
+                <div class="form-group">
+                    <label class="form-label">Nom</label>
+                    <input type="text" name="name" class="form-input" value="{{ old('name', $user->name) }}" required>
+                </div>
+            @endif
 
             <div class="form-group">
                 <label class="form-label">Email</label>

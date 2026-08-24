@@ -20,7 +20,7 @@
 </head>
 <body class="auth-page">
     @php
-        $registerHasErrors = $errors->has('federation_name') || $errors->has('password_confirmation') || old('federation_name') || request()->query('tab') === 'register';
+        $registerHasErrors = $errors->has('federation_name') || $errors->has('arrete_numero') || $errors->has('arrete_date') || $errors->has('password_confirmation') || old('federation_name') || request()->query('tab') === 'register';
     @endphp
 
     <!-- Left Side - Branding -->
@@ -87,8 +87,8 @@
                 <div id="flashStatus" data-message="{{ session('status') }}" data-type="success" style="display:none;"></div>
             @endif
 
-            @if ($errors->has('email') && !$registerHasErrors)
-                <p class="strength-text" style="color: var(--loss, #c27878); margin-bottom: 16px;">{{ $errors->first('email') }}</p>
+            @if ($errors->has('identifiant') && !$registerHasErrors)
+                <p class="strength-text" style="color: var(--loss, #c27878); margin-bottom: 16px;">{{ $errors->first('identifiant') }}</p>
             @endif
 
             <!-- Tab Switcher -->
@@ -101,13 +101,13 @@
             <form class="auth-form {{ $registerHasErrors ? '' : 'active' }}" id="loginForm" method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
-                    <label class="form-label">Adresse e-mail</label>
+                    <label class="form-label">Email ou numéro d'arrêté</label>
                     <div class="form-input-wrapper">
                         <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                             <polyline points="22,6 12,13 2,6"/>
                         </svg>
-                        <input type="email" name="email" class="form-input" placeholder="votre@email.com" value="{{ old('email') }}" required>
+                        <input type="text" name="identifiant" class="form-input" placeholder="votre@email.com ou numéro d'arrêté" value="{{ old('identifiant') }}" required>
                     </div>
                 </div>
 
@@ -149,7 +149,7 @@
             <form class="auth-form {{ $registerHasErrors ? 'active' : '' }}" id="registerForm" method="POST" action="{{ route('register') }}">
                 @csrf
                 <div class="form-group">
-                    <label class="form-label">Nom de la fédération</label>
+                    <label class="form-label">Dénomination de la fédération</label>
                     <div class="form-input-wrapper">
                         <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -163,15 +163,31 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Nom du responsable</label>
+                    <label class="form-label">Numéro de l'arrêté de validation du MSJE</label>
                     <div class="form-input-wrapper">
                         <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        <input type="text" name="name" class="form-input" placeholder="Nom et prénom" value="{{ old('name') }}" required>
+                        <input type="text" name="arrete_numero" class="form-input" placeholder="Ex. 2024-0123/MSJE/SG" value="{{ old('arrete_numero') }}" required>
                     </div>
-                    @error('name')
+                    @error('arrete_numero')
+                        <p class="strength-text" style="color: var(--loss, #c27878);">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date de l'arrêté de validation</label>
+                    <div class="form-input-wrapper">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <input type="date" name="arrete_date" class="form-input" value="{{ old('arrete_date') }}" required>
+                    </div>
+                    @error('arrete_date')
                         <p class="strength-text" style="color: var(--loss, #c27878);">{{ $message }}</p>
                     @enderror
                 </div>
