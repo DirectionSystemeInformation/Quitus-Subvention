@@ -516,23 +516,27 @@ body {
 }
 
 .status-badge.status-gain {
-    background: rgba(92, 190, 141, 0.15);
-    color: var(--color-success);
+    background: #ECFDF5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
 }
 
 .status-badge.status-loss {
-    background: rgba(229, 72, 77, 0.12);
-    color: var(--color-danger);
+    background: #FEF2F2;
+    color: #B91C1C;
+    border: 1px solid #FECACA;
 }
 
 .status-badge.status-neutral {
-    background: rgba(18, 152, 80, 0.15);
-    color: var(--color-primary);
+    background: #FFFBEB;
+    color: #B45309;
+    border: 1px solid #FDE68A;
 }
 
 .status-badge.status-muted {
-    background: var(--bg-secondary, rgba(255,255,255,0.06));
-    color: var(--text-muted, #9a9a9a);
+    background: #F3F4F6;
+    color: #374151;
+    border: 1px solid #E5E7EB;
 }
 
 /* ========================================

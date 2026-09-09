@@ -10,7 +10,7 @@
         'brouillon' => ['label' => 'Brouillon', 'class' => 'status-muted', 'icon' => 'dash'],
     ];
 
-    $info = $map[$status] ?? ['label' => ucfirst($status), 'class' => 'status-neutral', 'icon' => 'dash'];
+    $info = $map[$status] ?? ['label' => ucfirst($status), 'class' => 'status-muted', 'icon' => 'dash'];
 
     $icons = [
         'check' => '<polyline points="20 6 9 17 4 12"/>',
