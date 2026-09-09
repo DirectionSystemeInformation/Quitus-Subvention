@@ -9,7 +9,7 @@
 @section('content')
     <div class="page-header">
         <nav class="breadcrumb" aria-label="Fil d'Ariane">
-            <a href="{{ route('activities.index') }}">Gestion des activités</a>
+            <a href="{{ route('activities.index') }}">Activités</a>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{ $activity->exists ? "Modifier l'activité" : 'Nouvelle activité' }}</span>
         </nav>

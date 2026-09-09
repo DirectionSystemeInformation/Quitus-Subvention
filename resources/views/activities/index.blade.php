@@ -1,6 +1,6 @@
 @extends('layouts.dashboard', ['active' => 'activities'])
 
-@section('title', 'Gestion des activités')
+@section('title', 'Activités')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="page-header">
-        <h1>Gestion des activités</h1>
+        <h1>Activités</h1>
         <p>Déclarez chaque activité réalisée avec ses pièces justificatives. Une fois validée par la DGF, elle est automatiquement versée à votre rapport d'activité.</p>
     </div>
 
