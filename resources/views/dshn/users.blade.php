@@ -5,12 +5,10 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
     <style>
-        .user-item { display: flex; gap: 10px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--border, #333); flex-wrap: wrap; }
-        .user-item:last-child { border-bottom: none; }
-        .user-item form.user-edit-form { display: flex; gap: 10px; align-items: flex-start; flex: 1; flex-wrap: wrap; }
-        .user-edit-form input, .user-edit-form select { min-width: 160px; }
-        .user-edit-form input[type="password"] { min-width: 160px; }
-        .user-add-form { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border, #333); flex-wrap: wrap; }
+        .market-table td input, .market-table td select { min-width: 140px; }
+        .market-table td.password-cell { min-width: 150px; }
+        .market-table tfoot tr { border-top: 1px dashed #cbd5e1; background: var(--bg-primary); }
+        .market-table tfoot td { padding-top: 18px; padding-bottom: 18px; }
     </style>
 @endpush
 
@@ -23,61 +21,93 @@
     @php
         $saveIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
         $trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+        $roleOptions = [
+            'dshn' => 'Agent DSHN',
+            'admin' => 'Administrateur',
+            'dg' => 'Directeur Général',
+            'comite_arbitrage' => "Comité d'arbitrage budgétaire",
+            'ministre' => 'Ministre',
+            'dgf' => 'DGF',
+        ];
     @endphp
+
+    {{-- Forms live outside the table markup (a <form> is not a valid child of <tbody>/<tr>);
+         inputs inside the table cells reference them via the HTML `form="..."` attribute. --}}
+    @foreach ($users as $user)
+        <form id="edit-user-{{ $user->id }}" method="POST" action="{{ role_route('users.update', $user) }}" style="display:none;">
+            @csrf
+            @method('PUT')
+        </form>
+        <form id="delete-user-{{ $user->id }}" method="POST" action="{{ role_route('users.destroy', $user) }}" data-confirm="Supprimer le compte de {{ $user->name }} ?" style="display:none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endforeach
+    <form id="add-user" method="POST" action="{{ role_route('users.store') }}" style="display:none;">
+        @csrf
+    </form>
 
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Comptes</h2>
             @if ($users->isNotEmpty())
-                <input type="search" class="form-input js-table-search" data-target="users-list" placeholder="Rechercher..." style="max-width: 260px;">
+                <input type="search" class="form-input js-table-search" data-target="users-table" placeholder="Rechercher..." style="max-width: 260px;">
             @endif
         </div>
 
-        <div id="users-list">
-            @foreach ($users as $user)
-                <div class="user-item" data-search-row>
-                <form method="POST" action="{{ role_route('users.update', $user) }}" class="user-edit-form">
-                    @csrf
-                    @method('PUT')
-                    <input type="text" name="name" class="form-input" value="{{ $user->name }}" required placeholder="Nom">
-                    <input type="email" name="email" class="form-input" value="{{ $user->email }}" required placeholder="Email">
-                    <select name="role" class="form-select">
-                        <option value="dshn" {{ $user->role === 'dshn' ? 'selected' : '' }}>Agent DSHN</option>
-                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrateur</option>
-                        <option value="dg" {{ $user->role === 'dg' ? 'selected' : '' }}>Directeur Général</option>
-                        <option value="comite_arbitrage" {{ $user->role === 'comite_arbitrage' ? 'selected' : '' }}>Comité d'arbitrage budgétaire</option>
-                        <option value="ministre" {{ $user->role === 'ministre' ? 'selected' : '' }}>Ministre</option>
-                        <option value="dgf" {{ $user->role === 'dgf' ? 'selected' : '' }}>DGF</option>
-                    </select>
-                    <input type="password" name="password" class="form-input" placeholder="Nouveau mot de passe (optionnel)">
-                    <input type="password" name="password_confirmation" class="form-input" placeholder="Confirmer">
-                    <button type="submit" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
-                </form>
-                    <form method="POST" action="{{ role_route('users.destroy', $user) }}" data-confirm="Supprimer le compte de {{ $user->name }} ?">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
-                    </form>
-                </div>
-            @endforeach
-            <x-empty-state icon="search" title="Aucun résultat." :compact="true" class="js-table-empty" data-target="users-list" style="display:none;" />
+        <div class="table-responsive">
+        <table class="market-table sortable" id="users-table">
+            <thead>
+                <tr>
+                    <th data-sort="text">Nom</th>
+                    <th data-sort="text">Email</th>
+                    <th data-sort="text">Rôle</th>
+                    <th>Nouveau mot de passe</th>
+                    <th>Confirmer</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($users as $user)
+                    <tr data-search-row>
+                        <td><input type="text" name="name" form="edit-user-{{ $user->id }}" class="form-input" value="{{ $user->name }}" required></td>
+                        <td><input type="email" name="email" form="edit-user-{{ $user->id }}" class="form-input" value="{{ $user->email }}" required></td>
+                        <td>
+                            <select name="role" form="edit-user-{{ $user->id }}" class="form-select">
+                                @foreach ($roleOptions as $value => $label)
+                                    <option value="{{ $value }}" {{ $user->role === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td class="password-cell"><input type="password" name="password" form="edit-user-{{ $user->id }}" class="form-input" placeholder="Optionnel"></td>
+                        <td class="password-cell"><input type="password" name="password_confirmation" form="edit-user-{{ $user->id }}" class="form-input" placeholder="Confirmer"></td>
+                        <td>
+                            <div style="display:flex; gap:6px;">
+                                <button type="submit" form="edit-user-{{ $user->id }}" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
+                                <button type="submit" form="delete-user-{{ $user->id }}" class="icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><input type="text" name="name" form="add-user" class="form-input" placeholder="Nom" required></td>
+                    <td><input type="email" name="email" form="add-user" class="form-input" placeholder="Email" required></td>
+                    <td>
+                        <select name="role" form="add-user" class="form-select">
+                            @foreach ($roleOptions as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td class="password-cell"><input type="password" name="password" form="add-user" class="form-input" placeholder="Mot de passe" required></td>
+                    <td class="password-cell"><input type="password" name="password_confirmation" form="add-user" class="form-input" placeholder="Confirmer" required></td>
+                    <td><button type="submit" form="add-user" class="btn primary" style="white-space:nowrap;">+ Ajouter</button></td>
+                </tr>
+            </tfoot>
+        </table>
         </div>
-
-        <form method="POST" action="{{ role_route('users.store') }}" class="user-add-form">
-            @csrf
-            <input type="text" name="name" class="form-input" placeholder="Nom" required>
-            <input type="email" name="email" class="form-input" placeholder="Email" required>
-            <select name="role" class="form-select">
-                <option value="dshn">Agent DSHN</option>
-                <option value="admin">Administrateur</option>
-                <option value="dg">Directeur Général</option>
-                <option value="comite_arbitrage">Comité d'arbitrage budgétaire</option>
-                <option value="ministre">Ministre</option>
-                <option value="dgf">DGF</option>
-            </select>
-            <input type="password" name="password" class="form-input" placeholder="Mot de passe" required>
-            <input type="password" name="password_confirmation" class="form-input" placeholder="Confirmer" required>
-            <button type="submit" class="btn primary">+ Ajouter un compte</button>
-        </form>
+        <x-empty-state icon="search" title="Aucun résultat." :compact="true" class="js-table-empty" data-target="users-table" style="display:none;" />
     </div>
 @endsection

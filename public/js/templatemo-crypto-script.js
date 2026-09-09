@@ -468,13 +468,22 @@ https://templatemo.com/tm-609-crypto-vault
             const emptyMessage = document.querySelector('.js-table-empty[data-target="' + targetId + '"]');
             const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
 
+            function rowSearchText(row) {
+                let text = row.textContent;
+                Array.prototype.forEach.call(row.querySelectorAll('input, select'), function(field) {
+                    if (field.type === 'password' || field.type === 'hidden') return;
+                    text += ' ' + (field.tagName === 'SELECT' ? field.options[field.selectedIndex].text : field.value);
+                });
+                return text.toLowerCase();
+            }
+
             function applyFilters() {
                 const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
                 const status = statusFilter ? statusFilter.value : '';
                 let visibleCount = 0;
 
                 rows.forEach(function(row) {
-                    const matchesQuery = !query || row.textContent.toLowerCase().includes(query);
+                    const matchesQuery = !query || rowSearchText(row).includes(query);
                     const matchesStatus = !status || row.dataset.status === status;
                     const matches = matchesQuery && matchesStatus;
                     row.style.display = matches ? '' : 'none';
@@ -607,6 +616,13 @@ https://templatemo.com/tm-609-crypto-vault
     /* ========================================
        Sortable Table Columns
     ======================================== */
+    function cellSortText(cell) {
+        if (cell.dataset.sortValue !== undefined) return cell.dataset.sortValue;
+        const field = cell.querySelector('input, select');
+        if (field) return field.tagName === 'SELECT' ? field.options[field.selectedIndex].text : field.value;
+        return cell.textContent;
+    }
+
     function initSortableTables() {
         document.querySelectorAll('table.sortable').forEach(function (table) {
             const tbody = table.querySelector('tbody');
@@ -634,8 +650,8 @@ https://templatemo.com/tm-609-crypto-vault
                         const cellB = b.children[colIndex];
                         if (!cellA || !cellB) return 0;
 
-                        const rawA = (cellA.dataset.sortValue !== undefined ? cellA.dataset.sortValue : cellA.textContent).trim();
-                        const rawB = (cellB.dataset.sortValue !== undefined ? cellB.dataset.sortValue : cellB.textContent).trim();
+                        const rawA = cellSortText(cellA).trim();
+                        const rawB = cellSortText(cellB).trim();
 
                         let valA, valB;
                         if (type === 'number') {
