@@ -475,6 +475,25 @@ https://templatemo.com/tm-609-crypto-vault
     margin-bottom: 32px;
 }
 
+.market-stats-3col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+}
+
+.dashboard-donut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+}
+
 .market-stat {
     background-color: var(--bg-card);
     border-radius: var(--radius-lg);
