@@ -14,7 +14,17 @@ class ReportController extends Controller
     {
         $reports = Report::with('user')->where('status', '!=', 'brouillon')->latest()->get();
 
-        return view('dshn.reports', compact('reports'));
+        $grouped = $reports->groupBy('type');
+        $reportsByType = collect(['rapport_activite', 'programme_budgetise', 'programme_reamenage'])
+            ->filter(fn ($type) => $grouped->has($type))
+            ->map(fn ($type) => [
+                'type' => $type,
+                'label' => $grouped[$type]->first()->typeLabel(),
+                'reports' => $grouped[$type],
+            ])
+            ->values();
+
+        return view('dshn.reports', compact('reports', 'reportsByType'));
     }
 
     public function download(Report $report)
@@ -42,7 +52,7 @@ class ReportController extends Controller
 
     public function reject(Request $request, Report $report)
     {
-        abort_if($report->status === 'brouillon', 403);
+        abort_unless($report->status === 'soumis', 404);
         $data = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);

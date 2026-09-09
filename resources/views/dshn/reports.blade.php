@@ -4,6 +4,10 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
+    <style>
+        .table-group-header td { padding-top: 20px; padding-bottom: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: none; }
+        .table-group-header:first-child td { padding-top: 4px; }
+    </style>
 @endpush
 
 @section('content')
@@ -32,40 +36,43 @@
             <x-empty-state icon="inbox" title="Aucun document déposé pour le moment." />
         @else
             <div class="table-responsive">
-            <table class="market-table sortable" id="reports-table">
+            <table class="market-table" id="reports-table">
                 <thead>
                     <tr>
-                        <th data-sort="text">Fédération</th>
-                        <th data-sort="text">Document</th>
-                        <th data-sort="number">Année</th>
-                        <th data-sort="number">Déposé le</th>
-                        <th data-sort="text">Statut</th>
+                        <th>Fédération</th>
+                        <th>Année</th>
+                        <th>Déposé le</th>
+                        <th>Statut</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($reports as $report)
-                        <tr data-search-row data-status="{{ $report->status }}">
-                            <td>{{ $report->user->federation_name }}</td>
-                            <td>{{ $report->typeLabel() }}</td>
-                            <td>{{ $report->year }}</td>
-                            <td data-sort-value="{{ $report->created_at->timestamp }}">{{ $report->created_at->format('d/m/Y H:i') }}</td>
-                            <td><x-status-badge :status="$report->status" /></td>
-                            <td>
-                                <div style="display:flex;gap:12px;align-items:center;">
-                                    <a href="{{ route('activity-form.show', $report) }}" class="security-btn">Voir le détail</a>
-                                    @if ($report->status !== 'valide')
-                                        <form method="POST" action="{{ role_route('reports.validate', $report) }}">
-                                            @csrf
-                                            <button type="submit" class="security-btn primary">Valider</button>
-                                        </form>
-                                    @endif
-                                    @if ($report->status !== 'rejete')
-                                        <button type="button" class="security-btn js-reject-reason" data-action="{{ role_route('reports.reject', $report) }}">Rejeter</button>
-                                    @endif
-                                </div>
-                            </td>
+                    @foreach ($reportsByType as $group)
+                        <tr class="table-group-header" data-group-header="{{ $group['type'] }}">
+                            <td colspan="5">{{ $group['label'] }} ({{ $group['reports']->count() }})</td>
                         </tr>
+                        @foreach ($group['reports'] as $report)
+                            <tr data-search-row data-status="{{ $report->status }}" data-group="{{ $group['type'] }}">
+                                <td>{{ $report->user->federation_name }}</td>
+                                <td>{{ $report->year }}</td>
+                                <td>{{ $report->created_at->format('d/m/Y H:i') }}</td>
+                                <td><x-status-badge :status="$report->status" /></td>
+                                <td>
+                                    <div style="display:flex;gap:12px;align-items:center;">
+                                        <a href="{{ route('activity-form.show', $report) }}" class="security-btn">Voir le détail</a>
+                                        @if ($report->status !== 'valide')
+                                            <form method="POST" action="{{ role_route('reports.validate', $report) }}">
+                                                @csrf
+                                                <button type="submit" class="security-btn primary">Valider</button>
+                                            </form>
+                                        @endif
+                                        @if ($report->status === 'soumis')
+                                            <button type="button" class="security-btn js-reject-reason" data-action="{{ role_route('reports.reject', $report) }}">Rejeter</button>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
                     @endforeach
                 </tbody>
             </table>

@@ -467,6 +467,7 @@ https://templatemo.com/tm-609-crypto-vault
             const statusFilter = document.querySelector('.js-table-status-filter[data-target="' + targetId + '"]');
             const emptyMessage = document.querySelector('.js-table-empty[data-target="' + targetId + '"]');
             const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
+            const groupHeaders = Array.prototype.slice.call(container.querySelectorAll('[data-group-header]'));
 
             function rowSearchText(row) {
                 let text = row.textContent;
@@ -482,12 +483,23 @@ https://templatemo.com/tm-609-crypto-vault
                 const status = statusFilter ? statusFilter.value : '';
                 let visibleCount = 0;
 
+                const visibleByGroup = {};
+
                 rows.forEach(function(row) {
                     const matchesQuery = !query || rowSearchText(row).includes(query);
                     const matchesStatus = !status || row.dataset.status === status;
                     const matches = matchesQuery && matchesStatus;
                     row.style.display = matches ? '' : 'none';
-                    if (matches) visibleCount++;
+                    if (matches) {
+                        visibleCount++;
+                        if (row.dataset.group) {
+                            visibleByGroup[row.dataset.group] = (visibleByGroup[row.dataset.group] || 0) + 1;
+                        }
+                    }
+                });
+
+                groupHeaders.forEach(function(header) {
+                    header.style.display = visibleByGroup[header.dataset.groupHeader] ? '' : 'none';
                 });
 
                 if (emptyMessage) {
