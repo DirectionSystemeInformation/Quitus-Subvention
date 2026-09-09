@@ -31,17 +31,17 @@ https://templatemo.com/tm-609-crypto-vault
     --bg-secondary: #ffffff;
     --bg-card: #ffffff;
     --bg-card-hover: #f1f5f9;
-    --color-primary: #059669;
-    --color-primary-hover: #047857;
+    --color-primary: #047857;
+    --color-primary-hover: #065f46;
     --color-primary-light: #6ee7b7;
-    --color-primary-gradient: linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%);
-    --color-primary-gradient-hover: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
-    --color-success: #059669;
+    --color-primary-gradient: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
+    --color-primary-gradient-hover: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+    --color-success: #047857;
     --color-danger: #DC2626;
     --color-danger-hover: #B91C1C;
     --color-accent-gold: #FCD116;
     --color-accent-gold-soft: rgba(252, 209, 22, 0.15);
-    --focus-ring: 0 0 0 4px rgba(5, 150, 105, 0.10), 0 0 0 1px var(--color-primary);
+    --focus-ring: 0 0 0 4px rgba(4, 120, 87, 0.10), 0 0 0 1px var(--color-primary);
 
     /* alias rétro-compat (utilisés par les pages DSHN/admin non redesignées) */
     --accent-copper: var(--color-primary);
@@ -274,7 +274,7 @@ body {
 }
 
 .nav-item.active {
-    background: var(--color-primary-gradient-soft, rgba(5, 150, 105, 0.08));
+    background: var(--color-primary-gradient-soft, rgba(4, 120, 87, 0.08));
     color: var(--color-primary);
     font-weight: 600;
     border-left: 3px solid var(--color-primary);
@@ -283,7 +283,7 @@ body {
 }
 
 .nav-item.active:hover {
-    background: rgba(5, 150, 105, 0.12);
+    background: rgba(4, 120, 87, 0.12);
 }
 
 .nav-icon {

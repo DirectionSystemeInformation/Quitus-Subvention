@@ -567,11 +567,15 @@ https://templatemo.com/tm-609-crypto-vault
     font-size: 14px;
     font-weight: 500;
     background: none;
-    border: none;
+    border: 1px solid transparent;
     color: var(--text-secondary);
     cursor: pointer;
     font-family: inherit;
     transition: all 0.2s ease;
+}
+
+.filter-tab:not(.active) {
+    border-color: var(--border);
 }
 
 .filter-tab:hover {
@@ -832,11 +836,15 @@ https://templatemo.com/tm-609-crypto-vault
     font-size: 14px;
     font-weight: 500;
     background: none;
-    border: none;
+    border: 1px solid transparent;
     color: var(--text-secondary);
     cursor: pointer;
     font-family: inherit;
     transition: all 0.2s ease;
+}
+
+.settings-tab:not(.active) {
+    border-color: var(--border);
 }
 
 .settings-tab:hover {

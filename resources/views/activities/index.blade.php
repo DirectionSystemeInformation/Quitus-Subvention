@@ -18,7 +18,7 @@
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 @if ($availableYears->isNotEmpty())
                     <form method="GET" action="{{ route('activities.index') }}">
-                        <select name="annee" aria-label="Année des activités" class="form-select" onchange="this.form.submit()" style="max-width: 160px;">
+                        <select name="annee" aria-label="Année des activités" class="form-select" onchange="this.form.submit()" style="max-width: 200px;">
                             <option value="">Toutes les années</option>
                             @foreach ($availableYears as $y)
                                 <option value="{{ $y }}" {{ (string) $year === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -50,7 +50,7 @@
                     @foreach ($activities as $activity)
                         <tr>
                             <td>{{ $activity->year }}</td>
-                            <td>{{ $activity->axe_label }} — {{ $activity->sous_axe_label }}</td>
+                            <td class="cell-clamp" title="{{ $activity->axe_label }} — {{ $activity->sous_axe_label }}">{{ $activity->axe_label }} — {{ $activity->sous_axe_label }}</td>
                             <td>{{ $activity->designation }}</td>
                             <td data-sort-value="{{ $activity->montant ?? 0 }}">{{ $activity->montant !== null ? number_format((float) $activity->montant, 0, ',', ' ').' FCFA' : '—' }}</td>
                             <td><x-status-badge :status="$activity->status" /></td>

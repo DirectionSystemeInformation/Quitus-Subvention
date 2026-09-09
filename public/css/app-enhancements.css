@@ -449,7 +449,7 @@
 .dropzone:hover,
 .dropzone.is-dragover {
     border-color: var(--color-primary);
-    background: rgba(5, 150, 105, 0.05);
+    background: rgba(4, 120, 87, 0.05);
 }
 
 .dropzone-icon {
@@ -678,7 +678,7 @@
     width: 36px;
     height: 36px;
     border-radius: var(--radius-md);
-    background: rgba(5, 150, 105, 0.1);
+    background: rgba(4, 120, 87, 0.1);
     color: var(--color-primary);
     display: flex;
     align-items: center;
@@ -714,6 +714,22 @@
 @media (max-width: 900px) {
     .profile-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   Long text clamp in a table cell (hover for full text via title=)
+======================================== */
+.cell-clamp {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .cell-clamp {
+        max-width: 160px;
     }
 }
 

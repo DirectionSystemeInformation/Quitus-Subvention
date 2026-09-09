@@ -19,15 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (AuthFacade::check()) {
-        $user = AuthFacade::user();
-
-        return redirect()->route(match (true) {
-            $user->isAdmin() => 'admin.dashboard',
-            $user->isDshn() => 'dshn.dashboard',
-            $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
-            $user->isDgf() => 'dgf.activities.index',
-            default => 'dashboard',
-        });
+        return redirect()->route(home_route_name(AuthFacade::user()));
     }
 
     return view('landing');

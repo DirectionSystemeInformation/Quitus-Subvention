@@ -52,7 +52,7 @@
                             <td data-sort-value="{{ $report->created_at->timestamp }}">{{ $report->created_at->format('d/m/Y H:i') }}</td>
                             <td><x-status-badge :status="$report->status" /></td>
                             <td>
-                                <div style="display:flex;gap:8px;align-items:center;">
+                                <div style="display:flex;gap:12px;align-items:center;">
                                     <a href="{{ route('activity-form.show', $report) }}" class="security-btn">Voir le détail</a>
                                     @if ($report->status !== 'valide')
                                         <form method="POST" action="{{ role_route('reports.validate', $report) }}">

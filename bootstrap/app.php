@@ -14,6 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserRole::class,
         ]);
+
+        // The framework default sends an already-authenticated user to the
+        // "dashboard" route when they hit a guest-only page (e.g. /login) —
+        // but that route is federation-only here, so anyone else (DSHN,
+        // admin, DG...) would bounce straight into a 403. Send each role to
+        // its own dashboard instead.
+        $middleware->redirectUsersTo(fn () => route(home_route_name(auth()->user())));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, $request) {

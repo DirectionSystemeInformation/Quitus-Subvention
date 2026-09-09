@@ -71,7 +71,7 @@
                         <tr>
                             <td>{{ $activity->user->federation_name }}</td>
                             <td>{{ $activity->year }}</td>
-                            <td>{{ $activity->axe_label }} — {{ $activity->sous_axe_label }}</td>
+                            <td class="cell-clamp" title="{{ $activity->axe_label }} — {{ $activity->sous_axe_label }}">{{ $activity->axe_label }} — {{ $activity->sous_axe_label }}</td>
                             <td>{{ $activity->designation }}</td>
                             <td data-sort-value="{{ $activity->montant ?? 0 }}">{{ $activity->montant !== null ? number_format((float) $activity->montant, 0, ',', ' ').' FCFA' : '—' }}</td>
                             <td><x-status-badge :status="$activity->status" /></td>
