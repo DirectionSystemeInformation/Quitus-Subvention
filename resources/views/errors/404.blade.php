@@ -19,6 +19,7 @@
     </style>
 </head>
 <body>
+    <div class="flag-ribbon" aria-hidden="true"></div>
     <div class="card error-card reveal">
         <img src="{{ asset('img/armoiries.png') }}" alt="Armoiries du Burkina Faso" class="error-logo">
         <div class="error-code">404</div>

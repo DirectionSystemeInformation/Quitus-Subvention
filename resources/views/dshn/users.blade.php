@@ -69,22 +69,23 @@
             </thead>
             <tbody>
                 @foreach ($users as $user)
+                    @php $fid = $user->id; @endphp
                     <tr data-search-row>
-                        <td><input type="text" name="name" form="edit-user-{{ $user->id }}" class="form-input" value="{{ $user->name }}" required></td>
-                        <td><input type="email" name="email" form="edit-user-{{ $user->id }}" class="form-input" value="{{ $user->email }}" required></td>
+                        <td><input type="text" name="name_{{ $fid }}" form="edit-user-{{ $fid }}" class="form-input" value="{{ old("name_$fid", $user->name) }}" required></td>
+                        <td><input type="email" name="email_{{ $fid }}" form="edit-user-{{ $fid }}" class="form-input" value="{{ old("email_$fid", $user->email) }}" required></td>
                         <td>
-                            <select name="role" form="edit-user-{{ $user->id }}" class="form-select">
+                            <select name="role_{{ $fid }}" form="edit-user-{{ $fid }}" class="form-select">
                                 @foreach ($roleOptions as $value => $label)
-                                    <option value="{{ $value }}" {{ $user->role === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    <option value="{{ $value }}" {{ old("role_$fid", $user->role) === $value ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </td>
-                        <td class="password-cell"><input type="password" name="password" form="edit-user-{{ $user->id }}" class="form-input" placeholder="Optionnel"></td>
-                        <td class="password-cell"><input type="password" name="password_confirmation" form="edit-user-{{ $user->id }}" class="form-input" placeholder="Confirmer"></td>
+                        <td class="password-cell"><input type="password" name="password_{{ $fid }}" form="edit-user-{{ $fid }}" class="form-input" placeholder="Optionnel"></td>
+                        <td class="password-cell"><input type="password" name="password_{{ $fid }}_confirmation" form="edit-user-{{ $fid }}" class="form-input" placeholder="Confirmer"></td>
                         <td>
                             <div style="display:flex; gap:6px;">
-                                <button type="submit" form="edit-user-{{ $user->id }}" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
-                                <button type="submit" form="delete-user-{{ $user->id }}" class="icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
+                                <button type="submit" form="edit-user-{{ $fid }}" class="icon-btn" title="Enregistrer">{!! $saveIcon !!}</button>
+                                <button type="submit" form="delete-user-{{ $fid }}" class="icon-btn danger" title="Supprimer">{!! $trashIcon !!}</button>
                             </div>
                         </td>
                     </tr>

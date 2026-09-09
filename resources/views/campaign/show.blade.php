@@ -12,10 +12,6 @@
         .ponderation-table th, .ponderation-table td { font-size: 12px; padding: 6px; white-space: nowrap; }
         .ponderation-table .critere-input { width: 52px; text-align: center; }
         .ponderation-table thead tr:first-child th { text-align: center; background: var(--bg-secondary); }
-        .campaign-stepper { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-        .campaign-step { padding: 6px 12px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); }
-        .campaign-step.is-done { background: rgba(29, 170, 94, 0.12); border-color: var(--color-primary-light); color: var(--color-primary); }
-        .campaign-step.is-current { background: var(--color-primary-gradient); border-color: transparent; color: #1c1c1e; }
         .repartition-bareme { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 20px; }
     </style>
 @endpush
@@ -31,12 +27,32 @@
         <p>Étape {{ $campaign->etape }} sur 12 — {{ $campaign->etapeLabel() }}</p>
     </div>
 
-    <div class="campaign-stepper">
-        @foreach (range(3, 12) as $step)
-            <span class="campaign-step {{ $step < $campaign->etape ? 'is-done' : ($step === $campaign->etape ? 'is-current' : '') }}">
-                {{ $step }}. {{ \App\Models\Campaign::labelForEtape($step) }}
-            </span>
-        @endforeach
+    <div class="table-responsive" style="margin-bottom: 28px;">
+        <div class="campaign-stepper" role="list" aria-label="Étapes du circuit de répartition">
+            @foreach (range(3, 12) as $step)
+                @php
+                    $state = $step < $campaign->etape ? 'done' : ($step === $campaign->etape ? 'current' : 'upcoming');
+                @endphp
+                <div class="campaign-step is-{{ $state }}" role="listitem">
+                    <div class="campaign-step-track">
+                        <span class="campaign-step-marker" aria-hidden="true">
+                            @if ($state === 'done')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            @else
+                                {{ $step }}
+                            @endif
+                        </span>
+                        @if (!$loop->last)
+                            <span class="campaign-step-line {{ $step < $campaign->etape ? 'is-filled' : '' }}" aria-hidden="true"></span>
+                        @endif
+                    </div>
+                    <span class="campaign-step-eyebrow">Étape {{ $step }}</span>
+                    <span class="campaign-step-label">{{ \App\Models\Campaign::labelForEtape($step) }}</span>
+                </div>
+            @endforeach
+        </div>
     </div>
 
     {{-- Étape 3 : Traitement --}}

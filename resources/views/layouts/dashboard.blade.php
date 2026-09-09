@@ -12,6 +12,7 @@
     @stack('styles')
 </head>
 <body>
+    <div class="flag-ribbon" aria-hidden="true"></div>
     <a class="skip-link" href="#mainContent">Aller au contenu</a>
     <!-- Mobile Menu Toggle -->
     <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Ouvrir le menu" aria-controls="sidebar" aria-expanded="false">
@@ -34,9 +35,29 @@
             </div>
 
             @auth
+                @php
+                    $roleLabels = [
+                        'federation' => 'Fédération',
+                        'dshn' => 'Agent DSHN',
+                        'admin' => 'Administrateur',
+                        'dg' => 'Directeur Général',
+                        'comite_arbitrage' => "Comité d'arbitrage",
+                        'ministre' => 'Ministre',
+                        'dgf' => 'DGF',
+                    ];
+                    $displayName = auth()->user()->isFederation() ? auth()->user()->federation_name : auth()->user()->name;
+                    $initial = mb_strtoupper(mb_substr($displayName ?: '?', 0, 1));
+                @endphp
+                <div class="sidebar-user">
+                    <span class="sidebar-user-avatar" aria-hidden="true">{{ $initial }}</span>
+                    <span class="sidebar-user-info">
+                        <span class="sidebar-user-name" title="{{ $displayName }}">{{ $displayName }}</span>
+                        <span class="sidebar-user-role">{{ $roleLabels[auth()->user()->role] ?? auth()->user()->role }}</span>
+                    </span>
+                </div>
+
                 @if (auth()->user()->isFederation())
                     <nav class="nav-section">
-                        <div class="nav-label">Menu</div>
                         <a href="{{ route('dashboard') }}" class="nav-item {{ ($active ?? '') === 'dashboard' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -46,6 +67,9 @@
                             </svg>
                             Tableau de bord
                         </a>
+                    </nav>
+                    <nav class="nav-section">
+                        <div class="nav-label">Gestion</div>
                         <a href="{{ route('documents.index') }}" class="nav-item {{ ($active ?? '') === 'documents' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -60,6 +84,9 @@
                             </svg>
                             Gestion des activités
                         </a>
+                    </nav>
+                    <nav class="nav-section">
+                        <div class="nav-label">Compte</div>
                         <a href="{{ route('profile.edit') }}" class="nav-item {{ ($active ?? '') === 'profile' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -70,7 +97,6 @@
                     </nav>
                 @elseif (auth()->user()->isDshn())
                     <nav class="nav-section">
-                        <div class="nav-label">Menu</div>
                         <a href="{{ role_route('dashboard') }}" class="nav-item {{ ($active ?? '') === 'dshn-dashboard' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -80,6 +106,9 @@
                             </svg>
                             Tableau de bord
                         </a>
+                    </nav>
+                    <nav class="nav-section">
+                        <div class="nav-label">Fédérations</div>
                         <a href="{{ role_route('federations.index') }}" class="nav-item {{ ($active ?? '') === 'federations' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -107,6 +136,9 @@
                             </svg>
                             Canevas
                         </a>
+                    </nav>
+                    <nav class="nav-section">
+                        <div class="nav-label">Répartition</div>
                         <a href="{{ route('campagnes.index') }}" class="nav-item {{ ($active ?? '') === 'campagnes' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/>
@@ -121,6 +153,11 @@
                                 </svg>
                                 Activités
                             </a>
+                        @endif
+                    </nav>
+                    @if (auth()->user()->isAdmin())
+                        <nav class="nav-section">
+                            <div class="nav-label">Administration</div>
                             <a href="{{ role_route('activity-log.index') }}" class="nav-item {{ ($active ?? '') === 'activity-log' ? 'active' : '' }}">
                                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
@@ -137,7 +174,10 @@
                                 </svg>
                                 Comptes
                             </a>
-                        @endif
+                        </nav>
+                    @endif
+                    <nav class="nav-section">
+                        <div class="nav-label">Compte</div>
                         <a href="{{ route('profile.edit') }}" class="nav-item {{ ($active ?? '') === 'profile' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3"/>
@@ -148,13 +188,15 @@
                     </nav>
                 @elseif (auth()->user()->isCampaignActor())
                     <nav class="nav-section">
-                        <div class="nav-label">Menu</div>
                         <a href="{{ route('campagnes.index') }}" class="nav-item {{ ($active ?? '') === 'campagnes' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/>
                             </svg>
                             Répartition des subventions
                         </a>
+                    </nav>
+                    <nav class="nav-section">
+                        <div class="nav-label">Compte</div>
                         <a href="{{ route('profile.edit') }}" class="nav-item {{ ($active ?? '') === 'profile' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3"/>
@@ -165,7 +207,6 @@
                     </nav>
                 @elseif (auth()->user()->isDgf())
                     <nav class="nav-section">
-                        <div class="nav-label">Menu</div>
                         <a href="{{ route('dgf.activities.index') }}" class="nav-item {{ ($active ?? '') === 'dgf-activities' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
@@ -173,6 +214,9 @@
                             </svg>
                             Activités à valider
                         </a>
+                    </nav>
+                    <nav class="nav-section">
+                        <div class="nav-label">Compte</div>
                         <a href="{{ route('profile.edit') }}" class="nav-item {{ ($active ?? '') === 'profile' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3"/>

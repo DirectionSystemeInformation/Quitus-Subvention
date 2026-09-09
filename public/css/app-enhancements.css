@@ -303,6 +303,111 @@
 }
 
 /* ========================================
+   Campaign Workflow Stepper (12-step allocation circuit)
+======================================== */
+.campaign-stepper {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    min-width: max-content;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.campaign-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 128px;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.campaign-step-track {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.campaign-step-marker {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    border: 2px solid var(--border);
+    color: var(--text-muted);
+    background: var(--bg-secondary, var(--bg-primary));
+    transition: all 0.3s ease;
+}
+
+.campaign-step-marker svg {
+    width: 15px;
+    height: 15px;
+}
+
+.campaign-step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 0 2px;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.campaign-step-line.is-filled {
+    background: var(--color-success);
+}
+
+.campaign-step-label {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-muted);
+}
+
+.campaign-step-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.campaign-step.is-done .campaign-step-marker {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: #fff;
+}
+
+.campaign-step.is-done .campaign-step-label {
+    color: var(--text-secondary);
+}
+
+.campaign-step.is-current .campaign-step-marker {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(4, 120, 87, 0.16);
+}
+
+.campaign-step.is-current .campaign-step-label {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.campaign-step.is-current .campaign-step-eyebrow {
+    color: var(--color-primary);
+}
+
+/* ========================================
    Year Selector (documents page)
 ======================================== */
 .year-select-form {
@@ -813,7 +918,6 @@
 .criterion-heading summary { cursor: pointer; line-height: 1.45; color: #064e3b; padding: 6px 2px; }
 .criterion-heading details > span { display: block; margin-top: 8px; font-weight: 400; }
 .ponderation-table th:first-child, .ponderation-table td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
-.dashboard .campaign-step.is-current { background: #047857; color: #fff; }
 @media (max-width: 600px) {
     .queue-filters { align-items: stretch; }
     .queue-filters .form-group { flex-basis: 100%; }

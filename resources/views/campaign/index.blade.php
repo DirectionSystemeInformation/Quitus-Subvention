@@ -46,7 +46,7 @@
                 <thead>
                     <tr>
                         <th>Année N+1</th>
-                        <th>Étape en cours</th>
+                        <th style="min-width: 220px;">Étape en cours</th>
                         <th>Statut</th>
                         <th>Fédérations</th>
                         <th></th>
@@ -56,7 +56,15 @@
                     @foreach ($campaigns as $campaign)
                         <tr>
                             <td>{{ $campaign->annee_n1 }}</td>
-                            <td>Étape {{ $campaign->etape }} — {{ $campaign->etapeLabel() }}</td>
+                            <td>
+                                <div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-muted); margin-bottom:4px;">
+                                    <span>Étape {{ $campaign->etape }}/12</span>
+                                </div>
+                                <div class="pb-progress-track">
+                                    <div class="pb-progress-fill" style="width: {{ round((($campaign->etape - 2) / 10) * 100) }}%"></div>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">{{ $campaign->etapeLabel() }}</div>
+                            </td>
                             <td>
                                 <span class="status-badge {{ $campaign->statut === 'termine' ? 'status-gain' : 'status-neutral' }}">
                                     {{ $campaign->statut === 'termine' ? 'Terminée' : 'En cours' }}

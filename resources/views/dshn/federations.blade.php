@@ -152,34 +152,41 @@
     </div>
 
     @if (auth()->user()->isDshn())
-        <div class="modal-overlay" id="editFederationModal">
+        @php
+            // Si la soumission précédente a échoué, on rouvre la fenêtre avec ce que
+            // l'agent avait saisi (via old()) plutôt que de la laisser fermée ou de la
+            // re-remplir avec les anciennes valeurs de la fédération.
+            $federationEditFailed = $errors->any() && old('_federation_id');
+        @endphp
+        <div class="modal-overlay" id="editFederationModal" @if ($federationEditFailed) data-reopen="1" @endif>
             <div class="modal-box">
                 <h3>Modifier la fédération</h3>
-                <form method="POST" id="editFederationForm">
+                <form method="POST" id="editFederationForm" action="{{ $federationEditFailed ? role_route('federations.update', old('_federation_id')) : '' }}">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_federation_id" id="editFedId" value="{{ old('_federation_id') }}">
                     <div class="form-group">
                         <label class="form-label">Dénomination de la fédération</label>
-                        <input type="text" name="federation_name" id="editFedFederationName" class="form-input" required>
+                        <input type="text" name="federation_name" id="editFedFederationName" class="form-input" value="{{ old('federation_name') }}" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Numéro de l'arrêté de validation</label>
-                        <input type="text" name="arrete_numero" id="editFedArreteNumero" class="form-input" required>
+                        <input type="text" name="arrete_numero" id="editFedArreteNumero" class="form-input" value="{{ old('arrete_numero') }}" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Date de l'arrêté de validation</label>
-                        <input type="date" name="arrete_date" id="editFedArreteDate" class="form-input" required>
+                        <input type="date" name="arrete_date" id="editFedArreteDate" class="form-input" value="{{ old('arrete_date') }}" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" id="editFedEmail" class="form-input" required>
+                        <input type="email" name="email" id="editFedEmail" class="form-input" value="{{ old('email') }}" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Statut</label>
                         <select name="status" id="editFedStatus" class="form-select">
-                            <option value="pending">En attente</option>
-                            <option value="active">Actif</option>
-                            <option value="rejected">Rejeté</option>
+                            <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>En attente</option>
+                            <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Actif</option>
+                            <option value="rejected" {{ old('status') === 'rejected' ? 'selected' : '' }}>Rejeté</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -211,6 +218,7 @@
             document.querySelectorAll('.js-edit-federation').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     form.action = btn.dataset.action;
+                    document.getElementById('editFedId').value = btn.dataset.id;
                     document.getElementById('editFedFederationName').value = btn.dataset.federationName;
                     document.getElementById('editFedArreteNumero').value = btn.dataset.arreteNumero;
                     document.getElementById('editFedArreteDate').value = btn.dataset.arreteDate;
@@ -227,6 +235,13 @@
             modal.addEventListener('click', function (e) {
                 if (e.target === modal) modal.classList.remove('active');
             });
+
+            // La soumission précédente a échoué la validation : rouvrir la fenêtre avec
+            // ce que l'agent avait saisi (rendu côté serveur via old()) au lieu de la
+            // laisser fermée sans indication de la fédération concernée.
+            if (modal.dataset.reopen === '1') {
+                modal.classList.add('active');
+            }
         })();
 
         (function () {

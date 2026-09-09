@@ -129,8 +129,8 @@
             <td>{{ $federation->federation_name }}</td>
         </tr>
         <tr>
-            <td class="label">Responsable</td>
-            <td>{{ $federation->name }}</td>
+            <td class="label">Numéro de l'arrêté de validation</td>
+            <td>{{ $federation->arrete_numero }}</td>
         </tr>
         <tr>
             <td class="label">Catégorie</td>

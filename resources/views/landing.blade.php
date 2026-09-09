@@ -264,6 +264,7 @@
     </style>
 </head>
 <body class="landing-page">
+    <div class="flag-ribbon" aria-hidden="true"></div>
     <nav class="landing-nav" aria-label="Navigation principale">
         <div class="landing-nav-brand">
             <img src="{{ asset('img/armoiries.png') }}" alt="Armoiries du Burkina Faso">

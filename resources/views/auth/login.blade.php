@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
 </head>
 <body class="auth-page">
+    <div class="flag-ribbon" aria-hidden="true"></div>
     @php
         $registerHasErrors = $errors->has('federation_name') || $errors->has('arrete_numero') || $errors->has('arrete_date') || $errors->has('email') || $errors->has('password_confirmation') || old('federation_name') || old('email') || request()->query('tab') === 'register';
     @endphp
@@ -20,6 +21,7 @@
     <div class="auth-branding">
         <div class="branding-content">
             <img src="{{ asset('img/armoiries.png') }}" alt="Armoiries du Burkina Faso" class="branding-logo branding-crest">
+            <div class="crest-divider" aria-hidden="true"></div>
             <h2 class="branding-title branding-title-ministry">Ministère des Sports, de la Jeunesse et de l'Emploi</h2>
             <p class="branding-subtitle">Quitus de subvention : votre espace pour déclarer vos activités, préparer votre programme et suivre votre dossier.</p>
 
@@ -57,7 +59,12 @@
     <!-- Right Side - Form -->
     <div class="auth-form-container">
         <div class="auth-form-wrapper">
-            <a href="{{ url('/') }}" class="auth-home-link">← Retour à l'accueil</a>
+            <a href="{{ url('/') }}" class="auth-home-link">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Retour à l'accueil
+            </a>
             <div class="form-header">
                 <h1>Bienvenue</h1>
                 <p>Connectez-vous ou créez le compte de votre fédération</p>
