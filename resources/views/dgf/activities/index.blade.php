@@ -43,7 +43,9 @@
                 </select>
             </div>
             <button class="btn primary" type="submit">Filtrer</button>
-            <a class="btn" href="{{ route('dgf.activities.index', ['justificatif' => $justificatif]) }}">Réinitialiser</a>
+            @if (request('federation') || request('annee'))
+                <a class="btn" href="{{ route('dgf.activities.index', ['justificatif' => $justificatif]) }}">Réinitialiser</a>
+            @endif
         </form>
         @if ($justificatif === 'sans')
             <p class="strength-text">Ces activités n'ont pas encore de pièce jointe. La validation ne sera possible qu'une fois un justificatif ajouté par la fédération.</p>
