@@ -24,7 +24,20 @@ class ReportController extends Controller
             ])
             ->values();
 
-        return view('dshn.reports', compact('reports', 'reportsByType'));
+        $documentTypes = collect(['rapport_activite', 'programme_budgetise', 'programme_reamenage'])
+            ->filter(fn ($type) => $grouped->has($type))
+            ->mapWithKeys(fn ($type) => [$type => $grouped[$type]->first()->typeLabel()]);
+
+        $years = $reports->pluck('year')->unique()->sortDesc()->values();
+
+        $counts = [
+            'total' => $reports->count(),
+            'soumis' => $reports->where('status', 'soumis')->count(),
+            'valide' => $reports->where('status', 'valide')->count(),
+            'rejete' => $reports->where('status', 'rejete')->count(),
+        ];
+
+        return view('dshn.reports', compact('reports', 'reportsByType', 'documentTypes', 'years', 'counts'));
     }
 
     public function download(Report $report)

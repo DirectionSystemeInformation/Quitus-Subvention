@@ -455,7 +455,7 @@ https://templatemo.com/tm-609-crypto-vault
     ======================================== */
     function initTableSearch() {
         const targets = new Set();
-        document.querySelectorAll('.js-table-search, .js-table-status-filter').forEach(function(el) {
+        document.querySelectorAll('.js-table-search, .js-table-status-filter, .js-table-filter').forEach(function(el) {
             targets.add(el.dataset.target);
         });
 
@@ -464,7 +464,9 @@ https://templatemo.com/tm-609-crypto-vault
             if (!container) return;
 
             const searchInput = document.querySelector('.js-table-search[data-target="' + targetId + '"]');
-            const statusFilter = document.querySelector('.js-table-status-filter[data-target="' + targetId + '"]');
+            const filterEls = Array.prototype.slice.call(
+                document.querySelectorAll('.js-table-status-filter[data-target="' + targetId + '"], .js-table-filter[data-target="' + targetId + '"]')
+            );
             const emptyMessage = document.querySelector('.js-table-empty[data-target="' + targetId + '"]');
             const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
             const groupHeaders = Array.prototype.slice.call(container.querySelectorAll('[data-group-header]'));
@@ -480,15 +482,16 @@ https://templatemo.com/tm-609-crypto-vault
 
             function applyFilters() {
                 const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
-                const status = statusFilter ? statusFilter.value : '';
                 let visibleCount = 0;
-
                 const visibleByGroup = {};
 
                 rows.forEach(function(row) {
                     const matchesQuery = !query || rowSearchText(row).includes(query);
-                    const matchesStatus = !status || row.dataset.status === status;
-                    const matches = matchesQuery && matchesStatus;
+                    const matchesFilters = filterEls.every(function(el) {
+                        const field = el.dataset.field || 'status';
+                        return !el.value || row.dataset[field] === el.value;
+                    });
+                    const matches = matchesQuery && matchesFilters;
                     row.style.display = matches ? '' : 'none';
                     if (matches) {
                         visibleCount++;
@@ -508,7 +511,49 @@ https://templatemo.com/tm-609-crypto-vault
             }
 
             if (searchInput) searchInput.addEventListener('input', applyFilters);
-            if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+            filterEls.forEach(function(el) { el.addEventListener('change', applyFilters); });
+        });
+    }
+
+    /* ========================================
+       Visual Tabs synced to a hidden filter <select>
+    ======================================== */
+    function initVisualTabs() {
+        document.querySelectorAll('.js-visual-tabs').forEach(function (group) {
+            const select = document.getElementById(group.dataset.syncs);
+            if (!select) return;
+            const buttons = Array.prototype.slice.call(group.querySelectorAll('[data-value]'));
+
+            buttons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    buttons.forEach(function (b) { b.classList.remove('active', 'primary'); });
+                    btn.classList.add('active', 'primary');
+                    select.value = btn.dataset.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            });
+        });
+    }
+
+    /* ========================================
+       Collapsible Table Groups
+    ======================================== */
+    function initCollapsibleGroups() {
+        document.querySelectorAll('[data-group-header]').forEach(function (header) {
+            const table = header.closest('table');
+            if (!table) return;
+            const groupId = header.dataset.groupHeader;
+            const rows = Array.prototype.slice.call(
+                table.querySelectorAll('[data-search-row][data-group="' + CSS.escape(groupId) + '"]')
+            );
+
+            header.classList.add('is-collapsible');
+            header.addEventListener('click', function () {
+                const collapsed = header.classList.toggle('is-collapsed');
+                rows.forEach(function (row) {
+                    row.classList.toggle('is-group-collapsed', collapsed);
+                });
+            });
         });
     }
 
@@ -936,6 +981,8 @@ https://templatemo.com/tm-609-crypto-vault
         initPasswordStrength();
         initAuthTabs();
         initTableSearch();
+        initVisualTabs();
+        initCollapsibleGroups();
         initButtonLoadingState();
         initConfirmModal();
         initRejectReasonModal();

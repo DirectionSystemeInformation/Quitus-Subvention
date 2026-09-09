@@ -844,3 +844,59 @@
     .card, .btn, .security-btn, .nav-item, .pb-progress-fill { transition: none; }
     .ripple { animation: none; display: none; }
 }
+
+/* ========================================
+   Collapsible table groups
+======================================== */
+.is-group-collapsed {
+    display: none !important;
+}
+
+.market-table .table-group-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.market-table .table-group-header td {
+    background: var(--bg-primary);
+}
+
+.table-group-header .group-chevron {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    transition: transform 0.15s ease;
+    vertical-align: -1px;
+}
+
+.table-group-header.is-collapsed .group-chevron {
+    transform: rotate(-90deg);
+}
+
+/* ========================================
+   Cell with a stacked date + time
+======================================== */
+.cell-datetime {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cell-datetime-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ========================================
+   Compact summary line
+======================================== */
+.table-summary-line {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.table-summary-line strong {
+    color: var(--text-primary);
+}
