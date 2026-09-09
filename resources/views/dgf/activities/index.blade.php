@@ -9,21 +9,21 @@
 @section('content')
     <div class="page-header">
         <h1>Activités à valider</h1>
-        <p>Vérifiez les activités soumises et leurs justificatifs. Les brouillons restent consultables dans un onglet séparé.</p>
+        <p>Vérifiez les activités et leurs justificatifs. La validation n'est possible que pour une activité soumise avec au moins une pièce jointe.</p>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h2 class="card-title">{{ $status === 'soumis' ? 'Activités à vérifier' : 'Activités en préparation' }}</h2>
+            <h2 class="card-title">{{ $justificatif === 'avec' ? 'Avec pièce justificative' : 'Sans pièce justificative' }}</h2>
         </div>
 
-        <nav class="queue-tabs" aria-label="Statut des activités">
-            @foreach (['soumis' => 'À vérifier', 'brouillon' => 'Brouillons'] as $value => $label)
-                <a href="{{ route('dgf.activities.index', array_merge(request()->only('annee', 'federation'), ['statut' => $value])) }}" class="btn {{ $status === $value ? 'primary' : '' }}" @if ($status === $value) aria-current="page" @endif>{{ $label }} ({{ $counts[$value] }})</a>
+        <nav class="queue-tabs" aria-label="Justificatif des activités">
+            @foreach (['avec' => 'Avec justificatif', 'sans' => 'Sans justificatif'] as $value => $label)
+                <a href="{{ route('dgf.activities.index', array_merge(request()->only('annee', 'federation'), ['justificatif' => $value])) }}" class="btn {{ $justificatif === $value ? 'primary' : '' }}" @if ($justificatif === $value) aria-current="page" @endif>{{ $label }} ({{ $counts[$value] }})</a>
             @endforeach
         </nav>
         <form method="GET" class="queue-filters" action="{{ route('dgf.activities.index') }}">
-            <input type="hidden" name="statut" value="{{ $status }}">
+            <input type="hidden" name="justificatif" value="{{ $justificatif }}">
             <div class="form-group">
                 <label class="form-label" for="queueFederation">Fédération</label>
                 <select class="form-select" name="federation" id="queueFederation">
@@ -43,14 +43,14 @@
                 </select>
             </div>
             <button class="btn primary" type="submit">Filtrer</button>
-            <a class="btn" href="{{ route('dgf.activities.index', ['statut' => $status]) }}">Réinitialiser</a>
+            <a class="btn" href="{{ route('dgf.activities.index', ['justificatif' => $justificatif]) }}">Réinitialiser</a>
         </form>
-        @if ($status === 'brouillon')
-            <p class="strength-text">Ces activités n'ont pas encore été soumises. La fédération doit les compléter et les soumettre avant votre vérification.</p>
+        @if ($justificatif === 'sans')
+            <p class="strength-text">Ces activités n'ont pas encore de pièce jointe. La validation ne sera possible qu'une fois un justificatif ajouté par la fédération.</p>
         @endif
 
         @if ($activities->isEmpty())
-            <x-empty-state icon="inbox" :title="$status === 'soumis' ? 'Aucune activité à vérifier pour ces filtres.' : 'Aucun brouillon pour ces filtres.'" />
+            <x-empty-state icon="inbox" :title="$justificatif === 'avec' ? 'Aucune activité avec justificatif pour ces filtres.' : 'Aucune activité sans justificatif pour ces filtres.'" />
         @else
             <div class="table-responsive">
             <table class="market-table">

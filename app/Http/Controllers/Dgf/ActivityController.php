@@ -19,24 +19,29 @@ class ActivityController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate([
-            'statut' => ['nullable', 'in:soumis,brouillon'],
+            'justificatif' => ['nullable', 'in:avec,sans'],
             'annee' => ['nullable', 'integer', 'between:2000,2100'],
             'federation' => ['nullable', 'integer'],
         ]);
-        $status = $filters['statut'] ?? 'soumis';
+        $justificatif = $filters['justificatif'] ?? 'avec';
         $query = FederationActivity::query()
+            ->whereIn('status', ['soumis', 'brouillon'])
             ->when($filters['annee'] ?? null, fn ($q, $year) => $q->where('year', $year))
             ->when($filters['federation'] ?? null, fn ($q, $id) => $q->where('user_id', $id));
         $counts = [
-            'soumis' => (clone $query)->where('status', 'soumis')->count(),
-            'brouillon' => (clone $query)->where('status', 'brouillon')->count(),
+            'avec' => (clone $query)->has('documents')->count(),
+            'sans' => (clone $query)->doesntHave('documents')->count(),
         ];
-        $activities = $query->with('user', 'documents')->where('status', $status)
-            ->orderBy('created_at')->paginate(25)->withQueryString();
+        $activities = $query->with('user', 'documents')
+            ->when($justificatif === 'avec', fn ($q) => $q->has('documents'))
+            ->when($justificatif === 'sans', fn ($q) => $q->doesntHave('documents'))
+            ->orderByRaw("CASE status WHEN 'soumis' THEN 0 ELSE 1 END")
+            ->orderBy('created_at')
+            ->paginate(25)->withQueryString();
         $federations = User::where('role', 'federation')->orderBy('federation_name')->get(['id', 'federation_name']);
         $years = FederationActivity::whereIn('status', ['soumis', 'brouillon'])->distinct()->orderByDesc('year')->pluck('year');
 
-        return view('dgf.activities.index', compact('activities', 'status', 'counts', 'federations', 'years'));
+        return view('dgf.activities.index', compact('activities', 'justificatif', 'counts', 'federations', 'years'));
     }
 
     public function show(FederationActivity $activity)
