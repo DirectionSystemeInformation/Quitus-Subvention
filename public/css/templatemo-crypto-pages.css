@@ -593,6 +593,10 @@ https://templatemo.com/tm-609-crypto-vault
     border-collapse: collapse;
 }
 
+.market-table thead {
+    background: var(--bg-primary);
+}
+
 .market-table th {
     text-align: left;
     padding: 12px 16px;
@@ -601,7 +605,7 @@ https://templatemo.com/tm-609-crypto-vault
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #cbd5e1;
 }
 
 .market-table th.text-right {
@@ -612,6 +616,10 @@ https://templatemo.com/tm-609-crypto-vault
     padding: 16px;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
+}
+
+.market-table tbody tr:nth-child(even) {
+    background: rgba(15, 23, 42, 0.018);
 }
 
 .market-table tr:last-child td {

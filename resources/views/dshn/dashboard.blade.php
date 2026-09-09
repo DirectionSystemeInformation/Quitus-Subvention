@@ -13,7 +13,7 @@
     </div>
 
     <div class="market-stats" style="margin-bottom: 24px;">
-        <div class="market-stat">
+        <div class="market-stat is-gold">
             <div class="market-stat-icon is-gold">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
@@ -27,7 +27,7 @@
             <div class="market-stat-label">Fédérations actives</div>
             <div class="market-stat-value">{{ $stats['active_federations'] }}</div>
         </div>
-        <div class="market-stat">
+        <div class="market-stat is-gold">
             <div class="market-stat-icon is-gold">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
@@ -41,7 +41,7 @@
             <div class="market-stat-label">Rapports validés</div>
             <div class="market-stat-value">{{ $stats['reports_valide'] }}</div>
         </div>
-        <div class="market-stat">
+        <div class="market-stat is-danger">
             <div class="market-stat-icon is-danger">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </div>

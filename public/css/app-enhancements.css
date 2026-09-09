@@ -736,13 +736,20 @@
     background: #fff;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 10px rgba(15, 23, 42, .06);
 }
 .dashboard .card:hover {
     transform: none;
-    border-color: var(--border);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px rgba(15, 23, 42, .08);
 }
+.dashboard .market-stat {
+    border-left: 3px solid var(--color-primary);
+    padding-left: calc(var(--space-6) - 3px);
+}
+.dashboard .market-stat.is-gold { border-left-color: var(--color-accent-gold, #FCD116); }
+.dashboard .market-stat.is-danger { border-left-color: var(--color-danger); }
 .dashboard .nav-item:hover, .dashboard .btn:active, .dashboard .security-btn:active { transform: none; }
 .dashboard .card.reveal, .dashboard .market-stat.reveal { animation: none; }
 .dashboard .btn.primary, .dashboard .security-btn.primary {
@@ -776,7 +783,6 @@
 .criterion-heading details > span { display: block; margin-top: 8px; font-weight: 400; }
 .ponderation-table th:first-child, .ponderation-table td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
 .dashboard .campaign-step.is-current { background: #047857; color: #fff; }
-.dropzone input[type="file"] { display: block; width: 100%; margin-top: 12px; font: inherit; font-size: 13px; }
 @media (max-width: 600px) {
     .queue-filters { align-items: stretch; }
     .queue-filters .form-group { flex-basis: 100%; }
