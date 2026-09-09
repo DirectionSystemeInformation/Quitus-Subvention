@@ -21,6 +21,7 @@ class FederationActivity extends Model
         'date_fin',
         'observations',
         'status',
+        'submitted_at',
         'rejection_reason',
         'validated_by',
         'validated_at',
@@ -34,6 +35,7 @@ class FederationActivity extends Model
             'date_fin' => 'date',
             'montant' => 'decimal:2',
             'validated_at' => 'datetime',
+            'submitted_at' => 'datetime',
         ];
     }
 

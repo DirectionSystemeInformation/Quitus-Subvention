@@ -721,10 +721,23 @@
    Long text clamp in a table cell (hover for full text via title=)
 ======================================== */
 .cell-clamp {
-    max-width: 280px;
+    max-width: 320px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.justificatif-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.justificatif-chip.is-empty {
+    color: var(--color-danger);
 }
 
 @media (max-width: 900px) {

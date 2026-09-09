@@ -1,3 +1,5 @@
+@props(['status', 'label' => null])
+
 @php
     $map = [
         'valide' => ['label' => 'Validé', 'class' => 'status-gain', 'icon' => 'check'],
@@ -24,5 +26,5 @@
     <svg class="status-badge-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         {!! $icons[$info['icon']] !!}
     </svg>
-    {{ $info['label'] }}
+    {{ $label ?? $info['label'] }}
 </span>

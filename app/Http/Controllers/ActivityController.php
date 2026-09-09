@@ -105,7 +105,7 @@ class ActivityController extends Controller
         abort_unless($activity->user_id === Auth::id(), 403);
         abort_unless(in_array($activity->status, ['brouillon', 'rejete'], true), 403);
 
-        $activity->update(['status' => 'soumis', 'rejection_reason' => null]);
+        $activity->update(['status' => 'soumis', 'rejection_reason' => null, 'submitted_at' => now()]);
 
         ActivityLog::record(
             'created',

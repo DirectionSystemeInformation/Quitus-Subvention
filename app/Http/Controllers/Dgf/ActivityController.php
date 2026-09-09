@@ -36,6 +36,8 @@ class ActivityController extends Controller
             ->when($justificatif === 'avec', fn ($q) => $q->has('documents'))
             ->when($justificatif === 'sans', fn ($q) => $q->doesntHave('documents'))
             ->orderByRaw("CASE status WHEN 'soumis' THEN 0 ELSE 1 END")
+            ->orderByRaw('submitted_at IS NULL')
+            ->orderBy('submitted_at')
             ->orderBy('created_at')
             ->paginate(25)->withQueryString();
         $federations = User::where('role', 'federation')->orderBy('federation_name')->get(['id', 'federation_name']);
