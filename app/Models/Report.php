@@ -31,6 +31,7 @@ class Report extends Model
         return match ($this->type) {
             'rapport_activite' => "Rapport d'activité",
             'programme_budgetise' => "Projet de programme d'activités budgétisé",
+            'programme_reamenage' => "Programme d'activités budgétisé réaménagé",
             default => $this->type,
         };
     }

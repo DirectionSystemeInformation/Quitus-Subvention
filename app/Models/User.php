@@ -84,6 +84,11 @@ class User extends Authenticatable
         return $this->role === 'ministre';
     }
 
+    public function isDgf(): bool
+    {
+        return $this->role === 'dgf';
+    }
+
     public function isCampaignActor(): bool
     {
         return $this->isDshn() || $this->isDg() || $this->isComiteArbitrage() || $this->isMinistre();
@@ -97,6 +102,11 @@ class User extends Authenticatable
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(FederationActivity::class);
     }
 
     public function sendPasswordResetNotification($token): void

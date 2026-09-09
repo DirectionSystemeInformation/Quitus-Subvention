@@ -24,6 +24,10 @@ https://templatemo.com/tm-609-crypto-vault
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
+        function syncSidebarAccess() {
+            if (sidebar) sidebar.inert = window.innerWidth <= 1024 && !sidebar.classList.contains('active');
+        }
+        syncSidebarAccess();
 
         function toggleMobileMenu() {
             if (mobileMenuToggle && sidebar && sidebarOverlay) {
@@ -31,6 +35,9 @@ https://templatemo.com/tm-609-crypto-vault
                 sidebar.classList.toggle('active');
                 sidebarOverlay.classList.toggle('active');
                 document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+                mobileMenuToggle.setAttribute('aria-expanded', String(sidebar.classList.contains('active')));
+                mobileMenuToggle.setAttribute('aria-label', sidebar.classList.contains('active') ? 'Fermer le menu' : 'Ouvrir le menu');
+                syncSidebarAccess();
             }
         }
 
@@ -41,6 +48,12 @@ https://templatemo.com/tm-609-crypto-vault
         if (sidebarOverlay) {
             sidebarOverlay.addEventListener('click', toggleMobileMenu);
         }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+                toggleMobileMenu();
+                mobileMenuToggle.focus();
+            }
+        });
 
         // Close menu when clicking nav items
         document.querySelectorAll('.nav-item').forEach(function(item) {
@@ -56,6 +69,7 @@ https://templatemo.com/tm-609-crypto-vault
             if (window.innerWidth > 1024 && sidebar && sidebar.classList.contains('active')) {
                 toggleMobileMenu();
             }
+            syncSidebarAccess();
         });
     }
 
@@ -180,6 +194,9 @@ https://templatemo.com/tm-609-crypto-vault
     ======================================== */
     function initPasswordToggle() {
         document.querySelectorAll('.password-toggle').forEach(function(btn) {
+            btn.setAttribute('aria-label', 'Afficher le mot de passe');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-controls', btn.dataset.target);
             btn.addEventListener('click', function() {
                 const targetId = btn.dataset.target;
                 const input = document.getElementById(targetId);
@@ -187,6 +204,8 @@ https://templatemo.com/tm-609-crypto-vault
                 if (input) {
                     const type = input.type === 'password' ? 'text' : 'password';
                     input.type = type;
+                    btn.setAttribute('aria-label', type === 'text' ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+                    btn.setAttribute('aria-pressed', String(type === 'text'));
                 }
             });
         });
@@ -232,10 +251,13 @@ https://templatemo.com/tm-609-crypto-vault
         const confirmBtn = document.getElementById('confirmModalConfirm');
         const cancelBtn = document.getElementById('confirmModalCancel');
         let pendingForm = null;
+        let pendingSubmitter = null;
+        let opener = null;
 
         function closeModal() {
             modal.classList.remove('active');
             pendingForm = null;
+            if (opener) opener.focus();
         }
 
         document.querySelectorAll('form[data-confirm]').forEach(function(form) {
@@ -245,20 +267,24 @@ https://templatemo.com/tm-609-crypto-vault
                 }
                 e.preventDefault();
                 pendingForm = form;
+                pendingSubmitter = e.submitter;
+                opener = document.activeElement;
                 messageEl.textContent = form.dataset.confirm;
                 modal.classList.add('active');
+                cancelBtn.focus();
             });
         });
 
         confirmBtn.addEventListener('click', function() {
             if (pendingForm) {
                 pendingForm.dataset.confirmed = 'true';
-                pendingForm.requestSubmit();
+                pendingForm.requestSubmit(pendingSubmitter || undefined);
             }
             closeModal();
         });
 
         cancelBtn.addEventListener('click', closeModal);
+        trapDialogKeyboard(modal, closeModal);
 
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
@@ -275,14 +301,17 @@ https://templatemo.com/tm-609-crypto-vault
         const form = document.getElementById('rejectReasonForm');
         const reasonInput = document.getElementById('rejectReasonInput');
         const cancelBtn = document.getElementById('rejectReasonCancel');
+        let opener = null;
 
         function closeModal() {
             modal.classList.remove('active');
+            if (opener) opener.focus();
         }
 
         document.querySelectorAll('.js-reject-reason').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 form.action = btn.dataset.action;
+                opener = btn;
                 reasonInput.value = '';
                 modal.classList.add('active');
                 setTimeout(function() { reasonInput.focus(); }, 50);
@@ -290,9 +319,23 @@ https://templatemo.com/tm-609-crypto-vault
         });
 
         cancelBtn.addEventListener('click', closeModal);
+        trapDialogKeyboard(modal, closeModal);
 
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
+        });
+    }
+
+    function trapDialogKeyboard(modal, close) {
+        modal.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+            if (e.key !== 'Tab') return;
+            const items = Array.from(modal.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]'))
+                .filter(function(el) { return el.getClientRects().length > 0; });
+            if (!items.length) return;
+            const first = items[0], last = items[items.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
         });
     }
 
@@ -380,8 +423,10 @@ https://templatemo.com/tm-609-crypto-vault
 
         toast.innerHTML =
             '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + iconPath + '</svg>' +
-            '<span>' + message + '</span>' +
-            '<button type="button" class="toast-close">&times;</button>';
+            '<span></span>' +
+            '<button type="button" class="toast-close" aria-label="Fermer la notification">&times;</button>';
+        toast.querySelector('span').textContent = message;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
 
         container.appendChild(toast);
 
@@ -391,7 +436,7 @@ https://templatemo.com/tm-609-crypto-vault
         }
 
         toast.querySelector('.toast-close').addEventListener('click', remove);
-        setTimeout(remove, 5000);
+        if (type !== 'error') setTimeout(remove, 5000);
     }
 
     function initToasts() {
@@ -400,7 +445,7 @@ https://templatemo.com/tm-609-crypto-vault
             showToast(flash.dataset.message, flash.dataset.type || 'success');
         }
 
-        document.querySelectorAll('#flashErrors li').forEach(function(li) {
+        document.querySelectorAll('#flashErrors:not(.notice) li').forEach(function(li) {
             showToast(li.textContent, 'error');
         });
     }
@@ -451,18 +496,344 @@ https://templatemo.com/tm-609-crypto-vault
     ======================================== */
     function initButtonLoadingState() {
         document.addEventListener('submit', function(e) {
+            if (e.defaultPrevented) return;
             const form = e.target;
             if (!(form instanceof HTMLFormElement)) return;
             if (form.hasAttribute('data-confirm') && form.dataset.confirmed !== 'true') return;
 
             const btn = e.submitter || form.querySelector('button[type="submit"]');
-            if (!btn || btn.disabled || btn.classList.contains('is-loading')) return;
+            if (!btn || btn.disabled) return;
+            if (form.dataset.submitting === 'true') { e.preventDefault(); return; }
 
+            form.dataset.submitting = 'true';
             btn.classList.add('is-loading');
-            btn.disabled = true;
+            // Keep the submitter enabled so its name/value reaches the server.
+            btn.setAttribute('aria-disabled', 'true');
+            form.setAttribute('aria-busy', 'true');
             const spinner = document.createElement('span');
             spinner.className = 'btn-spinner';
             btn.prepend(spinner);
+        });
+        window.addEventListener('pageshow', function() {
+            document.querySelectorAll('form[data-submitting]').forEach(function(form) {
+                delete form.dataset.submitting;
+                form.removeAttribute('aria-busy');
+                form.querySelectorAll('.is-loading').forEach(function(btn) {
+                    btn.classList.remove('is-loading');
+                    btn.removeAttribute('aria-disabled');
+                    btn.querySelectorAll('.btn-spinner').forEach(function(spinner) { spinner.remove(); });
+                });
+            });
+        });
+    }
+
+    function initFieldAccessibility() {
+        document.querySelectorAll('.form-group').forEach(function(group, index) {
+            const label = group.querySelector('label.form-label');
+            const field = group.querySelector('input:not([type="hidden"]), select, textarea');
+            if (label && field && !label.htmlFor) {
+                if (!field.id) field.id = 'form-field-' + index;
+                label.htmlFor = field.id;
+            }
+        });
+        document.querySelectorAll('.nav-item.active').forEach(function(link) { link.setAttribute('aria-current', 'page'); });
+        const summary = document.querySelector('#flashErrors.notice');
+        if (!summary) return;
+        const fields = Array.from(document.querySelectorAll('input[name], select[name], textarea[name]'));
+        summary.querySelectorAll('[data-error-field]').forEach(function(item, index) {
+            const key = item.dataset.errorField;
+            const field = fields.find(function(input) {
+                return input.dataset.errorKey === key || input.name.replace(/\[([^\]]+)\]/g, '.$1') === key;
+            });
+            if (!field) return;
+            if (!field.id) field.id = 'invalid-field-' + index;
+            field.setAttribute('aria-invalid', 'true');
+            field.classList.add('is-invalid');
+            const error = document.createElement('p');
+            error.id = 'server-error-' + index;
+            error.className = 'field-error server-field-error';
+            error.textContent = item.textContent;
+            field.insertAdjacentElement('afterend', error);
+            field.setAttribute('aria-describedby', ((field.getAttribute('aria-describedby') || '') + ' ' + error.id).trim());
+            const link = document.createElement('a');
+            link.href = '#' + field.id;
+            link.textContent = item.textContent;
+            item.textContent = '';
+            item.appendChild(link);
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                let parent = field.parentElement;
+                while (parent) { if (parent.tagName === 'DETAILS') parent.open = true; parent = parent.parentElement; }
+                field.focus();
+                field.scrollIntoView({ block: 'center' });
+            });
+        });
+        summary.focus();
+    }
+
+    /* ========================================
+       Status Badge Pulse (flash confirmation)
+    ======================================== */
+    function initStatusBadgePulse() {
+        const flash = document.getElementById('flashStatus');
+        if (!flash) return;
+
+        const badge = document.querySelector('.page-header .status-badge');
+        if (!badge) return;
+
+        badge.classList.add('badge-pulse');
+        badge.addEventListener('animationend', function () {
+            badge.classList.remove('badge-pulse');
+        }, { once: true });
+    }
+
+    /* ========================================
+       Table Scroll Shadow (mobile affordance)
+    ======================================== */
+    function initTableScrollShadow() {
+        document.querySelectorAll('.table-responsive').forEach(function (wrap) {
+            function update() {
+                const scrollable = wrap.scrollWidth > wrap.clientWidth + 1;
+                wrap.classList.toggle('has-scroll', scrollable);
+                wrap.classList.toggle('scrolled-end', wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 1);
+            }
+
+            wrap.addEventListener('scroll', update);
+            window.addEventListener('resize', update);
+            update();
+        });
+    }
+
+    /* ========================================
+       Sortable Table Columns
+    ======================================== */
+    function initSortableTables() {
+        document.querySelectorAll('table.sortable').forEach(function (table) {
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+
+            const headers = Array.prototype.slice.call(table.querySelectorAll('thead th[data-sort]'));
+
+            headers.forEach(function (th) {
+                th.classList.add('is-sortable');
+
+                th.addEventListener('click', function () {
+                    const type = th.dataset.sort;
+                    const dir = th.classList.contains('sort-asc') ? 'desc' : 'asc';
+
+                    headers.forEach(function (h) {
+                        h.classList.remove('sort-asc', 'sort-desc');
+                    });
+                    th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+                    const colIndex = Array.prototype.indexOf.call(th.parentElement.children, th);
+                    const rows = Array.prototype.slice.call(tbody.querySelectorAll(':scope > tr'));
+
+                    rows.sort(function (a, b) {
+                        const cellA = a.children[colIndex];
+                        const cellB = b.children[colIndex];
+                        if (!cellA || !cellB) return 0;
+
+                        const rawA = (cellA.dataset.sortValue !== undefined ? cellA.dataset.sortValue : cellA.textContent).trim();
+                        const rawB = (cellB.dataset.sortValue !== undefined ? cellB.dataset.sortValue : cellB.textContent).trim();
+
+                        let valA, valB;
+                        if (type === 'number') {
+                            valA = parseFloat(rawA.replace(/[^0-9.\-]/g, '')) || 0;
+                            valB = parseFloat(rawB.replace(/[^0-9.\-]/g, '')) || 0;
+                        } else {
+                            valA = rawA.toLowerCase();
+                            valB = rawB.toLowerCase();
+                        }
+
+                        if (valA < valB) return dir === 'asc' ? -1 : 1;
+                        if (valA > valB) return dir === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+
+                    rows.forEach(function (row) { tbody.appendChild(row); });
+                });
+            });
+        });
+    }
+
+    /* ========================================
+       Drag & Drop Upload Zone
+    ======================================== */
+    function initDropzones() {
+        document.querySelectorAll('.dropzone').forEach(function (zone) {
+            const input = zone.querySelector('input[type="file"]');
+            if (!input) return;
+
+            ['dragenter', 'dragover'].forEach(function (evt) {
+                zone.addEventListener(evt, function (e) {
+                    e.preventDefault();
+                    zone.classList.add('is-dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(function (evt) {
+                zone.addEventListener(evt, function (e) {
+                    e.preventDefault();
+                    zone.classList.remove('is-dragover');
+                });
+            });
+
+            zone.addEventListener('drop', function (e) {
+                const dt = e.dataTransfer;
+                if (!dt || !dt.files || dt.files.length === 0) return;
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        });
+    }
+
+    /* ========================================
+       File Upload Preview (name, size, remove)
+    ======================================== */
+    function initFilePreview() {
+        document.querySelectorAll('input[type="file"].js-file-input').forEach(function (input) {
+            const previewId = input.dataset.previewTarget || (input.id + 'Preview');
+            const preview = document.getElementById(previewId);
+            if (!preview) return;
+
+            let files = [];
+
+            function humanSize(bytes) {
+                if (bytes < 1024) return bytes + ' o';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Ko';
+                return (bytes / (1024 * 1024)).toFixed(1) + ' Mo';
+            }
+
+            function syncInput() {
+                const dt = new DataTransfer();
+                files.forEach(function (file) { dt.items.add(file); });
+                input.files = dt.files;
+            }
+
+            function render() {
+                preview.innerHTML = '';
+                files.forEach(function (file, index) {
+                    const item = document.createElement('div');
+                    item.className = 'file-preview-item';
+
+                    const name = document.createElement('span');
+                    name.className = 'file-preview-name';
+                    name.textContent = file.name;
+
+                    const size = document.createElement('span');
+                    size.className = 'file-preview-size';
+                    size.textContent = humanSize(file.size);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'file-preview-remove';
+                    removeBtn.setAttribute('aria-label', 'Retirer ce fichier');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.addEventListener('click', function () {
+                        files.splice(index, 1);
+                        syncInput();
+                        render();
+                    });
+
+                    item.appendChild(name);
+                    item.appendChild(size);
+                    item.appendChild(removeBtn);
+                    preview.appendChild(item);
+                });
+            }
+
+            input.addEventListener('change', function () {
+                files = Array.prototype.slice.call(input.files);
+                render();
+            });
+        });
+    }
+
+    /* ========================================
+       Inline Form Validation
+    ======================================== */
+    function initInlineValidation() {
+        document.querySelectorAll('form.js-validate').forEach(function (form) {
+            const fields = Array.prototype.slice.call(
+                form.querySelectorAll('[required], input[type="number"], input[type="email"]')
+            );
+
+            function validateField(field) {
+                let message = '';
+
+                if (field.type === 'file') {
+                    if (field.hasAttribute('required') && field.files.length === 0) {
+                        message = 'Veuillez sélectionner un fichier.';
+                    }
+                } else if (field.hasAttribute('required') && !field.value.trim()) {
+                    message = 'Ce champ est requis.';
+                } else if (field.value) {
+                    if (field.type === 'number') {
+                        const val = parseFloat(field.value);
+                        if (field.min !== '' && !isNaN(parseFloat(field.min)) && val < parseFloat(field.min)) {
+                            message = 'Valeur minimale : ' + field.min + '.';
+                        } else if (field.max !== '' && !isNaN(parseFloat(field.max)) && val > parseFloat(field.max)) {
+                            message = 'Valeur maximale : ' + field.max + '.';
+                        }
+                    } else if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+                        message = 'Adresse email invalide.';
+                    }
+                }
+
+                let errorEl = field.parentElement.querySelector(':scope > .field-error');
+                if (message) {
+                    field.classList.add('is-invalid');
+                    if (!errorEl) {
+                        errorEl = document.createElement('p');
+                        errorEl.className = 'field-error';
+                        field.insertAdjacentElement('afterend', errorEl);
+                    }
+                    if (!errorEl.id) errorEl.id = 'validation-' + (field.id || fields.indexOf(field));
+                    field.setAttribute('aria-invalid', 'true');
+                    const descriptions = new Set((field.getAttribute('aria-describedby') || '').split(' ').filter(Boolean));
+                    descriptions.add(errorEl.id);
+                    field.setAttribute('aria-describedby', Array.from(descriptions).join(' '));
+                    errorEl.textContent = message;
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.removeAttribute('aria-invalid');
+                    if (errorEl) {
+                        field.setAttribute('aria-describedby', (field.getAttribute('aria-describedby') || '').split(' ').filter(function(id) { return id !== errorEl.id; }).join(' '));
+                        errorEl.remove();
+                    }
+                }
+
+                return !message;
+            }
+
+            fields.forEach(function (field) {
+                field.addEventListener('blur', function () { validateField(field); });
+                field.addEventListener('change', function () {
+                    if (field.type === 'file' || field.classList.contains('is-invalid')) validateField(field);
+                });
+                field.addEventListener('input', function () {
+                    if (field.classList.contains('is-invalid')) validateField(field);
+                });
+            });
+
+            form.addEventListener('submit', function (e) {
+                let valid = true;
+                let firstInvalid = null;
+
+                fields.forEach(function (field) {
+                    if (!validateField(field)) {
+                        valid = false;
+                        if (!firstInvalid) firstInvalid = field;
+                    }
+                });
+
+                if (!valid) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (firstInvalid) firstInvalid.focus();
+                }
+            });
         });
     }
 
@@ -479,8 +850,10 @@ https://templatemo.com/tm-609-crypto-vault
             tab.addEventListener('click', function() {
                 authTabs.forEach(function(t) {
                     t.classList.remove('active');
+                    t.setAttribute('aria-pressed', 'false');
                 });
                 tab.classList.add('active');
+                tab.setAttribute('aria-pressed', 'true');
 
                 if (tab.dataset.form === 'login') {
                     if (loginForm) loginForm.classList.add('active');
@@ -523,6 +896,7 @@ https://templatemo.com/tm-609-crypto-vault
        Initialize All
     ======================================== */
     function init() {
+        initFieldAccessibility();
         initMobileMenu();
         initToggleSwitches();
         initCopyButtons();
@@ -541,6 +915,12 @@ https://templatemo.com/tm-609-crypto-vault
         initAnimatedCounters();
         initRippleEffect();
         initToasts();
+        initStatusBadgePulse();
+        initTableScrollShadow();
+        initSortableTables();
+        initDropzones();
+        initFilePreview();
+        initInlineValidation();
     }
 
     // Run on DOM ready

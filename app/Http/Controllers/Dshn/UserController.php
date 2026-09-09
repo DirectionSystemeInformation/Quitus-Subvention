@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-    private const ROLES = ['dshn', 'admin', 'dg', 'comite_arbitrage', 'ministre'];
+    private const ROLES = ['dshn', 'admin', 'dg', 'comite_arbitrage', 'ministre', 'dgf'];
 
     private const ROLE_LABELS = [
         'dshn' => 'agent DSHN',
@@ -21,6 +21,7 @@ class UserController extends Controller
         'dg' => 'Directeur Général',
         'comite_arbitrage' => "Comité d'arbitrage budgétaire",
         'ministre' => 'Ministre',
+        'dgf' => 'DGF',
     ];
 
     public function index()

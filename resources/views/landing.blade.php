@@ -6,7 +6,7 @@
     <title>{{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
     <style>
@@ -126,6 +126,17 @@
             justify-content: center;
         }
 
+        .landing-hero .btn.secondary {
+            color: #14532d;
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .landing-hero .btn.secondary:hover {
+            background: #f0fdf4;
+            border-color: #f0fdf4;
+        }
+
         .landing-section {
             padding: 80px 48px;
             max-width: 1100px;
@@ -149,8 +160,10 @@
 
         .landing-steps {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 24px;
+            padding: 0;
+            list-style: none;
         }
 
         .landing-step {
@@ -159,12 +172,6 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: var(--space-7) var(--space-6);
-            transition: border-color 0.2s ease, transform 0.2s ease;
-        }
-
-        .landing-step:hover {
-            border-color: var(--color-primary-light);
-            transform: translateY(-3px);
         }
 
         .landing-step-number {
@@ -199,10 +206,65 @@
             color: var(--text-secondary);
             font-size: 14px;
         }
+
+        @media (max-width: 768px) {
+            .landing-nav {
+                padding: 16px 20px;
+                gap: 16px;
+                flex-wrap: wrap;
+                position: static;
+            }
+
+            .landing-nav-actions {
+                flex-wrap: wrap;
+            }
+
+            .landing-hero {
+                padding: 56px 20px;
+            }
+
+            .landing-hero h1 {
+                font-size: 32px;
+            }
+
+            .landing-hero p {
+                font-size: 16px;
+            }
+
+            .landing-hero .btn-group {
+                flex-wrap: wrap;
+            }
+
+            .landing-section {
+                padding: 48px 20px;
+            }
+
+            .landing-steps {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .landing-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .landing-hero .btn-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .landing-hero-slide {
+                transition: none;
+            }
+        }
     </style>
 </head>
 <body class="landing-page">
-    <nav class="landing-nav">
+    <nav class="landing-nav" aria-label="Navigation principale">
         <div class="landing-nav-brand">
             <img src="{{ asset('img/armoiries.png') }}" alt="Armoiries du Burkina Faso">
             <span>Ministère des Sports, de la Jeunesse et de l'Emploi</span>
@@ -213,49 +275,61 @@
         </div>
     </nav>
 
-    <section class="landing-hero">
+    <main>
+    <section class="landing-hero" aria-labelledby="landing-title">
         <div class="landing-hero-slide active" style="--slide-image: url('{{ asset('img/burkina-faso-foot.jpg') }}');"></div>
         <div class="landing-hero-slide" style="--slide-image: url('{{ asset('img/hero-2.jpg') }}');"></div>
         <div class="landing-hero-slide" style="--slide-image: url('{{ asset('img/hero-3.jpg') }}');"></div>
 
         <div class="landing-hero-content">
             <span class="landing-hero-badge">Portail officiel — Ministère des Sports, de la Jeunesse et de l'Emploi</span>
-            <h1>Quitus de déblocage de subvention pour les fédérations sportives et de loisirs</h1>
-            <p>Déposez en ligne votre rapport d'activité et votre programme d'activités budgétisé, et suivez le traitement de votre dossier par la Direction du Sport de Haut Niveau.</p>
+            <h1 id="landing-title">Quitus de subvention</h1>
+            <p>Fédérations sportives et de loisirs : déclarez vos activités, préparez votre programme budgétisé et suivez votre dossier jusqu'à l'obtention du quitus de déblocage.</p>
             <div class="btn-group">
                 <a href="{{ route('login', ['tab' => 'register']) }}" class="btn primary">Créer un compte fédération</a>
-                <a href="{{ route('login') }}" class="btn">Se connecter</a>
+                <a href="{{ route('login') }}" class="btn secondary">Se connecter</a>
             </div>
         </div>
     </section>
 
     <section class="landing-section">
-        <h2>Comment ça marche</h2>
-        <p>Une procédure simple en quatre étapes, du dépôt de votre dossier jusqu'au suivi de votre subvention.</p>
+        <h2>Votre parcours jusqu'au quitus</h2>
+        <p>Retrouvez chaque étape dans votre espace fédération, avec le statut de votre dossier et les actions à effectuer.</p>
 
-        <div class="landing-steps">
-            <div class="landing-step">
-                <div class="landing-step-number">1</div>
+        <ol class="landing-steps">
+            <li class="landing-step">
+                <div class="landing-step-number" aria-hidden="true">1</div>
                 <h3>Créez votre compte</h3>
-                <p>Renseignez le nom de votre fédération et les coordonnées du responsable.</p>
-            </div>
-            <div class="landing-step">
-                <div class="landing-step-number">2</div>
-                <h3>Validation par la DSHN</h3>
-                <p>Votre demande est vérifiée avant activation de votre accès.</p>
-            </div>
-            <div class="landing-step">
-                <div class="landing-step-number">3</div>
-                <h3>Déposez vos documents</h3>
-                <p>Rapport d'activité et projet de programme budgétisé, directement en ligne.</p>
-            </div>
-            <div class="landing-step">
-                <div class="landing-step-number">4</div>
-                <h3>Suivez votre dossier</h3>
-                <p>Consultez à tout moment le statut de traitement de vos documents.</p>
-            </div>
-        </div>
+                <p>Renseignez les informations de votre fédération. La Direction du Sport de Haut Niveau (DSHN) vérifie votre demande avant d'activer votre accès.</p>
+            </li>
+            <li class="landing-step">
+                <div class="landing-step-number" aria-hidden="true">2</div>
+                <h3>Déclarez vos activités</h3>
+                <p>Ajoutez vos activités réalisées et leurs justificatifs. Après validation par la DGF, votre rapport d'activité est constitué automatiquement.</p>
+            </li>
+            <li class="landing-step">
+                <div class="landing-step-number" aria-hidden="true">3</div>
+                <h3>Préparez votre programme</h3>
+                <p>Renseignez les activités prévues et leur budget, puis soumettez votre programme budgétisé à la DSHN.</p>
+            </li>
+            <li class="landing-step">
+                <div class="landing-step-number" aria-hidden="true">4</div>
+                <h3>Suivez l'instruction et l'arbitrage</h3>
+                <p>Consultez l'avancement de votre dossier et les éventuelles corrections demandées pendant son examen.</p>
+            </li>
+            <li class="landing-step">
+                <div class="landing-step-number" aria-hidden="true">5</div>
+                <h3>Réaménagez votre programme</h3>
+                <p>Après l'arbitrage, adaptez votre programme au montant alloué et soumettez-le pour validation.</p>
+            </li>
+            <li class="landing-step">
+                <div class="landing-step-number" aria-hidden="true">6</div>
+                <h3>Téléchargez votre quitus</h3>
+                <p>Une fois le quitus délivré, retrouvez-le dans votre espace fédération pour le télécharger.</p>
+            </li>
+        </ol>
     </section>
+    </main>
 
     <footer class="landing-footer">
         &copy; {{ date('Y') }} Ministère des Sports, de la Jeunesse et de l'Emploi — Direction du Sport de Haut Niveau
@@ -264,7 +338,7 @@
         (function() {
             const slides = document.querySelectorAll('.landing-hero-slide');
             let current = 0;
-            if (slides.length > 1) {
+            if (slides.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 setInterval(function() {
                     slides[current].classList.remove('active');
                     current = (current + 1) % slides.length;

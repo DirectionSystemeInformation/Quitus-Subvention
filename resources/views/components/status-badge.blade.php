@@ -7,6 +7,7 @@
         'soumis' => ['label' => 'Soumis', 'class' => 'status-neutral', 'icon' => 'clock'],
         'pending' => ['label' => 'En attente', 'class' => 'status-neutral', 'icon' => 'clock'],
         'manquant' => ['label' => 'Non déposé', 'class' => 'status-muted', 'icon' => 'dash'],
+        'brouillon' => ['label' => 'Brouillon', 'class' => 'status-muted', 'icon' => 'dash'],
     ];
 
     $info = $map[$status] ?? ['label' => ucfirst($status), 'class' => 'status-neutral', 'icon' => 'dash'];

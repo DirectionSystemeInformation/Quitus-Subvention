@@ -32,14 +32,14 @@
             <x-empty-state icon="inbox" title="Aucun document déposé pour le moment." />
         @else
             <div class="table-responsive">
-            <table class="market-table" id="reports-table">
+            <table class="market-table sortable" id="reports-table">
                 <thead>
                     <tr>
-                        <th>Fédération</th>
-                        <th>Document</th>
-                        <th>Année</th>
-                        <th>Déposé le</th>
-                        <th>Statut</th>
+                        <th data-sort="text">Fédération</th>
+                        <th data-sort="text">Document</th>
+                        <th data-sort="number">Année</th>
+                        <th data-sort="number">Déposé le</th>
+                        <th data-sort="text">Statut</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@
                             <td>{{ $report->user->federation_name }}</td>
                             <td>{{ $report->typeLabel() }}</td>
                             <td>{{ $report->year }}</td>
-                            <td>{{ $report->created_at->format('d/m/Y H:i') }}</td>
+                            <td data-sort-value="{{ $report->created_at->timestamp }}">{{ $report->created_at->format('d/m/Y H:i') }}</td>
                             <td><x-status-badge :status="$report->status" /></td>
                             <td>
                                 <div style="display:flex;gap:8px;align-items:center;">

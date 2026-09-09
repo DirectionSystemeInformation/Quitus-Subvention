@@ -1,14 +1,17 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ActivityFormController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Dgf\ActivityController as DgfActivityController;
 use App\Http\Controllers\Dshn\ActivityLogController;
 use App\Http\Controllers\Dshn\CampaignController;
 use App\Http\Controllers\Dshn\CanevasController;
 use App\Http\Controllers\Dshn\DashboardController as DshnDashboardController;
 use App\Http\Controllers\Dshn\FederationController;
 use App\Http\Controllers\Dshn\ReportController as DshnReportController;
+use App\Http\Controllers\Dshn\SearchController as DshnSearchController;
 use App\Http\Controllers\Dshn\UserController as DshnUserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth as AuthFacade;
@@ -22,6 +25,7 @@ Route::get('/', function () {
             $user->isAdmin() => 'admin.dashboard',
             $user->isDshn() => 'dshn.dashboard',
             $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
+            $user->isDgf() => 'dgf.activities.index',
             default => 'dashboard',
         });
     }
@@ -58,19 +62,27 @@ Route::middleware(['auth', 'role:federation'])->group(function () {
         ->defaults('type', 'programme_budgetise')
         ->name('programme-budgetise.store');
 
-    Route::get('/rapport-activite/remplir', [ActivityFormController::class, 'create'])
-        ->defaults('type', 'rapport_activite')
-        ->name('rapport-activite.create');
-    Route::post('/rapport-activite', [ActivityFormController::class, 'store'])
-        ->defaults('type', 'rapport_activite')
-        ->name('rapport-activite.store');
-
     Route::get('/programme-reamenage/remplir', [ActivityFormController::class, 'create'])
         ->defaults('type', 'programme_reamenage')
         ->name('programme-reamenage.create');
     Route::post('/programme-reamenage', [ActivityFormController::class, 'store'])
         ->defaults('type', 'programme_reamenage')
         ->name('programme-reamenage.store');
+
+    // Gestion des activités réalisées : chaque activité, une fois validée par la DGF,
+    // se déverse automatiquement en ligne budgétaire dans le rapport d'activité de
+    // l'année concernée (voir Dgf\ActivityController::validate_()). Le rapport
+    // d'activité n'est donc plus rempli manuellement (routes rapport-activite.* retirées).
+    Route::get('/activites', [ActivityController::class, 'index'])->name('activities.index');
+    Route::get('/activites/nouvelle', [ActivityController::class, 'create'])->name('activities.create');
+    Route::post('/activites', [ActivityController::class, 'store'])->name('activities.store');
+    Route::get('/activites/{activity}', [ActivityController::class, 'show'])->name('activities.show');
+    Route::get('/activites/{activity}/modifier', [ActivityController::class, 'edit'])->name('activities.edit');
+    Route::put('/activites/{activity}', [ActivityController::class, 'update'])->name('activities.update');
+    Route::post('/activites/{activity}/soumettre', [ActivityController::class, 'submit'])->name('activities.submit');
+    Route::post('/activites/{activity}/pieces', [ActivityController::class, 'addDocument'])->name('activities.documents.store');
+    Route::delete('/activites/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+    Route::get('/activites/{activity}/pieces/{document}', [ActivityController::class, 'downloadDocument'])->name('activities.documents.download');
 });
 
 Route::get('/mes-documents/{report}', [ActivityFormController::class, 'show'])
@@ -100,6 +112,8 @@ $backOfficeRoutes = function () {
     Route::get('/rapports/{report}/telecharger', [DshnReportController::class, 'download'])->name('reports.download');
     Route::post('/rapports/{report}/valider', [DshnReportController::class, 'validate_'])->name('reports.validate');
     Route::post('/rapports/{report}/rejeter', [DshnReportController::class, 'reject'])->name('reports.reject');
+
+    Route::get('/recherche', [DshnSearchController::class, 'index'])->name('search.index');
 
     Route::get('/canevas', [CanevasController::class, 'index'])->name('canevas.index');
     Route::post('/canevas/axes', [CanevasController::class, 'storeAxe'])->name('canevas.axes.store');
@@ -152,5 +166,21 @@ Route::middleware(['auth', 'role:dshn,admin,dg,comite_arbitrage,ministre'])
         Route::post('/{campaign}/session', [CampaignController::class, 'organizeSession'])->name('session.organize');
 
         Route::post('/{campaign}/federations/{federation}/quitus', [CampaignController::class, 'deliverQuitus'])->name('quitus.deliver');
-        Route::get('/{campaign}/federations/{federation}/quitus', [CampaignController::class, 'downloadQuitus'])->name('quitus.download');
     });
+
+// Le téléchargement est aussi accessible à la fédération propriétaire ;
+// le contrôleur vérifie l'appartenance et la délivrance effective du quitus.
+Route::get('/campagnes/{campaign}/federations/{federation}/quitus', [CampaignController::class, 'downloadQuitus'])
+    ->middleware('auth')
+    ->name('campagnes.quitus.download');
+
+// Vérification des activités réalisées par les fédérations, avant leur déversement
+// dans le rapport d'activité (voir Dgf\ActivityController). L'admin y a aussi accès
+// pour supervision, comme pour le reste du back-office.
+Route::middleware(['auth', 'role:dgf,admin'])->prefix('dgf')->name('dgf.')->group(function () {
+    Route::get('/activites', [DgfActivityController::class, 'index'])->name('activities.index');
+    Route::get('/activites/{activity}', [DgfActivityController::class, 'show'])->name('activities.show');
+    Route::post('/activites/{activity}/valider', [DgfActivityController::class, 'validate_'])->name('activities.validate');
+    Route::post('/activites/{activity}/rejeter', [DgfActivityController::class, 'reject'])->name('activities.reject');
+    Route::get('/activites/{activity}/pieces/{document}', [DgfActivityController::class, 'downloadDocument'])->name('activities.documents.download');
+});

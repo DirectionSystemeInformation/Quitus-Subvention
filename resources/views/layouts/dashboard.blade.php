@@ -6,14 +6,15 @@
     <title>@yield('title') - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
     @stack('styles')
 </head>
 <body>
+    <a class="skip-link" href="#mainContent">Aller au contenu</a>
     <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Ouvrir le menu" aria-controls="sidebar" aria-expanded="false">
         <div class="hamburger">
             <span></span>
             <span></span>
@@ -51,6 +52,13 @@
                                 <polyline points="14 2 14 8 20 8"/>
                             </svg>
                             Rapport &amp; Programme
+                        </a>
+                        <a href="{{ route('activities.index') }}" class="nav-item {{ ($active ?? '') === 'activities' ? 'active' : '' }}">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Gestion des activités
                         </a>
                         <a href="{{ route('profile.edit') }}" class="nav-item {{ ($active ?? '') === 'profile' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -106,6 +114,13 @@
                             Campagnes
                         </a>
                         @if (auth()->user()->isAdmin())
+                            <a href="{{ route('dgf.activities.index') }}" class="nav-item {{ ($active ?? '') === 'dgf-activities' ? 'active' : '' }}">
+                                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                Activités
+                            </a>
                             <a href="{{ role_route('activity-log.index') }}" class="nav-item {{ ($active ?? '') === 'activity-log' ? 'active' : '' }}">
                                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"/>
@@ -148,6 +163,24 @@
                             Mon profil
                         </a>
                     </nav>
+                @elseif (auth()->user()->isDgf())
+                    <nav class="nav-section">
+                        <div class="nav-label">Menu</div>
+                        <a href="{{ route('dgf.activities.index') }}" class="nav-item {{ ($active ?? '') === 'dgf-activities' ? 'active' : '' }}">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Activités à valider
+                        </a>
+                        <a href="{{ route('profile.edit') }}" class="nav-item {{ ($active ?? '') === 'profile' ? 'active' : '' }}">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                            </svg>
+                            Mon profil
+                        </a>
+                    </nav>
                 @endif
             @endauth
 
@@ -167,17 +200,34 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="mainContent" tabindex="-1">
             @if (session('status'))
-                <div id="flashStatus" data-message="{{ session('status') }}" data-type="success" style="display:none;"></div>
+                <div id="flashStatus" class="notice notice-success" role="status">{{ session('status') }}</div>
             @endif
             @if ($errors->any())
-                <ul id="flashErrors" style="display:none;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+                <section id="flashErrors" class="notice notice-error" role="alert" tabindex="-1" aria-labelledby="errorSummaryTitle">
+                    <h2 id="errorSummaryTitle">Vérifiez les informations saisies</h2>
+                    <ul>
+                        @foreach ($errors->getMessages() as $field => $messages)
+                            @foreach ($messages as $error)
+                                <li data-error-field="{{ $field }}">{{ $error }}</li>
+                            @endforeach
+                        @endforeach
+                    </ul>
+                </section>
             @endif
+
+            @auth
+                @if (auth()->user()->isDshn())
+                    <form method="GET" action="{{ role_route('search.index') }}" class="topbar-search">
+                        <svg class="topbar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="search" name="q" aria-label="Rechercher dans la plateforme" placeholder="Rechercher une fédération, un rapport, une activité..." value="{{ request('q') }}">
+                    </form>
+                @endif
+            @endauth
 
             @yield('content')
 
@@ -189,7 +239,7 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div class="modal-overlay" id="confirmModal">
+    <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage">
         <div class="modal-box">
             <h3 id="confirmModalTitle">Confirmer l'action</h3>
             <p id="confirmModalMessage"></p>
@@ -201,13 +251,13 @@
     </div>
 
     <!-- Reject Reason Modal -->
-    <div class="modal-overlay" id="rejectReasonModal">
+    <div class="modal-overlay" id="rejectReasonModal" role="dialog" aria-modal="true" aria-labelledby="rejectReasonTitle">
         <div class="modal-box">
-            <h3>Rejeter</h3>
+            <h3 id="rejectReasonTitle">Motiver le rejet</h3>
             <form method="POST" id="rejectReasonForm">
                 @csrf
                 <div class="form-group">
-                    <label class="form-label">Motif du rejet</label>
+                    <label class="form-label" for="rejectReasonInput">Motif du rejet</label>
                     <textarea name="rejection_reason" id="rejectReasonInput" class="form-input" rows="3" required placeholder="Expliquez pourquoi ce document est rejeté..."></textarea>
                 </div>
                 <div class="modal-actions">

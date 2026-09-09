@@ -47,6 +47,7 @@
                         <option value="dg" {{ $user->role === 'dg' ? 'selected' : '' }}>Directeur Général</option>
                         <option value="comite_arbitrage" {{ $user->role === 'comite_arbitrage' ? 'selected' : '' }}>Comité d'arbitrage budgétaire</option>
                         <option value="ministre" {{ $user->role === 'ministre' ? 'selected' : '' }}>Ministre</option>
+                        <option value="dgf" {{ $user->role === 'dgf' ? 'selected' : '' }}>DGF</option>
                     </select>
                     <input type="password" name="password" class="form-input" placeholder="Nouveau mot de passe (optionnel)">
                     <input type="password" name="password_confirmation" class="form-input" placeholder="Confirmer">
@@ -72,6 +73,7 @@
                 <option value="dg">Directeur Général</option>
                 <option value="comite_arbitrage">Comité d'arbitrage budgétaire</option>
                 <option value="ministre">Ministre</option>
+                <option value="dgf">DGF</option>
             </select>
             <input type="password" name="password" class="form-input" placeholder="Mot de passe" required>
             <input type="password" name="password_confirmation" class="form-input" placeholder="Confirmer" required>

@@ -58,6 +58,7 @@ class AuthController extends Controller
             $user->isAdmin() => 'admin.dashboard',
             $user->isDshn() => 'dshn.dashboard',
             $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
+            $user->isDgf() => 'dgf.activities.index',
             default => 'dashboard',
         }));
     }

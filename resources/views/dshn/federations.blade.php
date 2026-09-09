@@ -94,14 +94,14 @@
             </div>
         </div>
         <div class="table-responsive">
-        <table class="market-table" id="federations-table">
+        <table class="market-table sortable" id="federations-table">
             <thead>
                 <tr>
-                    <th>Fédération</th>
-                    <th>N° arrêté</th>
-                    <th>Email</th>
-                    <th>Statut</th>
-                    <th>Documents déposés</th>
+                    <th data-sort="text">Fédération</th>
+                    <th data-sort="text">N° arrêté</th>
+                    <th data-sort="text">Email</th>
+                    <th data-sort="text">Statut</th>
+                    <th data-sort="number">Documents déposés</th>
                     @if (auth()->user()->isDshn())
                         <th></th>
                     @endif

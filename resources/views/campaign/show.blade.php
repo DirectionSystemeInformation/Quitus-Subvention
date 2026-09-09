@@ -39,10 +39,6 @@
         @endforeach
     </div>
 
-    @if (session('status'))
-        <div id="flashStatus" data-message="{{ session('status') }}" data-type="success" style="display:none;"></div>
-    @endif
-
     {{-- Étape 3 : Traitement --}}
     @if ($campaign->etape === 3 && $user->isDshn())
         <div class="card" style="margin-bottom: 24px;">
@@ -80,7 +76,12 @@
                             </tr>
                             <tr>
                                 @foreach ($criteres as $critere)
-                                    <th title="{{ $critere['label'] }}">/{{ rtrim(rtrim(number_format($critere['max'], 1), '0'), '.') }}</th>
+                                    <th scope="col" class="criterion-heading">
+                                        <details>
+                                            <summary>{{ \Illuminate\Support\Str::limit($critere['label'], 36) }} · /{{ rtrim(rtrim(number_format($critere['max'], 1), '0'), '.') }}</summary>
+                                            <span>{{ $critere['label'] }}</span>
+                                        </details>
+                                    </th>
                                 @endforeach
                             </tr>
                         </thead>
@@ -92,6 +93,7 @@
                                         <td>
                                             <input type="number" step="0.5" min="0" max="{{ $critere['max'] }}"
                                                 name="scores[{{ $allocation->id }}][{{ $critere['slug'] }}]"
+                                                aria-label="{{ $allocation->federation->federation_name }} — {{ $critere['label'] }} (sur {{ $critere['max'] }})"
                                                 value="{{ $allocation->criteres_scores[$critere['slug']] ?? '' }}"
                                                 class="pb-num critere-input">
                                         </td>

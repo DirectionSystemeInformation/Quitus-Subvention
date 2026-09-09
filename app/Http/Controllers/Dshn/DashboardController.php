@@ -20,16 +20,18 @@ class DashboardController extends Controller
 
         $recentPending = User::where('role', 'federation')
             ->where('status', 'pending')
-            ->latest()
+            ->oldest()
             ->take(5)
             ->get();
 
         $recentReports = Report::with('user')
             ->where('status', 'soumis')
-            ->latest()
+            ->oldest()
             ->take(5)
             ->get();
 
-        return view('dshn.dashboard', compact('stats', 'recentPending', 'recentReports'));
+        $reportsTotal = $stats['reports_soumis'] + $stats['reports_valide'] + $stats['reports_rejete'];
+
+        return view('dshn.dashboard', compact('stats', 'recentPending', 'recentReports', 'reportsTotal'));
     }
 }

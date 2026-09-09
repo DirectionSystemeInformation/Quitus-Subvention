@@ -9,6 +9,7 @@ class BudgetLine extends Model
     protected $fillable = [
         'report_id',
         'canvas_sous_axe_id',
+        'activity_id',
         'axe',
         'axe_label',
         'sous_axe_code',
@@ -32,5 +33,10 @@ class BudgetLine extends Model
     public function report()
     {
         return $this->belongsTo(Report::class);
+    }
+
+    public function activity()
+    {
+        return $this->belongsTo(FederationActivity::class, 'activity_id');
     }
 }

@@ -26,7 +26,7 @@ class FederationController extends Controller
     {
         abort_unless($federation->role === 'federation', 404);
 
-        $reports = $federation->reports()->orderByDesc('year')->orderBy('type')->get();
+        $reports = $federation->reports()->where('status', '!=', 'brouillon')->orderByDesc('year')->orderBy('type')->get();
 
         $stats = [
             'total' => $reports->count(),

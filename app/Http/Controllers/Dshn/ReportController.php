@@ -12,13 +12,14 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $reports = Report::with('user')->latest()->get();
+        $reports = Report::with('user')->where('status', '!=', 'brouillon')->latest()->get();
 
         return view('dshn.reports', compact('reports'));
     }
 
     public function download(Report $report)
     {
+        abort_if($report->status === 'brouillon', 403);
         abort_unless($report->file_path, 404);
 
         return Storage::disk('local')->download($report->file_path, $report->original_filename);
@@ -26,6 +27,7 @@ class ReportController extends Controller
 
     public function validate_(Report $report)
     {
+        abort_if($report->status === 'brouillon', 403);
         $report->update(['status' => 'valide', 'rejection_reason' => null]);
 
         ActivityLog::record(
@@ -40,6 +42,7 @@ class ReportController extends Controller
 
     public function reject(Request $request, Report $report)
     {
+        abort_if($report->status === 'brouillon', 403);
         $data = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);

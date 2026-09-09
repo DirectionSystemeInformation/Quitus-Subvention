@@ -1,4 +1,4 @@
-@extends('layouts.dashboard', ['active' => auth()->user()->isDshn() ? 'reports' : 'dashboard'])
+@extends('layouts.dashboard', ['active' => auth()->user()->isDshn() ? 'reports' : 'documents'])
 
 @section('title', $title)
 
@@ -43,7 +43,7 @@
                     <tr>
                         <th class="pb-col-num">N°</th>
                         <th>Désignation de l'activité</th>
-                        <th class="pb-col-montant">Montant</th>
+                        <th class="pb-col-montant">Montant (FCFA)</th>
                         <th class="pb-col-contrib">Contribution des partenaires</th>
                         <th class="pb-col-date">Date</th>
                         <th>Observations</th>
@@ -74,7 +74,7 @@
         <table class="pb-table">
             <tbody>
                 <tr class="pb-total-row">
-                    <td colspan="2">TOTAL GENERAL</td>
+                    <td colspan="2">TOTAL GÉNÉRAL (FCFA)</td>
                     <td class="pb-col-montant">{{ number_format($total, 0, ',', ' ') }}</td>
                     <td colspan="3"></td>
                 </tr>
@@ -85,7 +85,11 @@
 
     @if (auth()->user()->isFederation() && $report->status !== 'valide')
         <div class="btn-group">
-            <a href="{{ route(str_replace('_', '-', $type).'.create', ['annee' => $report->year]) }}" class="btn primary">Modifier</a>
+            @if ($type === 'rapport_activite')
+                <a href="{{ route('activities.index', ['annee' => $report->year]) }}" class="btn primary">Gérer les activités du rapport</a>
+            @else
+                <a href="{{ route(str_replace('_', '-', $type).'.create', ['annee' => $report->year]) }}" class="btn primary">{{ $report->status === 'brouillon' ? 'Reprendre le brouillon' : 'Modifier le programme' }}</a>
+            @endif
         </div>
     @endif
 

@@ -6,7 +6,7 @@
     <title>Mot de passe oublié - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
@@ -15,37 +15,38 @@
     <div class="auth-branding">
         <div class="branding-content">
             <img src="{{ asset('img/armoiries.png') }}" alt="Armoiries du Burkina Faso" class="branding-logo branding-crest">
-            <h1 class="branding-title branding-title-ministry">Ministère des Sports, de la Jeunesse et de l'Emploi</h1>
-            <p class="branding-subtitle">Portail des fédérations sportives et de loisirs pour le dépôt des rapports d'activité et l'obtention du quitus de déblocage de subvention</p>
+            <h2 class="branding-title branding-title-ministry">Ministère des Sports, de la Jeunesse et de l'Emploi</h2>
+            <p class="branding-subtitle">Quitus de subvention : votre espace pour déclarer vos activités, préparer votre programme et suivre votre dossier.</p>
         </div>
     </div>
 
     <div class="auth-form-container">
         <div class="auth-form-wrapper">
+            <a href="{{ url('/') }}" class="auth-home-link">← Retour à l'accueil</a>
             <div class="form-header">
                 <h1>Mot de passe oublié</h1>
                 <p>Indiquez votre adresse e-mail, nous vous enverrons un lien de réinitialisation</p>
             </div>
 
             @if (session('status'))
-                <div id="flashStatus" data-message="{{ session('status') }}" data-type="success" style="display:none;"></div>
-            @endif
-
-            @if ($errors->has('email'))
-                <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-bottom: 16px;">{{ $errors->first('email') }}</p>
+                <div class="auth-feedback auth-feedback-success" role="status">{{ session('status') }}</div>
             @endif
 
             <form class="auth-form active" method="POST" action="{{ route('password.email') }}">
                 @csrf
+                <p class="auth-required-hint">L'adresse e-mail est obligatoire.</p>
                 <div class="form-group">
-                    <label class="form-label">Adresse e-mail</label>
+                    <label for="forgotEmail" class="form-label">Adresse e-mail</label>
                     <div class="form-input-wrapper">
-                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg aria-hidden="true" class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                             <polyline points="22,6 12,13 2,6"/>
                         </svg>
-                        <input type="email" name="email" class="form-input" placeholder="votre@email.com" value="{{ old('email') }}" required autofocus>
+                        <input type="email" id="forgotEmail" name="email" class="form-input" placeholder="votre@email.com" value="{{ old('email') }}" autocomplete="email" autocapitalize="none" spellcheck="false" @if ($errors->has('email')) aria-invalid="true" aria-describedby="forgotEmailError" @endif required>
                     </div>
+                    @error('email')
+                        <p id="forgotEmailError" class="field-error" role="alert">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <button type="submit" class="submit-btn">Envoyer le lien de réinitialisation</button>

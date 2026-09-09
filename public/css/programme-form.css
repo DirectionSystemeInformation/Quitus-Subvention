@@ -1,0 +1,45 @@
+.programme-year { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:24px; font-size:14px; }
+.programme-year .form-input { width:110px; }
+.programme-summary { display:flex; align-items:center; flex-wrap:wrap; gap:20px 40px; margin-bottom:16px; }
+.programme-summary strong { display:block; color:#064e3b; font-size:24px; font-variant-numeric:tabular-nums; }
+.programme-caption { color:var(--text-secondary); font-size:13px; }
+#saveState { margin-left:auto; font-size:13px; color:var(--text-secondary); max-width:260px; }
+.programme-help { font-size:14px; color:var(--text-secondary); margin-bottom:24px; }
+.programme-axis { margin-bottom:20px; padding:0; overflow:hidden; }
+.programme-axis > summary { display:flex; justify-content:space-between; gap:20px; align-items:center; cursor:pointer; padding:20px 24px; font-size:16px; font-weight:700; background:#f0fdf4; color:#064e3b; }
+.programme-axis > summary::before { content:'+'; font-size:20px; }
+.programme-axis[open] > summary::before { content:'−'; }
+.programme-axis > summary > span:first-child { flex:1; }
+.axis-total { font-size:14px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.programme-subaxis { padding:20px 24px; }
+.programme-subaxis + .programme-subaxis { border-top:1px solid var(--border); }
+.programme-subaxis h2 { font-size:15px; margin:0 0 16px; }
+.programme-line { border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:16px; min-width:0; background:#fff; }
+.programme-line legend { padding:0 6px; font-size:13px; font-weight:600; color:#475569; }
+.programme-line-fields { display:grid; grid-template-columns:2fr 1fr 1.4fr; gap:16px; }
+.programme-field { min-width:0; }
+.programme-field label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+.programme-field .form-input { width:100%; font-size:15px; }
+.field-observations { grid-column:span 2; }
+.programme-remove { display:block; border:0; background:transparent; color:#b91c1c; padding:12px 0 0; min-height:44px; cursor:pointer; font:inherit; font-size:13px; text-decoration:underline; }
+.programme-add { color:#047857; font-size:14px; }
+.programme-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:12px; margin:24px 0; position:sticky; top:8px; z-index:10; background:#fff; padding:12px; border:1px solid var(--border); border-radius:12px; box-shadow:0 2px 8px rgba(15,23,42,.05); }
+.programme-review h2 { font-size:22px; margin-bottom:12px; }
+.programme-review p, .programme-review ul { font-size:15px; margin-bottom:16px; }
+.programme-review ul { padding-left:22px; }
+.programme-confirm { display:flex; align-items:flex-start; gap:10px; font-size:15px; margin:24px 0; cursor:pointer; }
+.programme-confirm input { width:20px; height:20px; margin-top:3px; flex-shrink:0; }
+.programme-review[hidden] { display:none; }
+@media (max-width:1024px) { .programme-actions { top:76px; } }
+@media (max-width:700px) {
+    .programme-line-fields { grid-template-columns:1fr; }
+    .field-observations { grid-column:auto; }
+    .programme-subaxis { padding:16px; }
+    .programme-axis > summary { padding:16px; gap:10px; flex-wrap:wrap; }
+    .axis-total { flex-basis:100%; padding-left:22px; }
+    .programme-summary { gap:16px; }
+    #saveState { margin-left:0; max-width:none; flex-basis:100%; }
+    .programme-actions { gap:8px; padding:8px; }
+    .programme-actions .btn { flex:1; font-size:13px; padding:10px; }
+    .programme-field .form-input { font-size:16px; }
+}

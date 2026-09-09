@@ -15,7 +15,7 @@ class CanvasStructureSeeder extends Seeder
         $axes = [
             [
                 'code' => 'I',
-                'label' => 'Politique Nationale des Sports AXE-1 : MASSE ET RELEVE SPORTIVE',
+                'label' => 'Politique Nationale des Sports AXE-1 : Masse et relève sportive',
                 'sous_axes' => [
                     ['code' => 'I.1', 'label' => 'Championnat de jeunes et relève sportive', 'lignes_count' => 3],
                     ['code' => 'I.2', 'label' => 'Autres activités', 'lignes_count' => 3],
@@ -23,7 +23,7 @@ class CanvasStructureSeeder extends Seeder
             ],
             [
                 'code' => 'II',
-                'label' => 'Politique Nationale des Sports AXE-2 : ELITE',
+                'label' => 'Politique Nationale des Sports AXE-2 : Élite',
                 'sous_axes' => [
                     ['code' => 'II.1', 'label' => "Championnat national d'élite (1ère et 2ème divisions)", 'lignes_count' => 3],
                     ['code' => 'II.2', 'label' => 'Activités sous-régionales', 'lignes_count' => 3],
@@ -34,7 +34,7 @@ class CanvasStructureSeeder extends Seeder
             ],
             [
                 'code' => 'III',
-                'label' => "Politique Nationale des Sports AXE 3 : CADRE D'EVOLUTION ET CONDITIONS DE MISE EN ŒUVRE",
+                'label' => "Politique Nationale des Sports AXE 3 : Cadre d'évolution et conditions de mise en œuvre",
                 'sous_axes' => [
                     ['code' => 'III.1', 'label' => 'Infrastructures', 'lignes_count' => 2],
                     ['code' => 'III.2', 'label' => 'Equipements', 'lignes_count' => 2],

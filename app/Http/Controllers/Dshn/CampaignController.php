@@ -40,7 +40,7 @@ class CampaignController extends Controller
     {
         $campaign->load(['allocations' => fn ($q) => $q->with([
             'federation',
-            'federation.reports' => fn ($r) => $r->where('type', 'programme_reamenage')->where('year', $campaign->annee_n1),
+            'federation.reports' => fn ($r) => $r->where('type', 'programme_reamenage')->where('year', $campaign->annee_n1)->where('status', '!=', 'brouillon'),
         ])->orderByDesc('score_total')]);
 
         return view('campaign.show', [
@@ -372,7 +372,7 @@ class CampaignController extends Controller
     public function downloadQuitus(Campaign $campaign, User $federation)
     {
         $user = Auth::user();
-        abort_unless($user->isDshn() || $user->id === $federation->id, 403);
+        abort_unless($user->isDshn() || ($user->isFederation() && $user->id === $federation->id), 403);
 
         $allocation = $campaign->allocations()->where('user_id', $federation->id)->firstOrFail();
 
