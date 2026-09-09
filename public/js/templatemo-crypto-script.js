@@ -451,22 +451,49 @@ https://templatemo.com/tm-609-crypto-vault
     }
 
     /* ========================================
-       Generic Table Search
+       Generic Table Search & Pagination
+       (tablePaginationRefresh lets initSortableTables() ask a table's
+       pagination to recompute after it reorders rows.)
     ======================================== */
+    var tablePaginationRefresh = {};
+    var TABLE_PAGE_SIZE = 7;
+
+    // Builds [1, '...', 4, 5, 6, '...', 12] style page lists: first, last,
+    // and a small window around the current page, so long lists stay compact.
+    function pageNumbersWithEllipsis(current, total) {
+        const pages = [1];
+        for (let p = current - 1; p <= current + 1; p++) {
+            if (p > 1 && p < total) pages.push(p);
+        }
+        if (total > 1) pages.push(total);
+
+        const unique = pages.filter(function(p, i) { return pages.indexOf(p) === i; }).sort(function(a, b) { return a - b; });
+
+        const result = [];
+        let previous = null;
+        unique.forEach(function(p) {
+            if (previous !== null && p - previous > 1) result.push('...');
+            result.push(p);
+            previous = p;
+        });
+        return result;
+    }
+
     function initTableSearch() {
-        const targets = new Set();
-        document.querySelectorAll('.js-table-search, .js-table-status-filter').forEach(function(el) {
-            targets.add(el.dataset.target);
+        const containerIds = new Set();
+        document.querySelectorAll('[data-search-row]').forEach(function(row) {
+            const el = row.closest('[id]');
+            if (el) containerIds.add(el.id);
         });
 
-        targets.forEach(function(targetId) {
+        containerIds.forEach(function(targetId) {
             const container = document.getElementById(targetId);
             if (!container) return;
 
             const searchInput = document.querySelector('.js-table-search[data-target="' + targetId + '"]');
             const statusFilter = document.querySelector('.js-table-status-filter[data-target="' + targetId + '"]');
             const emptyMessage = document.querySelector('.js-table-empty[data-target="' + targetId + '"]');
-            const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
+            let currentPage = 1;
 
             function rowSearchText(row) {
                 let text = row.textContent;
@@ -477,26 +504,114 @@ https://templatemo.com/tm-609-crypto-vault
                 return text.toLowerCase();
             }
 
-            function applyFilters() {
+            function matchingRows() {
                 const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
                 const status = statusFilter ? statusFilter.value : '';
-                let visibleCount = 0;
-
-                rows.forEach(function(row) {
+                // Re-queried live (not cached) so a column re-sort — which reorders the
+                // DOM — is reflected before we slice out the current page.
+                const rows = Array.prototype.slice.call(container.querySelectorAll('[data-search-row]'));
+                return rows.filter(function(row) {
                     const matchesQuery = !query || rowSearchText(row).includes(query);
                     const matchesStatus = !status || row.dataset.status === status;
-                    const matches = matchesQuery && matchesStatus;
-                    row.style.display = matches ? '' : 'none';
-                    if (matches) visibleCount++;
+                    return matchesQuery && matchesStatus;
+                });
+            }
+
+            function renderPagination(total, totalPages) {
+                let nav = document.querySelector('.table-pagination[data-target="' + targetId + '"]');
+
+                if (totalPages <= 1) {
+                    if (nav) nav.style.display = 'none';
+                    return;
+                }
+
+                if (!nav) {
+                    nav = document.createElement('div');
+                    nav.className = 'table-pagination';
+                    nav.dataset.target = targetId;
+                    const anchor = container.closest('.table-responsive') || container;
+                    anchor.insertAdjacentElement('afterend', nav);
+                }
+                nav.style.display = '';
+                nav.innerHTML = '';
+
+                const prevBtn = document.createElement('button');
+                prevBtn.type = 'button';
+                prevBtn.className = 'btn table-pagination-btn';
+                prevBtn.textContent = 'Précédent';
+                prevBtn.disabled = currentPage <= 1;
+                prevBtn.addEventListener('click', function() {
+                    currentPage -= 1;
+                    apply();
+                });
+
+                const numbers = document.createElement('div');
+                numbers.className = 'table-pagination-numbers';
+                pageNumbersWithEllipsis(currentPage, totalPages).forEach(function(entry) {
+                    if (entry === '...') {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.className = 'table-pagination-ellipsis';
+                        ellipsis.textContent = '…';
+                        numbers.appendChild(ellipsis);
+                        return;
+                    }
+
+                    const pageBtn = document.createElement('button');
+                    pageBtn.type = 'button';
+                    pageBtn.className = 'table-pagination-page' + (entry === currentPage ? ' active' : '');
+                    pageBtn.textContent = String(entry);
+                    if (entry === currentPage) {
+                        pageBtn.setAttribute('aria-current', 'page');
+                    } else {
+                        pageBtn.addEventListener('click', function() {
+                            currentPage = entry;
+                            apply();
+                        });
+                    }
+                    numbers.appendChild(pageBtn);
+                });
+
+                const nextBtn = document.createElement('button');
+                nextBtn.type = 'button';
+                nextBtn.className = 'btn table-pagination-btn';
+                nextBtn.textContent = 'Suivant';
+                nextBtn.disabled = currentPage >= totalPages;
+                nextBtn.addEventListener('click', function() {
+                    currentPage += 1;
+                    apply();
+                });
+
+                nav.appendChild(prevBtn);
+                nav.appendChild(numbers);
+                nav.appendChild(nextBtn);
+            }
+
+            function apply() {
+                const matching = matchingRows();
+                const totalPages = Math.max(1, Math.ceil(matching.length / TABLE_PAGE_SIZE));
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
+
+                const start = (currentPage - 1) * TABLE_PAGE_SIZE;
+                const visible = new Set(matching.slice(start, start + TABLE_PAGE_SIZE));
+
+                container.querySelectorAll('[data-search-row]').forEach(function(row) {
+                    row.style.display = visible.has(row) ? '' : 'none';
                 });
 
                 if (emptyMessage) {
-                    emptyMessage.style.display = visibleCount === 0 ? '' : 'none';
+                    emptyMessage.style.display = matching.length === 0 ? '' : 'none';
                 }
+
+                renderPagination(matching.length, totalPages);
             }
 
-            if (searchInput) searchInput.addEventListener('input', applyFilters);
-            if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+            if (searchInput) searchInput.addEventListener('input', function() { currentPage = 1; apply(); });
+            if (statusFilter) statusFilter.addEventListener('change', function() { currentPage = 1; apply(); });
+
+            tablePaginationRefresh[targetId] = apply;
+
+            apply();
         });
     }
 
@@ -668,6 +783,8 @@ https://templatemo.com/tm-609-crypto-vault
                     });
 
                     rows.forEach(function (row) { tbody.appendChild(row); });
+
+                    if (tablePaginationRefresh[table.id]) tablePaginationRefresh[table.id]();
                 });
             });
         });

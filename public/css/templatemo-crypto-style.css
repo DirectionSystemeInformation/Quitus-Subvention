@@ -93,6 +93,23 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 /* ========================================
+   Base Links
+   Sane default for every <a> that isn't already styled as a button/nav-item/
+   etc. (those all use class selectors, which stay more specific than this).
+   Without this, any plain link falls back to the browser default — blue and
+   underlined — which happened repeatedly across the app.
+======================================== */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ========================================
    Body & Typography
 ======================================== */
 body {

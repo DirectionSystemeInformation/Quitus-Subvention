@@ -100,7 +100,7 @@
                     <label class="form-label">Pièces déjà jointes</label>
                     <ul style="margin: 0; padding-left: 20px;">
                         @foreach ($activity->documents as $document)
-                            <li><a href="{{ route('activities.documents.download', [$activity, $document]) }}">{{ $document->original_filename }}</a></li>
+                            <li><a href="{{ route('activities.documents.download', [$activity, $document]) }}" class="file-link">{{ $document->original_filename }}</a></li>
                         @endforeach
                     </ul>
                 </div>

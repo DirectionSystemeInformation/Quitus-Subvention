@@ -127,9 +127,10 @@ https://templatemo.com/tm-609-crypto-vault
 ======================================== */
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 1fr 1fr;
     gap: 24px;
     margin-bottom: 32px;
+    align-items: start;
 }
 
 /* ========================================

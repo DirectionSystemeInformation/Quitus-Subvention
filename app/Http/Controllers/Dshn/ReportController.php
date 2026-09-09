@@ -12,7 +12,7 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $reports = Report::with('user')->where('status', '!=', 'brouillon')->latest()->get();
+        $reports = Report::with('user')->where('status', '!=', 'brouillon')->latest()->get()->groupBy('type');
 
         return view('dshn.reports', compact('reports'));
     }

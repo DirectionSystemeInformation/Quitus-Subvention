@@ -303,6 +303,155 @@
 }
 
 /* ========================================
+   Section Tabs (client-side, instant switch — no page reload)
+======================================== */
+.section-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.section-tab {
+    flex: 1 1 0;
+    min-width: 200px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-card, #fff);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px var(--shadow);
+    transition: all 0.2s ease;
+}
+
+.section-tab:hover {
+    color: var(--text-primary);
+    border-color: var(--color-primary-light, var(--color-primary));
+    transform: translateY(-1px);
+}
+
+.section-tab.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(4, 120, 87, 0.28);
+}
+
+.section-tab.active:hover {
+    transform: none;
+}
+
+.section-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.section-tab.active .section-tab-count {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: transparent;
+    color: #fff;
+}
+
+.section-panel {
+    display: none;
+    animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.section-panel.active {
+    display: block;
+}
+
+@media (max-width: 640px) {
+    .section-tab {
+        min-width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .section-panel {
+        animation: none;
+    }
+}
+
+/* ========================================
+   List Toolbar (filter + search, above a table)
+======================================== */
+.list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.list-toolbar-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px;
+    flex-shrink: 0;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.list-toolbar-filter:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.list-toolbar-filter svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.list-toolbar-filter select {
+    border: none;
+    background: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding-right: 22px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236e6e6e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+.list-toolbar .topbar-search {
+    margin-bottom: 0;
+    height: 44px;
+    flex: 1 1 240px;
+    max-width: 320px;
+}
+
+/* ========================================
    Campaign Workflow Stepper (12-step allocation circuit)
 ======================================== */
 .campaign-stepper {
@@ -500,6 +649,83 @@
     .market-table th, .market-table td {
         padding: 10px 12px;
         font-size: 13px;
+    }
+}
+
+/* ========================================
+   Table pagination (client-side, 7 rows per page)
+======================================== */
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.table-pagination-btn {
+    padding: 8px 18px;
+    font-size: 13px;
+}
+
+.table-pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.table-pagination-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.table-pagination-page {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-card, #fff);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.table-pagination-page:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+
+.table-pagination-page.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    cursor: default;
+}
+
+.table-pagination-ellipsis {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 480px) {
+    .table-pagination {
+        flex-wrap: wrap;
+        gap: 10px;
     }
 }
 
@@ -804,6 +1030,186 @@
 .market-stat-icon svg {
     width: 18px;
     height: 18px;
+}
+
+/* ========================================
+   Dashboard "waiting queue" lists (Demandes/Rapports en attente) — these
+   classes are only defined in templatemo-crypto-dashboard.css, which isn't
+   loaded on every page that uses this component. Defined here (loaded
+   globally) so the name/date stack properly instead of running together.
+======================================== */
+.transaction-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.transaction-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.transaction-icon.transfer {
+    background-color: rgba(4, 120, 87, 0.12);
+    color: var(--color-primary);
+}
+
+.transaction-item {
+    gap: 18px;
+}
+
+.view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.view-all:hover {
+    color: var(--color-primary-hover, var(--color-primary));
+    gap: 7px;
+}
+
+.file-link {
+    color: var(--color-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.file-link:hover {
+    color: var(--color-primary-hover, var(--color-primary));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.view-all::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+@media (max-width: 480px) {
+    .transaction-item {
+        align-items: flex-start;
+    }
+}
+
+/* ========================================
+   Federations page (main list + pending-requests side rail)
+======================================== */
+.federations-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .federations-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pending-select-all {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding-bottom: 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pending-select-all input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 640px;
+    overflow-y: auto;
+}
+
+.pending-item {
+    padding: 22px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pending-item:first-child {
+    padding-top: 4px;
+}
+
+.pending-item:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+}
+
+.pending-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.pending-item-top input[type="checkbox"] {
+    margin-top: 4px;
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+}
+
+.pending-item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.pending-item-body .table-link {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.pending-item-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.pending-item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.pending-item-actions form {
+    flex: 1;
+    display: flex;
+}
+
+.pending-item-actions .security-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 12px;
+    font-size: 12px;
 }
 
 /* ========================================

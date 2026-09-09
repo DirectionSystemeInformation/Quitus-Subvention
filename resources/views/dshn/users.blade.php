@@ -50,10 +50,18 @@
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Comptes</h2>
-            @if ($users->isNotEmpty())
-                <input type="search" class="form-input js-table-search" data-target="users-table" placeholder="Rechercher..." style="max-width: 260px;">
-            @endif
         </div>
+        @if ($users->isNotEmpty())
+            <div class="list-toolbar">
+                <div class="topbar-search">
+                    <svg aria-hidden="true" class="topbar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="search" class="js-table-search" data-target="users-table" placeholder="Rechercher un compte..." aria-label="Rechercher un compte">
+                </div>
+            </div>
+        @endif
 
         <div class="table-responsive">
         <table class="market-table sortable" id="users-table">
