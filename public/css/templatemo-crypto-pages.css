@@ -476,7 +476,10 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .market-stats-3col {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* auto-fit (not auto-fill) collapses tracks with no card in them, so 2
+       cards fill the row as 2 even columns instead of leaving a 3rd empty
+       slot; 3 cards still lay out as 3 even columns. */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .dashboard-section-label {
