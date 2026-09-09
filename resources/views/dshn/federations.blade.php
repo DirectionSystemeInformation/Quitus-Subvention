@@ -59,7 +59,7 @@
                     @foreach ($pending as $federation)
                         <tr>
                             <td><input type="checkbox" name="ids[]" value="{{ $federation->id }}" form="bulkValidateForm" class="js-pending-checkbox"></td>
-                            <td>{{ $federation->federation_name }}</td>
+                            <td><a href="{{ role_route('federations.show', $federation) }}" class="table-link">{{ $federation->federation_name }}</a></td>
                             <td>{{ $federation->arrete_numero }}</td>
                             <td>{{ $federation->email }}</td>
                             <td>{{ $federation->created_at->format('d/m/Y') }}</td>
@@ -110,7 +110,7 @@
             <tbody>
                 @forelse ($others as $federation)
                     <tr data-search-row>
-                        <td>{{ $federation->federation_name }}</td>
+                        <td><a href="{{ role_route('federations.show', $federation) }}" class="table-link">{{ $federation->federation_name }}</a></td>
                         <td>{{ $federation->arrete_numero }}</td>
                         <td>{{ $federation->email }}</td>
                         <td><x-status-badge :status="$federation->status" /></td>

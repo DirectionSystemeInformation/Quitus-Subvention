@@ -718,6 +718,21 @@
 }
 
 /* ========================================
+   Clickable name in a table cell
+======================================== */
+.table-link {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.table-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* ========================================
    Waiting-time tag (priority queues)
 ======================================== */
 .waiting-tag {
