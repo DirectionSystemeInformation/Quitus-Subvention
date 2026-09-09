@@ -63,7 +63,14 @@
 
             <div class="form-group">
                 <label class="form-label">Date de réalisation</label>
-                <input type="date" name="date" class="form-input" value="{{ old('date', optional($activity->date)->format('Y-m-d')) }}">
+                <div class="date-range-group">
+                    <input type="date" name="date_debut" class="form-input" aria-label="Date de début" value="{{ old('date_debut', optional($activity->date_debut)->format('Y-m-d')) }}">
+                    <span class="date-range-sep">au</span>
+                    <input type="date" name="date_fin" class="form-input" aria-label="Date de fin" value="{{ old('date_fin', optional($activity->date_fin)->format('Y-m-d')) }}">
+                </div>
+                @error('date_fin')
+                    <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-top: 6px;">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="form-group full-width">

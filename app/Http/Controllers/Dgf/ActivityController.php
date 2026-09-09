@@ -77,7 +77,7 @@ class ActivityController extends Controller
                     'designation' => $activity->designation,
                     'montant' => $activity->montant,
                     'contribution_partenaires' => $activity->contribution_partenaires,
-                    'date' => $activity->date,
+                    'date' => $activity->date_debut,
                     'observations' => $activity->observations,
                 ]
             );

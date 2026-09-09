@@ -147,7 +147,8 @@ class ActivityController extends Controller
             'designation' => ['required', 'string', 'max:255'],
             'montant' => ['nullable', 'numeric', 'min:0'],
             'contribution_partenaires' => ['nullable', 'string', 'max:255'],
-            'date' => ['nullable', 'date'],
+            'date_debut' => ['nullable', 'date'],
+            'date_fin' => ['nullable', 'date', 'after_or_equal:date_debut'],
             'observations' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -175,7 +176,8 @@ class ActivityController extends Controller
             'designation' => $data['designation'],
             'montant' => $data['montant'] ?? null,
             'contribution_partenaires' => $data['contribution_partenaires'] ?? null,
-            'date' => $data['date'] ?? null,
+            'date_debut' => $data['date_debut'] ?? null,
+            'date_fin' => $data['date_fin'] ?? null,
             'observations' => $data['observations'] ?? null,
         ];
     }

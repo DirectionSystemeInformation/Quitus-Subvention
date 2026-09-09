@@ -31,7 +31,7 @@
             <tbody>
                 <tr><td style="width:220px;">Montant</td><td>{{ $activity->montant !== null ? number_format((float) $activity->montant, 0, ',', ' ').' FCFA' : '—' }}</td></tr>
                 <tr><td>Contribution des partenaires</td><td>{{ $activity->contribution_partenaires ?? '—' }}</td></tr>
-                <tr><td>Date de réalisation</td><td>{{ optional($activity->date)->format('d/m/Y') ?? '—' }}</td></tr>
+                <tr><td>Date de réalisation</td><td>{{ $activity->dateRangeLabel() ?? '—' }}</td></tr>
                 <tr><td>Observations</td><td>{{ $activity->observations ?? '—' }}</td></tr>
             </tbody>
         </table>

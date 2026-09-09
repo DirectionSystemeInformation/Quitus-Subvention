@@ -814,6 +814,12 @@
 .criterion-heading details > span { display: block; margin-top: 8px; font-weight: 400; }
 .ponderation-table th:first-child, .ponderation-table td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
 .dashboard .campaign-step.is-current { background: #047857; color: #fff; }
+.date-range-group { display: flex; align-items: center; gap: 8px; }
+.date-range-group .form-input { min-width: 0; }
+.date-range-sep { flex-shrink: 0; font-size: 13px; color: var(--text-muted); }
+@media (max-width: 480px) {
+    .date-range-group { flex-wrap: wrap; }
+}
 @media (max-width: 600px) {
     .queue-filters { align-items: stretch; }
     .queue-filters .form-group { flex-basis: 100%; }

@@ -17,7 +17,8 @@ class FederationActivity extends Model
         'designation',
         'montant',
         'contribution_partenaires',
-        'date',
+        'date_debut',
+        'date_fin',
         'observations',
         'status',
         'rejection_reason',
@@ -29,10 +30,20 @@ class FederationActivity extends Model
     protected function casts(): array
     {
         return [
-            'date' => 'date',
+            'date_debut' => 'date',
+            'date_fin' => 'date',
             'montant' => 'decimal:2',
             'validated_at' => 'datetime',
         ];
+    }
+
+    public function dateRangeLabel(): ?string
+    {
+        if ($this->date_debut && $this->date_fin && ! $this->date_debut->isSameDay($this->date_fin)) {
+            return $this->date_debut->format('d/m/Y').' – '.$this->date_fin->format('d/m/Y');
+        }
+
+        return optional($this->date_debut ?? $this->date_fin)->format('d/m/Y');
     }
 
     public function user()
