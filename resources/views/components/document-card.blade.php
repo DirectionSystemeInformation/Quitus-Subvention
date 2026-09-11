@@ -6,14 +6,14 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'document-card']) }}>
-    <div class="document-card-icon document-card-icon-{{ $ext }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            @if ($isImage)
-                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-            @else
+    <div class="document-card-icon document-card-icon-{{ $ext }}" @if ($ext === 'pdf') data-pdf-thumb="{{ $viewUrl }}" @endif>
+        @if ($isImage)
+            <img class="document-card-thumb" src="{{ $viewUrl }}" alt="" loading="lazy">
+        @else
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
-            @endif
-        </svg>
+            </svg>
+        @endif
     </div>
     <div class="document-card-body">
         <p class="document-card-name">{{ $document->nameWithoutExtension() }}</p>

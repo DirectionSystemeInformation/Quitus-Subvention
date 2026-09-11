@@ -78,4 +78,10 @@
             <button type="button" class="btn danger js-reject-reason" data-action="{{ route('dgf.activities.reject', $activity) }}">Rejeter</button>
         </div>
     @endif
+
+    @push('scripts')
+        <script src="{{ asset('js/vendor/pdfjs/pdf.min.js') }}"></script>
+        <script>pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('js/vendor/pdfjs/pdf.worker.min.js') }}";</script>
+        <script src="{{ asset('js/pdf-thumbnails.js') }}"></script>
+    @endpush
 @endsection

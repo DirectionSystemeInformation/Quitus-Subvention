@@ -140,4 +140,10 @@
             </form>
         @endif
     </div>
+
+    @push('scripts')
+        <script src="{{ asset('js/vendor/pdfjs/pdf.min.js') }}"></script>
+        <script>pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('js/vendor/pdfjs/pdf.worker.min.js') }}";</script>
+        <script src="{{ asset('js/pdf-thumbnails.js') }}"></script>
+    @endpush
 @endsection
