@@ -817,6 +817,7 @@
 .notice a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .notice-success { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
 .notice-error { background: #fff5f5; border-color: #fecaca; color: #991b1b; }
+.notice-warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
 .server-field-error { max-width: 100%; white-space: normal; }
 .queue-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 .queue-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
@@ -921,6 +922,79 @@
 
 .password-toggle:hover {
     color: var(--color-primary);
+}
+
+/* ========================================
+   Compact dropzone (inline "add one more document" contexts)
+======================================== */
+.dropzone.is-compact {
+    padding: 16px 20px;
+}
+
+.dropzone.is-compact .dropzone-icon {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 6px;
+}
+
+.dropzone.is-compact .dropzone-hint {
+    margin-top: 2px;
+}
+
+/* ========================================
+   Details grid (2-column fact sheet, replaces a 1-col table)
+======================================== */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 32px;
+}
+
+.details-grid dt {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.details-grid dd {
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+.details-grid .details-grid-full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 560px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   Capitalize the first letter only (leave the rest of the
+   federation-entered text as typed — no full Title Case mangling)
+======================================== */
+.cap-first::first-letter {
+    text-transform: uppercase;
+}
+
+/* ========================================
+   Small info badge (e.g. "Axe 3", a year)
+======================================== */
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
 }
 
 /* ========================================

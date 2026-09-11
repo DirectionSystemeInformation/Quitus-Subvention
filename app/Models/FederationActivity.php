@@ -39,6 +39,16 @@ class FederationActivity extends Model
         ];
     }
 
+    public function axeNumber(): ?int
+    {
+        return match ($this->axe) {
+            'I' => 1,
+            'II' => 2,
+            'III' => 3,
+            default => null,
+        };
+    }
+
     public function dateRangeLabel(): ?string
     {
         if ($this->date_debut && $this->date_fin && ! $this->date_debut->isSameDay($this->date_fin)) {
