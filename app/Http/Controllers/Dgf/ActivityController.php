@@ -133,4 +133,11 @@ class ActivityController extends Controller
 
         return Storage::disk('local')->download($document->file_path, $document->original_filename);
     }
+
+    public function viewDocument(FederationActivity $activity, FederationActivityDocument $document)
+    {
+        abort_unless($document->federation_activity_id === $activity->id, 404);
+
+        return Storage::disk('local')->response($document->file_path, $document->original_filename);
+    }
 }

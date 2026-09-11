@@ -51,11 +51,15 @@
         @if ($activity->documents->isEmpty())
             <x-empty-state icon="inbox" title="Aucune pièce jointe." :compact="true" />
         @else
-            <ul style="margin: 0; padding-left: 20px;">
+            <div>
                 @foreach ($activity->documents as $document)
-                    <li><a href="{{ route('dgf.activities.documents.download', [$activity, $document]) }}">{{ $document->original_filename }}</a></li>
+                    <x-document-card
+                        :document="$document"
+                        :view-url="route('dgf.activities.documents.view', [$activity, $document])"
+                        :download-url="route('dgf.activities.documents.download', [$activity, $document])"
+                    />
                 @endforeach
-            </ul>
+            </div>
         @endif
     </div>
 

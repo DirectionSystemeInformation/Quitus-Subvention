@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role:federation'])->group(function () {
     Route::post('/activites/{activity}/pieces', [ActivityController::class, 'addDocument'])->name('activities.documents.store');
     Route::delete('/activites/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
     Route::get('/activites/{activity}/pieces/{document}', [ActivityController::class, 'downloadDocument'])->name('activities.documents.download');
+    Route::get('/activites/{activity}/pieces/{document}/voir', [ActivityController::class, 'viewDocument'])->name('activities.documents.view');
 });
 
 Route::get('/mes-documents/{report}', [ActivityFormController::class, 'show'])
@@ -176,4 +177,5 @@ Route::middleware(['auth', 'role:dgf,admin'])->prefix('dgf')->name('dgf.')->grou
     Route::post('/activites/{activity}/valider', [DgfActivityController::class, 'validate_'])->name('activities.validate');
     Route::post('/activites/{activity}/rejeter', [DgfActivityController::class, 'reject'])->name('activities.reject');
     Route::get('/activites/{activity}/pieces/{document}', [DgfActivityController::class, 'downloadDocument'])->name('activities.documents.download');
+    Route::get('/activites/{activity}/pieces/{document}/voir', [DgfActivityController::class, 'viewDocument'])->name('activities.documents.view');
 });

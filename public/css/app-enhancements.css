@@ -946,8 +946,8 @@
 ======================================== */
 .details-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px 32px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 32px;
 }
 
 .details-grid dt {
@@ -966,6 +966,12 @@
 
 .details-grid .details-grid-full {
     grid-column: 1 / -1;
+}
+
+@media (max-width: 860px) {
+    .details-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 560px) {
@@ -1028,4 +1034,146 @@
 
 .table-summary-line strong {
     color: var(--text-primary);
+}
+
+/* ========================================
+   Document card (replaces raw <a> file links)
+======================================== */
+.document-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+}
+
+.document-card + .document-card {
+    margin-top: 10px;
+}
+
+.document-card-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm, 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card-hover);
+    color: var(--text-muted);
+}
+
+.document-card-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.document-card-icon-pdf {
+    background: rgba(229, 72, 77, 0.12);
+    color: #E5484D;
+}
+
+.document-card-icon-jpg,
+.document-card-icon-jpeg,
+.document-card-icon-png {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3B82F6;
+}
+
+.document-card-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.document-card-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.document-card-ext {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.document-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .document-card {
+        flex-wrap: wrap;
+    }
+
+    .document-card-body {
+        flex-basis: 100%;
+    }
+
+    .document-card-name {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .document-card-actions {
+        flex-basis: 100%;
+        margin-left: 52px;
+    }
+}
+
+.btn-sm {
+    padding: 7px 14px;
+    font-size: 13px;
+}
+
+/* ========================================
+   Validation traceability block
+======================================== */
+.validation-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #047857;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.validation-block strong {
+    color: inherit;
+}
+
+.validation-block-sep {
+    color: rgba(4, 120, 87, 0.4);
+}
+
+/* ========================================
+   Compact card modifier (denser padding for detail pages
+   with several stacked cards)
+======================================== */
+.card-compact {
+    padding: 20px;
+}
+
+.card-compact .card-header {
+    margin-bottom: 16px;
+}
 }

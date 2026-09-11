@@ -21,8 +21,9 @@
             @endif
             <span class="info-badge">{{ $activity->year }}</span>
         </div>
+        @php $axeParts = $activity->axeLabelParts(); @endphp
         <p style="margin-top: 10px;">
-            <span style="color: var(--text-muted); font-size: 13px; display:block;">{{ $activity->axe_label }}</span>
+            <span style="color: var(--text-muted); font-size: 13px; display:block;">{{ $axeParts['prefix'] }}@if ($axeParts['description']) — {{ $axeParts['description'] }}@endif</span>
             {{ $activity->sous_axe_label }}
         </p>
         @if ($activity->status === 'rejete' && $activity->rejection_reason)
@@ -37,7 +38,15 @@
         </div>
     @endif
 
-    <div class="card" style="margin-bottom: 24px;">
+    @if ($activity->status === 'valide')
+        <div class="validation-block">
+            <span>✓ Validée le {{ $activity->validated_at?->locale('fr')->translatedFormat('d F Y') }} à {{ $activity->validated_at?->format('H:i') }}</span>
+            <span class="validation-block-sep">&middot;</span>
+            <span>Validée par : DGF</span>
+        </div>
+    @endif
+
+    <div class="card card-compact" style="margin-bottom: 24px;">
         <div class="card-header">
             <h2 class="card-title">Détails</h2>
         </div>
@@ -62,10 +71,6 @@
                 <dt>Date de réalisation</dt>
                 <dd>{{ $activity->date_debut?->locale('fr')->translatedFormat('d F Y') ?? $activity->dateRangeLabel() ?? 'Non renseignée' }}</dd>
             </div>
-            <div>
-                <dt>Statut</dt>
-                <dd><x-status-badge :status="$activity->status" /></dd>
-            </div>
             <div class="details-grid-full">
                 <dt>Observations</dt>
                 <dd>{{ $activity->observations ?? 'Aucune' }}</dd>
@@ -73,18 +78,22 @@
         </dl>
     </div>
 
-    <div class="card" style="margin-bottom: 24px;">
+    <div class="card card-compact" style="margin-bottom: 24px;">
         <div class="card-header">
             <h2 class="card-title">Pièces justificatives</h2>
         </div>
         @if ($activity->documents->isEmpty())
             <x-empty-state icon="inbox" title="Aucune pièce jointe." :compact="true" />
         @else
-            <ul style="margin: 0 0 16px; padding-left: 20px;">
+            <div style="margin-bottom: 16px;">
                 @foreach ($activity->documents as $document)
-                    <li><a href="{{ route('activities.documents.download', [$activity, $document]) }}">{{ $document->original_filename }}</a></li>
+                    <x-document-card
+                        :document="$document"
+                        :view-url="route('activities.documents.view', [$activity, $document])"
+                        :download-url="route('activities.documents.download', [$activity, $document])"
+                    />
                 @endforeach
-            </ul>
+            </div>
         @endif
 
         @if ($activity->status !== 'valide')

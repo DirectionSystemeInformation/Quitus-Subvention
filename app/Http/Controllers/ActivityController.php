@@ -139,6 +139,14 @@ class ActivityController extends Controller
         return Storage::disk('local')->download($document->file_path, $document->original_filename);
     }
 
+    public function viewDocument(FederationActivity $activity, \App\Models\FederationActivityDocument $document)
+    {
+        abort_unless($activity->user_id === Auth::id(), 403);
+        abort_unless($document->federation_activity_id === $activity->id, 404);
+
+        return Storage::disk('local')->response($document->file_path, $document->original_filename);
+    }
+
     private function validateActivity(Request $request): array
     {
         $data = $request->validate([

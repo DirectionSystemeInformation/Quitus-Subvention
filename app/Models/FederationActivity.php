@@ -49,6 +49,21 @@ class FederationActivity extends Model
         };
     }
 
+    /**
+     * axe_label is stored as "Politique Nationale des Sports AXE-1 : Masse et
+     * relève sportive" — split the ministry-programme prefix from the axe's
+     * own description so the UI doesn't have to repeat "AXE N" next to the
+     * "Axe N" badge. Falls back to the raw label if the format ever changes.
+     */
+    public function axeLabelParts(): array
+    {
+        if (preg_match('/^(.+?)\s+AXE[- ]\S+\s*:\s*(.+)$/u', (string) $this->axe_label, $matches)) {
+            return ['prefix' => trim($matches[1]), 'description' => trim($matches[2])];
+        }
+
+        return ['prefix' => $this->axe_label, 'description' => null];
+    }
+
     public function dateRangeLabel(): ?string
     {
         if ($this->date_debut && $this->date_fin && ! $this->date_debut->isSameDay($this->date_fin)) {
