@@ -82,6 +82,10 @@ Route::get('/mes-documents/{report}', [ActivityFormController::class, 'show'])
     ->middleware('auth')
     ->name('activity-form.show');
 
+Route::get('/mes-documents/{report}/pdf', [ActivityFormController::class, 'downloadPdf'])
+    ->middleware('auth')
+    ->name('activity-form.pdf');
+
 Route::middleware('auth')->group(function () {
     Route::get('/mon-profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/mon-profil', [ProfileController::class, 'update'])->name('profile.update');

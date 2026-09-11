@@ -1433,3 +1433,39 @@
 .info-callout-more[open] summary {
     margin-bottom: 8px;
 }
+
+/* ========================================
+   Report totals panel (montant / contribution
+   totals, below the axe/sous-axe tables)
+======================================== */
+.report-totals {
+    width: 100%;
+    max-width: 420px;
+    margin: 20px 0 0 auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.report-totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    font-size: 14px;
+    background: var(--bg-card-hover);
+}
+
+.report-totals-row + .report-totals-row {
+    border-top: 1px solid var(--border);
+}
+
+.report-totals-row span {
+    color: var(--text-secondary);
+}
+
+.report-totals-row strong {
+    color: var(--text-primary);
+    font-size: 15px;
+}

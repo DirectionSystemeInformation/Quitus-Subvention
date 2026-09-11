@@ -285,20 +285,14 @@ class ActivityFormController extends Controller
         return collect($input)->contains(fn ($value) => filled($value));
     }
 
-    public function show(Report $report)
+    /**
+     * Regroupe les lignes d'un rapport par axe puis sous-axe, à partir des
+     * données propres au rapport (snapshot au moment de la soumission),
+     * indépendant de la version actuelle du canevas.
+     */
+    private function buildAxeGroups($budgetLines)
     {
-        abort_unless(array_key_exists($report->type, self::TITLES), 404);
-
-        abort_unless(
-            Auth::user()->id === $report->user_id || ($report->status !== 'brouillon' && Auth::user()->isDshn()),
-            403
-        );
-
-        $report->load('budgetLines', 'user');
-
-        // Regroupement à partir des données propres au rapport (snapshot au moment
-        // de la soumission), indépendant de la version actuelle du canevas.
-        $sousAxeGroups = $report->budgetLines
+        return $budgetLines
             ->sortBy('numero_ligne')
             ->groupBy('sous_axe_code')
             ->map(fn ($lines, $sousAxeCode) => [
@@ -308,21 +302,83 @@ class ActivityFormController extends Controller
                 'sous_axe_label' => $lines->first()->sous_axe_label,
                 'lines' => $lines->values(),
             ])
-            ->sortBy(fn ($group) => $group['axe'].'|'.$group['sous_axe_code']);
-
-        $axeGroups = $sousAxeGroups
+            ->sortBy(fn ($group) => $group['axe'].'|'.$group['sous_axe_code'])
             ->groupBy('axe_label')
-            ->map(fn ($groups, $axeLabel) => [
-                'label' => $axeLabel,
-                'sous_axes' => $groups->values(),
-            ])
+            ->map(function ($groups, $axeLabel) {
+                $firstLine = $groups->first()['lines']->first();
+
+                return [
+                    'label' => $axeLabel,
+                    'number' => $firstLine->axeNumber(),
+                    'label_parts' => $firstLine->axeLabelParts(),
+                    'sous_axes' => $groups->values(),
+                ];
+            })
             ->values();
+    }
+
+    public function show(Report $report)
+    {
+        abort_unless(array_key_exists($report->type, self::TITLES), 404);
+
+        abort_unless(
+            Auth::user()->id === $report->user_id || ($report->status !== 'brouillon' && Auth::user()->isDshn()),
+            403
+        );
+
+        $report->load('budgetLines', 'user', 'validator');
+
+        $axeGroups = $this->buildAxeGroups($report->budgetLines);
+
+        // Le nom du programme ministériel (ex. "Politique Nationale des
+        // Sports") est identique pour tous les axes d'un même canevas — on
+        // ne l'affiche donc qu'une seule fois, au-dessus des groupes.
+        $programmeLabel = $axeGroups->first()['label_parts']['prefix'] ?? null;
+
+        $linesCount = $report->budgetLines->count();
+        $totalMontant = $report->budgetLines->sum('montant');
+        $totalContribution = $report->budgetLines->sum(
+            fn ($line) => is_numeric($line->contribution_partenaires) ? (float) $line->contribution_partenaires : 0
+        );
 
         return view('activity-form.show', [
             'type' => $report->type,
             'title' => self::TITLES[$report->type],
             'report' => $report,
             'axeGroups' => $axeGroups,
+            'programmeLabel' => $programmeLabel,
+            'linesCount' => $linesCount,
+            'axesCount' => $axeGroups->count(),
+            'totalMontant' => $totalMontant,
+            'totalContribution' => $totalContribution,
         ]);
+    }
+
+    public function downloadPdf(Report $report)
+    {
+        abort_unless(array_key_exists($report->type, self::TITLES), 404);
+        abort_unless($report->status === 'valide', 404);
+
+        abort_unless(
+            Auth::user()->id === $report->user_id || Auth::user()->isDshn(),
+            403
+        );
+
+        $report->load('budgetLines', 'user', 'validator');
+
+        $axeGroups = $this->buildAxeGroups($report->budgetLines);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.rapport', [
+            'title' => self::TITLES[$report->type],
+            'report' => $report,
+            'axeGroups' => $axeGroups,
+            'programmeLabel' => $axeGroups->first()['label_parts']['prefix'] ?? null,
+            'totalMontant' => $report->budgetLines->sum('montant'),
+            'totalContribution' => $report->budgetLines->sum(
+                fn ($line) => is_numeric($line->contribution_partenaires) ? (float) $line->contribution_partenaires : 0
+            ),
+        ]);
+
+        return $pdf->download(str_replace('_', '-', $report->type)."-{$report->user->federation_name}-{$report->year}.pdf");
     }
 }
