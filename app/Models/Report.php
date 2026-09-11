@@ -14,11 +14,25 @@ class Report extends Model
         'original_filename',
         'status',
         'rejection_reason',
+        'validated_by',
+        'validated_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'validated_at' => 'datetime',
+        ];
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function validator()
+    {
+        return $this->belongsTo(User::class, 'validated_by');
     }
 
     public function budgetLines()

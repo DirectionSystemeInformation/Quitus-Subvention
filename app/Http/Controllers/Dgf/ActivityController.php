@@ -64,7 +64,7 @@ class ActivityController extends Controller
         DB::transaction(function () use ($activity) {
             $report = Report::updateOrCreate(
                 ['user_id' => $activity->user_id, 'type' => 'rapport_activite', 'year' => $activity->year],
-                ['status' => 'soumis', 'rejection_reason' => null]
+                ['status' => 'soumis', 'rejection_reason' => null, 'validated_by' => null, 'validated_at' => null]
             );
 
             $nextNumero = BudgetLine::where('report_id', $report->id)

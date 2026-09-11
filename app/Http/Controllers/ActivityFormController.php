@@ -18,6 +18,16 @@ class ActivityFormController extends Controller
         'programme_reamenage' => "Programme d'activités budgétisé réaménagé",
     ];
 
+    // Libellés courts, utilisés dans les onglets et le titre de la carte de
+    // cette page (cohérents avec le tableau de bord fédération) — les noms
+    // officiels longs (TITLES) restent réservés aux contextes administratifs
+    // et documents formels (journal d'activité, PDF, écrans DSHN).
+    private const SHORT_LABELS = [
+        'programme_budgetise' => 'Programme budgétisé',
+        'rapport_activite' => "Rapport d'activité",
+        'programme_reamenage' => 'Programme réaménagé',
+    ];
+
     public function index(Request $request)
     {
         $type = $request->query('type', 'rapport_activite');
@@ -38,13 +48,56 @@ class ActivityFormController extends Controller
         $maxYear = max($computedDefaultYear + 2, $reports->max('year') ?? $computedDefaultYear);
         $availableYears = collect(range($maxYear, $minYear));
 
+        // Année du rapport d'activité de la campagne en cours — sert de pivot
+        // pour situer les 3 documents entre eux (le programme budgétisé et le
+        // programme réaménagé de l'année N+1 se préparent aux côtés du
+        // rapport d'activité de l'année N).
+        $campaignYear = $type === 'rapport_activite' ? $selectedYear : $selectedYear - 1;
+        $tabYears = [
+            'rapport_activite' => $campaignYear,
+            'programme_budgetise' => $campaignYear + 1,
+            'programme_reamenage' => $campaignYear + 1,
+        ];
+
+        $tabReports = Auth::user()->reports()
+            ->where(function ($query) use ($tabYears) {
+                foreach ($tabYears as $tabType => $tabYear) {
+                    $query->orWhere(fn ($q) => $q->where('type', $tabType)->where('year', $tabYear));
+                }
+            })
+            ->get()
+            ->keyBy('type');
+
+        $reportStats = null;
+        if ($selectedReport) {
+            $reportStats = [
+                'lines_count' => $selectedReport->budgetLines()->count(),
+                'total_montant' => $selectedReport->budgetLines()->sum('montant'),
+            ];
+        }
+
+        $workflowStep = null;
+        if ($type === 'rapport_activite') {
+            $workflowStep = match (true) {
+                ! $selectedReport => 'activites',
+                $selectedReport->status === 'valide' => 'dshn',
+                default => 'rapport',
+            };
+        }
+
         return view('activity-form.index', [
             'type' => $type,
             'title' => self::TITLES[$type],
+            'shortTitle' => self::SHORT_LABELS[$type],
+            'shortLabels' => self::SHORT_LABELS,
             'selectedYear' => $selectedYear,
             'selectedReport' => $selectedReport,
             'availableYears' => $availableYears,
             'reports' => $reports,
+            'tabYears' => $tabYears,
+            'tabReports' => $tabReports,
+            'reportStats' => $reportStats,
+            'workflowStep' => $workflowStep,
         ]);
     }
 

@@ -1298,3 +1298,138 @@
 .period-field {
     flex: 1;
 }
+
+/* ========================================
+   Document page (Rapport & Programme) : header
+   row, tabs with status, workflow steps, summary
+   stats, compact info callout
+======================================== */
+.page-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.doc-tabs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.doc-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    text-decoration: none;
+    min-width: 168px;
+    transition: all 0.2s ease;
+}
+
+.doc-tab:hover {
+    border-color: var(--color-primary);
+}
+
+.doc-tab-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.doc-tab-status {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.doc-tab.active {
+    border-color: var(--color-primary);
+    background: rgba(18, 152, 80, 0.06);
+    box-shadow: 0 1px 2px var(--shadow);
+}
+
+.doc-tab.active .doc-tab-title {
+    color: var(--color-primary);
+}
+
+.workflow-steps {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 20px;
+}
+
+.workflow-step {
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-card-hover);
+    white-space: nowrap;
+}
+
+.workflow-step.is-current {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
+.workflow-step-arrow {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.report-summary-stats {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--bg-card-hover);
+    border-radius: var(--radius-md);
+}
+
+.report-summary-stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.report-summary-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.info-callout-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.info-callout-more {
+    margin-top: 10px;
+}
+
+.info-callout-more summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-primary);
+    list-style: none;
+}
+
+.info-callout-more summary::-webkit-details-marker {
+    display: none;
+}
+
+.info-callout-more[open] summary {
+    margin-bottom: 8px;
+}

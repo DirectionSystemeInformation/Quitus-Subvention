@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -51,7 +52,12 @@ class ReportController extends Controller
     public function validate_(Report $report)
     {
         abort_if($report->status === 'brouillon', 403);
-        $report->update(['status' => 'valide', 'rejection_reason' => null]);
+        $report->update([
+            'status' => 'valide',
+            'rejection_reason' => null,
+            'validated_by' => Auth::id(),
+            'validated_at' => now(),
+        ]);
 
         ActivityLog::record(
             'validated',
