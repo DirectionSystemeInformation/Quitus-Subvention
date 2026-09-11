@@ -8,6 +8,7 @@ use App\Support\ActivityCanvasStructure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ActivityController extends Controller
 {
@@ -40,10 +41,22 @@ class ActivityController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateActivity($request);
+        $data += $this->resolveStatusData($request, new FederationActivity());
 
-        $activity = Auth::user()->activities()->create($data + ['status' => 'brouillon']);
+        $activity = Auth::user()->activities()->create($data);
 
         $this->storeDocuments($request, $activity);
+
+        if ($activity->status === 'soumis') {
+            ActivityLog::record(
+                'created',
+                "a soumis l'activité « {$activity->designation} » ({$activity->year}) pour vérification",
+                $activity->id,
+                Auth::user()->federation_name
+            );
+
+            return redirect()->route('activities.show', $activity)->with('status', 'Activité soumise pour vérification.');
+        }
 
         return redirect()->route('activities.show', $activity)->with('status', 'Activité enregistrée en brouillon.');
     }
@@ -76,11 +89,25 @@ class ActivityController extends Controller
         abort_unless($activity->user_id === Auth::id(), 403);
         abort_unless($activity->status !== 'valide', 403);
 
+        $wasSubmittable = in_array($activity->status, ['brouillon', 'rejete'], true);
+
         $data = $this->validateActivity($request);
+        $data += $this->resolveStatusData($request, $activity);
 
         $activity->update($data);
 
         $this->storeDocuments($request, $activity);
+
+        if ($wasSubmittable && $activity->status === 'soumis') {
+            ActivityLog::record(
+                'created',
+                "a soumis l'activité « {$activity->designation} » ({$activity->year}) pour vérification",
+                $activity->id,
+                Auth::user()->federation_name
+            );
+
+            return redirect()->route('activities.show', $activity)->with('status', 'Activité soumise pour vérification.');
+        }
 
         return redirect()->route('activities.show', $activity)->with('status', 'Activité mise à jour.');
     }
@@ -147,18 +174,57 @@ class ActivityController extends Controller
         return Storage::disk('local')->response($document->file_path, $document->original_filename);
     }
 
+    private function resolveStatusData(Request $request, FederationActivity $activity): array
+    {
+        $intent = $request->input('intent', 'draft');
+        $canSubmit = ! $activity->exists || in_array($activity->status, ['brouillon', 'rejete'], true);
+
+        if ($intent === 'submit' && $canSubmit) {
+            return [
+                'status' => 'soumis',
+                'submitted_at' => now(),
+                'rejection_reason' => null,
+            ];
+        }
+
+        if (! $activity->exists) {
+            return ['status' => 'brouillon'];
+        }
+
+        return [];
+    }
+
     private function validateActivity(Request $request): array
     {
-        $data = $request->validate([
+        $request->merge([
+            'montant' => $request->filled('montant') ? preg_replace('/[^\d.]/', '', $request->input('montant')) : null,
+            'contribution_partenaires' => $request->filled('contribution_partenaires') ? preg_replace('/[^\d.]/', '', $request->input('contribution_partenaires')) : null,
+        ]);
+
+        $validator = Validator::make($request->all(), [
             'year' => ['required', 'integer', 'min:2000', 'max:2100'],
             'sous_axe_code' => ['required', 'string'],
             'designation' => ['required', 'string', 'max:255'],
             'montant' => ['nullable', 'numeric', 'min:0'],
-            'contribution_partenaires' => ['nullable', 'string', 'max:255'],
+            'contribution_partenaires' => ['nullable', 'numeric', 'min:0'],
             'date_debut' => ['nullable', 'date'],
             'date_fin' => ['nullable', 'date', 'after_or_equal:date_debut'],
             'observations' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $montant = $request->input('montant');
+            $contribution = $request->input('contribution_partenaires');
+
+            if ($montant !== null && $contribution !== null && (float) $contribution > (float) $montant) {
+                $validator->errors()->add(
+                    'contribution_partenaires',
+                    "La contribution des partenaires ne peut pas dépasser le montant total de l'activité."
+                );
+            }
+        });
+
+        $data = $validator->validate();
 
         $sousAxeIndex = collect(ActivityCanvasStructure::axes())
             ->flatMap(fn ($axe) => collect($axe['sous_axes'])->map(fn ($sousAxe) => [

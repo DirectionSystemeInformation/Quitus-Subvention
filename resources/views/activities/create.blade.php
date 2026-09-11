@@ -6,6 +6,18 @@
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
 @endpush
 
+@php
+    $selectedSousAxe = old('sous_axe_code', $activity->sous_axe_code);
+    $selectedAxe = collect($axes)->first(
+        fn ($axe) => collect($axe['sous_axes'])->pluck('code')->contains($selectedSousAxe)
+    )['code'] ?? null;
+
+    $canSubmit = ! $activity->exists || in_array($activity->status, ['brouillon', 'rejete'], true);
+    $primaryLabel = (! $activity->exists || $activity->status === 'brouillon')
+        ? 'Enregistrer comme brouillon'
+        : 'Enregistrer les modifications';
+@endphp
+
 @section('content')
     <div class="page-header">
         <nav class="breadcrumb" aria-label="Fil d'Ariane">
@@ -18,69 +30,97 @@
     </div>
 
     <div class="card">
-        <form method="POST" action="{{ $activity->exists ? route('activities.update', $activity) : route('activities.store') }}" enctype="multipart/form-data" class="form-grid js-validate" novalidate>
+        <p class="form-required-note"><span class="required-mark">*</span> Champs obligatoires</p>
+
+        <form method="POST" action="{{ $activity->exists ? route('activities.update', $activity) : route('activities.store') }}" enctype="multipart/form-data" class="form-grid form-compact js-validate" novalidate>
             @csrf
             @if ($activity->exists)
                 @method('PUT')
             @endif
+            <input type="hidden" name="year" value="{{ old('year', $year) }}">
 
-            <div class="form-group">
-                <label class="form-label">Année</label>
-                <input type="number" name="year" class="form-input" min="2000" max="2100" value="{{ old('year', $year) }}" required>
-                @error('year')
-                    <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-top: 6px;">{{ $message }}</p>
-                @enderror
+            <div class="form-group full-width form-section">
+                <h2 class="form-section-title">1 — Identification de l'activité</h2>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Axe / Sous-axe</label>
-                <select name="sous_axe_code" class="form-select" required>
+                <label class="form-label">Année d'exercice</label>
+                <span class="form-static-value">{{ old('year', $year) }}</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="axeSelect">Axe <span class="required-mark">*</span></label>
+                <select id="axeSelect" class="form-select" required>
                     <option value="">— Sélectionner —</option>
                     @foreach ($axes as $axe)
-                        <optgroup label="{{ $axe['label'] }}">
-                            @foreach ($axe['sous_axes'] as $sousAxe)
-                                <option value="{{ $sousAxe['code'] }}" {{ old('sous_axe_code', $activity->sous_axe_code) === $sousAxe['code'] ? 'selected' : '' }}>
-                                    {{ $sousAxe['label'] }}
-                                </option>
-                            @endforeach
-                        </optgroup>
+                        <option value="{{ $axe['code'] }}" {{ $selectedAxe === $axe['code'] ? 'selected' : '' }}>{{ $axe['label'] }}</option>
                     @endforeach
                 </select>
-                @error('sous_axe_code')
-                    <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-top: 6px;">{{ $message }}</p>
-                @enderror
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="sousAxeSelect">Sous-axe <span class="required-mark">*</span></label>
+                <select name="sous_axe_code" id="sousAxeSelect" class="form-select" required @if (! $selectedAxe) disabled @endif>
+                    @if ($selectedAxe)
+                        @foreach (collect($axes)->firstWhere('code', $selectedAxe)['sous_axes'] as $sousAxe)
+                            <option value="{{ $sousAxe['code'] }}" {{ $selectedSousAxe === $sousAxe['code'] ? 'selected' : '' }}>{{ $sousAxe['label'] }}</option>
+                        @endforeach
+                    @else
+                        <option value="">— Sélectionnez d'abord un axe —</option>
+                    @endif
+                </select>
             </div>
 
             <div class="form-group full-width">
-                <label class="form-label">Désignation de l'activité</label>
-                <input type="text" name="designation" class="form-input" value="{{ old('designation', $activity->designation) }}" required>
+                <label class="form-label" for="designationInput">Désignation de l'activité <span class="required-mark">*</span></label>
+                <input type="text" id="designationInput" name="designation" class="form-input" maxlength="255" data-char-counter="designationCounter" value="{{ old('designation', $activity->designation) }}" required>
+                <div class="form-field-hint" style="justify-content: flex-end;">
+                    <span id="designationCounter"></span>
+                </div>
+            </div>
+
+            <div class="form-group full-width form-section">
+                <h2 class="form-section-title">2 — Informations de réalisation</h2>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Montant (FCFA)</label>
-                <input type="number" step="0.01" min="0" name="montant" class="form-input" value="{{ old('montant', $activity->montant) }}">
+                <div class="input-money">
+                    <input type="text" inputmode="numeric" name="montant" class="form-input js-money-input" value="{{ old('montant', $activity->montant) }}">
+                    <span class="input-money-suffix">FCFA</span>
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Date de réalisation</label>
-                <div class="date-range-group">
-                    <input type="date" name="date_debut" class="form-input" aria-label="Date de début" value="{{ old('date_debut', optional($activity->date_debut)->format('Y-m-d')) }}">
-                    <span class="date-range-sep">au</span>
-                    <input type="date" name="date_fin" class="form-input" aria-label="Date de fin" value="{{ old('date_fin', optional($activity->date_fin)->format('Y-m-d')) }}">
+                <label class="form-label">Contribution des partenaires (FCFA)</label>
+                <div class="input-money">
+                    <input type="text" inputmode="numeric" name="contribution_partenaires" class="form-input js-money-input" value="{{ old('contribution_partenaires', $activity->contribution_partenaires) }}">
+                    <span class="input-money-suffix">FCFA</span>
                 </div>
-                @error('date_fin')
-                    <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-top: 6px;">{{ $message }}</p>
-                @enderror
             </div>
 
             <div class="form-group full-width">
-                <label class="form-label">Contribution des partenaires</label>
-                <input type="text" name="contribution_partenaires" class="form-input" value="{{ old('contribution_partenaires', $activity->contribution_partenaires) }}">
+                <label class="form-label">Période de réalisation</label>
+                <div class="date-range-group">
+                    <div class="period-field">
+                        <span class="period-field-label">Date de début</span>
+                        <input type="date" name="date_debut" class="form-input" aria-label="Date de début" value="{{ old('date_debut', optional($activity->date_debut)->format('Y-m-d')) }}">
+                    </div>
+                    <span class="date-range-sep">au</span>
+                    <div class="period-field">
+                        <span class="period-field-label">Date de fin</span>
+                        <input type="date" name="date_fin" class="form-input" aria-label="Date de fin" value="{{ old('date_fin', optional($activity->date_fin)->format('Y-m-d')) }}">
+                    </div>
+                </div>
             </div>
 
             <div class="form-group full-width">
-                <label class="form-label">Observations</label>
-                <input type="text" name="observations" class="form-input" value="{{ old('observations', $activity->observations) }}">
+                <label class="form-label" for="observationsInput">Observations</label>
+                <textarea id="observationsInput" name="observations" class="form-textarea" rows="3" maxlength="255">{{ old('observations', $activity->observations) }}</textarea>
+            </div>
+
+            <div class="form-group full-width form-section">
+                <h2 class="form-section-title">3 — Pièces justificatives</h2>
             </div>
 
             <div class="form-group full-width">
@@ -96,26 +136,72 @@
                     <input type="file" name="pieces[]" id="piecesInput" class="js-file-input" data-preview-target="piecesPreview" multiple accept=".pdf,.jpg,.jpeg,.png">
                 </label>
                 <div class="file-preview-list" id="piecesPreview"></div>
-                <p class="strength-text" style="margin-top: 6px;">Enregistrez votre brouillon, puis soumettez l'activité depuis sa fiche après avoir ajouté au moins une pièce justificative.</p>
-                @error('pieces.*')
-                    <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-top: 6px;">{{ $message }}</p>
-                @enderror
             </div>
 
             @if ($activity->exists && $activity->documents->isNotEmpty())
                 <div class="form-group full-width">
                     <label class="form-label">Pièces déjà jointes</label>
-                    <ul style="margin: 0; padding-left: 20px;">
+                    <div class="documents-grid">
                         @foreach ($activity->documents as $document)
-                            <li><a href="{{ route('activities.documents.download', [$activity, $document]) }}">{{ $document->original_filename }}</a></li>
+                            <x-document-card
+                                :document="$document"
+                                :view-url="route('activities.documents.view', [$activity, $document])"
+                                :download-url="route('activities.documents.download', [$activity, $document])"
+                            />
                         @endforeach
-                    </ul>
+                    </div>
                 </div>
             @endif
 
-            <div class="form-group full-width">
-                <button type="submit" class="btn primary">{{ $activity->exists ? 'Enregistrer' : 'Enregistrer en brouillon' }}</button>
+            <div class="form-group full-width" style="margin-bottom: 0;">
+                @if ($canSubmit)
+                    <p class="strength-text" style="margin-bottom: 12px;">Le brouillon reste modifiable à tout moment. Après soumission, les informations de l'activité sont verrouillées, mais vous pourrez encore ajouter des pièces justificatives — au moins une est nécessaire pour que la DGF puisse valider.</p>
+                @endif
+                <div class="btn-group">
+                    <button type="submit" name="intent" value="draft" class="btn">{{ $primaryLabel }}</button>
+                    @if ($canSubmit)
+                        <button type="submit" name="intent" value="submit" class="btn primary">Soumettre l'activité</button>
+                    @endif
+                </div>
             </div>
         </form>
     </div>
+
+    @push('scripts')
+        <script id="axesData" type="application/json">{!! json_encode($axes) !!}</script>
+        <script>
+            (function () {
+                const axesData = JSON.parse(document.getElementById('axesData').textContent);
+                const axeSelect = document.getElementById('axeSelect');
+                const sousAxeSelect = document.getElementById('sousAxeSelect');
+
+                function populateSousAxes(axeCode, preselect) {
+                    const axe = axesData.find(function (a) { return a.code === axeCode; });
+                    sousAxeSelect.innerHTML = '';
+
+                    if (!axe) {
+                        sousAxeSelect.disabled = true;
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = "— Sélectionnez d'abord un axe —";
+                        sousAxeSelect.appendChild(opt);
+                        return;
+                    }
+
+                    sousAxeSelect.disabled = false;
+                    axe.sous_axes.forEach(function (sousAxe) {
+                        const opt = document.createElement('option');
+                        opt.value = sousAxe.code;
+                        opt.textContent = sousAxe.label;
+                        if (preselect && sousAxe.code === preselect) opt.selected = true;
+                        sousAxeSelect.appendChild(opt);
+                    });
+                }
+
+                axeSelect.addEventListener('change', function () {
+                    populateSousAxes(axeSelect.value, null);
+                });
+            })();
+        </script>
+    @endpush
 @endsection

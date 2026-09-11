@@ -832,6 +832,65 @@ https://templatemo.com/tm-609-crypto-vault
     }
 
     /* ========================================
+       Money Input (live thousand-separator formatting;
+       digits-only value sent on submit)
+    ======================================== */
+    function initMoneyInputs() {
+        document.querySelectorAll('.js-money-input').forEach(function (input) {
+            function formatDisplay(raw) {
+                const integerPart = raw.split(/[.,]/)[0];
+                const digits = integerPart.replace(/[^\d]/g, '');
+                if (!digits) return '';
+                return Number(digits).toLocaleString('fr-FR');
+            }
+
+            if (input.value) {
+                input.value = formatDisplay(input.value);
+            }
+
+            input.addEventListener('input', function () {
+                const digitsBeforeCursor = input.value.slice(0, input.selectionStart).replace(/[^\d]/g, '').length;
+                input.value = formatDisplay(input.value);
+
+                let pos = 0;
+                let digitsSeen = 0;
+                while (pos < input.value.length && digitsSeen < digitsBeforeCursor) {
+                    if (/\d/.test(input.value[pos])) digitsSeen++;
+                    pos++;
+                }
+                input.setSelectionRange(pos, pos);
+            });
+
+            const form = input.closest('form');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    input.value = input.value.replace(/[^\d]/g, '');
+                });
+            }
+        });
+    }
+
+    /* ========================================
+       Character Counter (input/textarea paired with
+       a target element via data-char-counter="<id>")
+    ======================================== */
+    function initCharCounters() {
+        document.querySelectorAll('[data-char-counter]').forEach(function (input) {
+            const target = document.getElementById(input.dataset.charCounter);
+            if (!target) return;
+
+            const max = input.getAttribute('maxlength');
+
+            function update() {
+                target.textContent = input.value.length + (max ? '/' + max : '');
+            }
+
+            input.addEventListener('input', update);
+            update();
+        });
+    }
+
+    /* ========================================
        Inline Form Validation
     ======================================== */
     function initInlineValidation() {
@@ -1003,6 +1062,8 @@ https://templatemo.com/tm-609-crypto-vault
         initSortableTables();
         initDropzones();
         initFilePreview();
+        initMoneyInputs();
+        initCharCounters();
         initInlineValidation();
     }
 
