@@ -60,7 +60,7 @@ class ActivityController extends Controller
     public function edit(FederationActivity $activity)
     {
         abort_unless($activity->user_id === Auth::id(), 403);
-        abort_unless(in_array($activity->status, ['brouillon', 'rejete'], true), 403);
+        abort_unless($activity->status !== 'valide', 403);
 
         $activity->load('documents');
 
@@ -74,7 +74,7 @@ class ActivityController extends Controller
     public function update(Request $request, FederationActivity $activity)
     {
         abort_unless($activity->user_id === Auth::id(), 403);
-        abort_unless(in_array($activity->status, ['brouillon', 'rejete'], true), 403);
+        abort_unless($activity->status !== 'valide', 403);
 
         $data = $this->validateActivity($request);
 
@@ -103,7 +103,7 @@ class ActivityController extends Controller
     public function submit(FederationActivity $activity)
     {
         abort_unless($activity->user_id === Auth::id(), 403);
-        abort_unless(in_array($activity->status, ['brouillon', 'rejete'], true), 403);
+        abort_unless($activity->status !== 'valide', 403);
 
         $activity->update(['status' => 'soumis', 'rejection_reason' => null, 'submitted_at' => now()]);
 

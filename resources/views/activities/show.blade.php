@@ -114,7 +114,7 @@
     @endif
 
     <div class="btn-group">
-        @if (in_array($activity->status, ['brouillon', 'rejete'], true))
+        @if ($activity->status !== 'valide')
             <a href="{{ route('activities.edit', $activity) }}" class="btn">Modifier</a>
         @endif
         @if (in_array($activity->status, ['brouillon', 'rejete'], true))
