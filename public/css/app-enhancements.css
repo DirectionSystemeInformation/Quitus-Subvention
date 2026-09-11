@@ -416,8 +416,9 @@
     content: '\2195';
     position: absolute;
     right: 6px;
-    opacity: 0.35;
-    font-size: 11px;
+    opacity: 0.55;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .market-table th.is-sortable.sort-asc::after {
@@ -920,6 +921,26 @@
 
 .password-toggle:hover {
     color: var(--color-primary);
+}
+
+/* ========================================
+   Axe / sous-axe stacked cell (wraps on 2 lines instead of clamping)
+======================================== */
+.axe-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 320px;
+    white-space: normal;
+}
+
+.axe-cell-axe {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.axe-cell-sous-axe {
+    color: var(--text-primary);
 }
 
 /* ========================================
