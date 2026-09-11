@@ -242,10 +242,6 @@ body.auth-page {
     display: block;
 }
 
-.form-input-wrapper {
-    position: relative;
-}
-
 .auth-form .form-input {
     padding-left: 50px;
     background-color: var(--bg-card);
@@ -268,28 +264,6 @@ body.auth-page {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-}
-
-.password-toggle {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 10px;
-    transition: color 0.2s ease;
-}
-
-.password-toggle:hover {
-    color: var(--accent-copper);
 }
 
 .password-toggle:focus-visible,

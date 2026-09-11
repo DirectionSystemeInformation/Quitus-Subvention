@@ -84,6 +84,7 @@ Route::get('/mes-documents/{report}', [ActivityFormController::class, 'show'])
 Route::middleware('auth')->group(function () {
     Route::get('/mon-profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/mon-profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/mon-profil/mot-de-passe', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
 // Routes de "back-office" partagées par les rôles DSHN et Admin : mêmes contrôleurs,
