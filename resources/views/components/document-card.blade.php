@@ -23,12 +23,12 @@
                 @if ($document->sizeLabel())
                     <span>&middot; {{ $document->sizeLabel() }}</span>
                 @endif
-                <span>&middot; Ajoutée le {{ $document->created_at->locale('fr')->translatedFormat('d F Y') }}</span>
+                <span>&middot; Ajoutée le {{ $document->created_at->locale('fr')->translatedFormat('d F Y') }} à {{ $document->created_at->format('H:i') }}</span>
             </p>
         </div>
     </div>
     <div class="document-card-actions">
-        <a href="{{ $viewUrl }}" target="_blank" rel="noopener" class="btn btn-sm">Voir</a>
+        <a href="{{ $viewUrl }}" target="_blank" rel="noopener" class="btn btn-sm">Consulter</a>
         <a href="{{ $downloadUrl }}" class="btn btn-sm">Télécharger</a>
     </div>
 </div>

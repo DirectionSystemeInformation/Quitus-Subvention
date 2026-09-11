@@ -46,7 +46,7 @@
 
     <div class="card" style="margin-bottom: 24px;">
         <div class="card-header">
-            <h2 class="card-title">Pièces justificatives</h2>
+            <h2 class="card-title">Pièces justificatives ({{ $activity->documents->count() }})</h2>
         </div>
         @if ($activity->documents->isEmpty())
             <x-empty-state icon="inbox" title="Aucune pièce jointe." :compact="true" />

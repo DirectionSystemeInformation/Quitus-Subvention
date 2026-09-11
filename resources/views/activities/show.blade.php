@@ -15,17 +15,17 @@
             <span class="cap-first">{{ $activity->designation }}</span>
             <x-status-badge :status="$activity->status" />
         </h1>
+        @php $axeParts = $activity->axeLabelParts(); @endphp
+        <p style="margin-top: 8px; color: var(--text-muted); font-size: 13px;">
+            {{ $axeParts['prefix'] }}@if ($axeParts['description']) — {{ $axeParts['description'] }}@endif
+        </p>
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top: 8px;">
             @if ($activity->axeNumber())
                 <span class="info-badge">Axe {{ $activity->axeNumber() }}</span>
             @endif
+            <span class="info-badge">{{ $activity->sous_axe_label }}</span>
             <span class="info-badge">{{ $activity->year }}</span>
         </div>
-        @php $axeParts = $activity->axeLabelParts(); @endphp
-        <p style="margin-top: 10px;">
-            <span style="color: var(--text-muted); font-size: 13px; display:block;">{{ $axeParts['prefix'] }}@if ($axeParts['description']) — {{ $axeParts['description'] }}@endif</span>
-            {{ $activity->sous_axe_label }}
-        </p>
         @if ($activity->status === 'rejete' && $activity->rejection_reason)
             <p style="color: var(--color-danger, #E5484D); margin-top: 8px;">Motif du rejet : {{ $activity->rejection_reason }}</p>
         @endif
@@ -80,7 +80,7 @@
 
     <div class="card card-compact" style="margin-bottom: 24px;">
         <div class="card-header">
-            <h2 class="card-title">Pièces justificatives</h2>
+            <h2 class="card-title">Pièces justificatives ({{ $activity->documents->count() }})</h2>
         </div>
         @if ($activity->documents->isEmpty())
             <x-empty-state icon="inbox" title="Aucune pièce jointe." :compact="true" />
