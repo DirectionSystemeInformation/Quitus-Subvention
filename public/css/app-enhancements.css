@@ -1037,26 +1037,36 @@
 }
 
 /* ========================================
-   Document card (replaces raw <a> file links)
+   Document cards (replace raw <a> file links) — grid of
+   cards so 2-3 pieces sit side by side instead of stacking
 ======================================== */
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+}
+
 .document-card {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--bg-primary);
 }
 
-.document-card + .document-card {
-    margin-top: 10px;
+.document-card-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
 }
 
 .document-card-icon {
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
+    width: 64px;
+    height: 86px;
     border-radius: var(--radius-sm, 8px);
     display: flex;
     align-items: center;
@@ -1067,8 +1077,8 @@
 }
 
 .document-card-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
 }
 
 .document-card-thumb {
@@ -1093,21 +1103,24 @@
 .document-card-body {
     min-width: 0;
     flex: 1;
+    padding-top: 2px;
 }
 
 .document-card-name {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .document-card-meta {
     font-size: 12px;
     color: var(--text-muted);
-    margin-top: 2px;
+    margin-top: 6px;
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
@@ -1121,27 +1134,10 @@
 .document-card-actions {
     display: flex;
     gap: 8px;
-    flex-shrink: 0;
 }
 
-@media (max-width: 480px) {
-    .document-card {
-        flex-wrap: wrap;
-    }
-
-    .document-card-body {
-        flex-basis: 100%;
-    }
-
-    .document-card-name {
-        white-space: normal;
-        overflow-wrap: anywhere;
-    }
-
-    .document-card-actions {
-        flex-basis: 100%;
-        margin-left: 58px;
-    }
+.document-card-actions .btn {
+    flex: 1;
 }
 
 .btn-sm {

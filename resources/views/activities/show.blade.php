@@ -85,7 +85,7 @@
         @if ($activity->documents->isEmpty())
             <x-empty-state icon="inbox" title="Aucune pièce jointe." :compact="true" />
         @else
-            <div style="margin-bottom: 16px;">
+            <div class="documents-grid" style="margin-bottom: 16px;">
                 @foreach ($activity->documents as $document)
                     <x-document-card
                         :document="$document"

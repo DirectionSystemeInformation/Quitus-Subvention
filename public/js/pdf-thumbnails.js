@@ -6,7 +6,8 @@
 
         document.querySelectorAll('[data-pdf-thumb]').forEach(function (container) {
             var url = container.dataset.pdfThumb;
-            var displaySize = container.offsetWidth || 44;
+            var boxWidth = container.offsetWidth || 64;
+            var boxHeight = container.offsetHeight || 86;
             var dpr = window.devicePixelRatio || 1;
 
             pdfjsLib.getDocument(url).promise
@@ -15,7 +16,7 @@
                 })
                 .then(function (page) {
                     var baseViewport = page.getViewport({ scale: 1 });
-                    var scale = (displaySize / Math.min(baseViewport.width, baseViewport.height)) * dpr;
+                    var scale = Math.max(boxWidth / baseViewport.width, boxHeight / baseViewport.height) * dpr;
                     var viewport = page.getViewport({ scale: scale });
 
                     var canvas = document.createElement('canvas');
