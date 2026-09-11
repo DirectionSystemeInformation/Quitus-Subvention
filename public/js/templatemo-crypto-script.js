@@ -817,7 +817,15 @@ https://templatemo.com/tm-609-crypto-vault
             }
 
             input.addEventListener('change', function () {
-                files = Array.prototype.slice.call(input.files);
+                Array.prototype.slice.call(input.files).forEach(function (file) {
+                    const isDuplicate = files.some(function (f) {
+                        return f.name === file.name && f.size === file.size && f.lastModified === file.lastModified;
+                    });
+                    if (!isDuplicate) {
+                        files.push(file);
+                    }
+                });
+                syncInput();
                 render();
             });
         });
