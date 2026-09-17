@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Support\PonderationCriteria;
+use App\Support\PonderationGrille;
 use Illuminate\Database\Eloquent\Model;
 
 class CampaignAllocation extends Model
@@ -46,14 +46,19 @@ class CampaignAllocation extends Model
     /**
      * Recalcule score_total, categorie et categorie_ajustee à partir de criteres_scores.
      * À appeler après toute modification des scores, avant sauvegarde.
+     *
+     * La grille peut être passée pour éviter de la recharger à chaque allocation
+     * lors d'une mise à jour en lot ; sinon celle de la campagne est utilisée.
      */
-    public function recalculerScores(): void
+    public function recalculerScores(?PonderationGrille $grille = null): void
     {
+        $grille ??= $this->campaign->grille();
+
         $scores = $this->criteres_scores ?? [];
-        $total = PonderationCriteria::total($scores);
+        $total = $grille->total($scores);
 
         $this->score_total = $total;
-        $this->categorie = PonderationCriteria::categorie($total);
-        $this->categorie_ajustee = PonderationCriteria::categorieAjustee($total);
+        $this->categorie = $grille->categorie($total);
+        $this->categorie_ajustee = $grille->categorieAjustee($total);
     }
 }

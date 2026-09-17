@@ -10,6 +10,7 @@ use App\Http\Controllers\Dshn\CampaignController;
 use App\Http\Controllers\Dshn\CanevasController;
 use App\Http\Controllers\Dshn\DashboardController as DshnDashboardController;
 use App\Http\Controllers\Dshn\FederationController;
+use App\Http\Controllers\Dshn\PonderationController;
 use App\Http\Controllers\Dshn\ReportController as DshnReportController;
 use App\Http\Controllers\Dshn\SearchController as DshnSearchController;
 use App\Http\Controllers\Dshn\UserController as DshnUserController;
@@ -120,6 +121,17 @@ $backOfficeRoutes = function () {
     Route::post('/canevas/axes/{axe}/sous-axes', [CanevasController::class, 'storeSousAxe'])->name('canevas.sous-axes.store');
     Route::put('/canevas/sous-axes/{sousAxe}', [CanevasController::class, 'updateSousAxe'])->name('canevas.sous-axes.update');
     Route::delete('/canevas/sous-axes/{sousAxe}', [CanevasController::class, 'destroySousAxe'])->name('canevas.sous-axes.destroy');
+
+    Route::get('/ponderation', [PonderationController::class, 'index'])->name('ponderation.index');
+    Route::post('/ponderation/rubriques', [PonderationController::class, 'storeRubrique'])->name('ponderation.rubriques.store');
+    Route::put('/ponderation/rubriques/{rubrique}', [PonderationController::class, 'updateRubrique'])->name('ponderation.rubriques.update');
+    Route::delete('/ponderation/rubriques/{rubrique}', [PonderationController::class, 'destroyRubrique'])->name('ponderation.rubriques.destroy');
+    Route::post('/ponderation/rubriques/{rubrique}/criteres', [PonderationController::class, 'storeCritere'])->name('ponderation.criteres.store');
+    Route::put('/ponderation/criteres/{critere}', [PonderationController::class, 'updateCritere'])->name('ponderation.criteres.update');
+    Route::delete('/ponderation/criteres/{critere}', [PonderationController::class, 'destroyCritere'])->name('ponderation.criteres.destroy');
+    Route::put('/ponderation/paliers', [PonderationController::class, 'updatePaliers'])->name('ponderation.paliers.update');
+    Route::post('/ponderation/paliers', [PonderationController::class, 'storePalier'])->name('ponderation.paliers.store');
+    Route::delete('/ponderation/paliers/{palier}', [PonderationController::class, 'destroyPalier'])->name('ponderation.paliers.destroy');
 };
 
 Route::middleware(['auth', 'role:dshn'])->prefix('dshn')->name('dshn.')->group($backOfficeRoutes);

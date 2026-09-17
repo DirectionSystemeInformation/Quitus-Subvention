@@ -7,7 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Campaign;
 use App\Models\CampaignAllocation;
 use App\Models\User;
-use App\Support\PonderationCriteria;
+use App\Support\PonderationGrille;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -43,11 +43,13 @@ class CampaignController extends Controller
             'federation.reports' => fn ($r) => $r->where('type', 'programme_reamenage')->where('year', $campaign->annee_n1)->where('status', '!=', 'brouillon'),
         ])->orderByDesc('score_total')]);
 
+        $grille = $campaign->grille();
+
         return view('campaign.show', [
             'campaign' => $campaign,
-            'rubriques' => PonderationCriteria::rubriques(),
-            'criteres' => PonderationCriteria::criteres(),
-            'paliers' => PonderationCriteria::paliersCategorieAjustee(),
+            'rubriques' => $grille->rubriques(),
+            'criteres' => $grille->criteres(),
+            'paliers' => $grille->paliers(),
         ]);
     }
 
@@ -55,6 +57,12 @@ class CampaignController extends Controller
     {
         abort_unless(Auth::user()->isDshn(), 403);
         abort_unless($campaign->etape === 3, 404);
+
+        $grille = PonderationGrille::current();
+
+        if ($grille->isEmpty()) {
+            return back()->withErrors(['ponderation' => "Aucun critère de pondération n'est paramétré. Renseignez la grille avant de lancer la pondération."]);
+        }
 
         $rapportYear = $campaign->annee_n1 - 1;
 
@@ -71,7 +79,9 @@ class CampaignController extends Controller
             ]);
         }
 
-        $campaign->update(['etape' => 4]);
+        // La grille est figée ici : la campagne gardera ces critères et ces
+        // paliers même si la DSHN fait évoluer le paramétrage ensuite.
+        $campaign->update(['etape' => 4, 'grille_ponderation' => $grille->toSnapshot()]);
 
         ActivityLog::record(
             'updated',
@@ -88,7 +98,8 @@ class CampaignController extends Controller
         abort_unless(Auth::user()->isDshn(), 403);
         abort_unless($campaign->etape === 4, 404);
 
-        $criteres = collect(PonderationCriteria::criteres())->keyBy('slug');
+        $grille = $campaign->grille();
+        $criteres = collect($grille->criteres())->keyBy('slug');
 
         $data = $request->validate([
             'scores' => ['required', 'array'],
@@ -109,7 +120,7 @@ class CampaignController extends Controller
             }
 
             $allocation->criteres_scores = $clean;
-            $allocation->recalculerScores();
+            $allocation->recalculerScores($grille);
             $allocation->save();
         }
 
@@ -147,7 +158,7 @@ class CampaignController extends Controller
         abort_unless(Auth::user()->isDshn(), 403);
         abort_unless($campaign->etape === 6, 404);
 
-        $paliers = PonderationCriteria::paliersCategorieAjustee();
+        $paliers = $campaign->grille()->paliers();
 
         $data = $request->validate([
             'bareme' => ['required', 'array'],

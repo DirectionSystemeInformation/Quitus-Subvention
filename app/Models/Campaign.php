@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PonderationGrille;
 use Illuminate\Database\Eloquent\Model;
 
 class Campaign extends Model
@@ -19,12 +20,14 @@ class Campaign extends Model
         'session_arbitrage_date',
         'session_arbitrage_organized_at',
         'bareme_repartition',
+        'grille_ponderation',
     ];
 
     protected function casts(): array
     {
         return [
             'bareme_repartition' => 'array',
+            'grille_ponderation' => 'array',
             'dg_decided_at' => 'datetime',
             'ministre_decided_at' => 'datetime',
             'session_arbitrage_date' => 'date',
@@ -35,6 +38,18 @@ class Campaign extends Model
     public function allocations()
     {
         return $this->hasMany(CampaignAllocation::class);
+    }
+
+    /**
+     * Grille appliquée à cette campagne : celle figée à l'ouverture de la
+     * pondération, ou à défaut la grille actuellement paramétrée (campagnes
+     * antérieures à la mise en place du paramétrage, ou pas encore pondérées).
+     */
+    public function grille(): PonderationGrille
+    {
+        return $this->grille_ponderation
+            ? PonderationGrille::fromSnapshot($this->grille_ponderation)
+            : PonderationGrille::current();
     }
 
     public function etapeLabel(): string

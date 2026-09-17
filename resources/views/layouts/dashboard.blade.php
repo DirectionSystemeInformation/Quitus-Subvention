@@ -107,6 +107,15 @@
                             </svg>
                             Canevas
                         </a>
+                        <a href="{{ role_route('ponderation.index') }}" class="nav-item {{ ($active ?? '') === 'ponderation' ? 'active' : '' }}">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 3v18"/>
+                                <path d="M5 7l-3 6h6z"/>
+                                <path d="M19 7l-3 6h6z"/>
+                                <path d="M5 7l7-2 7 2"/>
+                            </svg>
+                            Pondération
+                        </a>
                         <a href="{{ route('campagnes.index') }}" class="nav-item {{ ($active ?? '') === 'campagnes' ? 'active' : '' }}">
                             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/>
