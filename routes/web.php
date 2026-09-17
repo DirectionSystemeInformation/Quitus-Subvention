@@ -160,6 +160,7 @@ Route::middleware(['auth', 'role:dshn,admin,dg,comite_arbitrage,ministre'])
         Route::post('/{campaign}/traitement', [CampaignController::class, 'advanceToPonderation'])->name('traitement');
         Route::post('/{campaign}/ponderation', [CampaignController::class, 'updatePonderation'])->name('ponderation.update');
         Route::post('/{campaign}/ponderation/confirmer', [CampaignController::class, 'confirmPonderation'])->name('ponderation.confirm');
+        Route::get('/{campaign}/ponderation/export', [CampaignController::class, 'exportPonderation'])->name('ponderation.export');
         Route::post('/{campaign}/categorisation/confirmer', [CampaignController::class, 'advanceToRepartition'])->name('categorisation.confirm');
         Route::post('/{campaign}/repartition', [CampaignController::class, 'updateRepartition'])->name('repartition.update');
         Route::post('/{campaign}/soumettre-dg', [CampaignController::class, 'submitToDg'])->name('submit-dg');

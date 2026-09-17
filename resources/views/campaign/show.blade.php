@@ -62,82 +62,59 @@
             @if ($campaign->allocations->isEmpty())
                 <x-empty-state icon="list" title="Aucune fédération retenue pour cette campagne." />
             @else
-                @php
-                    $points = fn ($valeur) => rtrim(rtrim(number_format((float) $valeur, 2, ',', ' '), '0'), ',');
-                @endphp
-                <p class="strength-text" style="margin-bottom: 16px;">Saisissez les points obtenus par chaque fédération, critère par critère. Les totaux de rubrique et la catégorie se recalculent à mesure.</p>
                 <form method="POST" action="{{ route('campagnes.ponderation.update', $campaign) }}" id="ponderationForm">
                     @csrf
                     <div class="table-responsive">
-                    <table class="ponderation-grille" id="ponderationTable">
+                    <table class="market-table pb-table ponderation-table" id="ponderationTable">
                         <thead>
                             <tr>
-                                <th class="pg-num">N°</th>
-                                <th class="pg-rubrique">Rubriques</th>
-                                <th class="pg-critere">Critères</th>
-                                <th class="pg-bareme">Pondération</th>
-                                @foreach ($campaign->allocations as $allocation)
-                                    <th class="pg-fede" title="{{ $allocation->federation->federation_name }}">
-                                        <span>{{ $allocation->federation->federation_name }}</span>
+                                <th rowspan="2">Fédération</th>
+                                @foreach ($rubriques as $rubrique)
+                                    <th colspan="{{ count($rubrique['criteres']) }}">{{ $rubrique['rubrique'] }} ({{ $rubrique['rubrique_max'] }})</th>
+                                @endforeach
+                                <th rowspan="2">Total</th>
+                            </tr>
+                            <tr>
+                                @foreach ($criteres as $critere)
+                                    <th scope="col" class="criterion-heading">
+                                        <details>
+                                            <summary>{{ \Illuminate\Support\Str::limit($critere['label'], 36) }} · /{{ rtrim(rtrim(number_format($critere['max'], 1), '0'), '.') }}</summary>
+                                            <span>{{ $critere['label'] }}</span>
+                                        </details>
                                     </th>
                                 @endforeach
                             </tr>
                         </thead>
                         <tbody>
-                            @php $numero = 1; @endphp
-                            @foreach ($rubriques as $rubriqueIndex => $rubrique)
-                                @foreach ($rubrique['criteres'] as $critereIndex => $critere)
-                                    <tr>
-                                        <td class="pg-num">{{ $numero++ }}</td>
-                                        @if ($critereIndex === 0)
-                                            <td class="pg-rubrique" rowspan="{{ count($rubrique['criteres']) }}">{{ $rubrique['rubrique'] }}</td>
-                                        @endif
-                                        <td class="pg-critere">{{ $critere['label'] }}</td>
-                                        <td class="pg-bareme">{{ $points($critere['max']) }}</td>
-                                        @foreach ($campaign->allocations as $allocation)
-                                            <td class="pg-fede">
-                                                <input type="number" step="0.5" min="0" max="{{ $critere['max'] }}"
-                                                    name="scores[{{ $allocation->id }}][{{ $critere['slug'] }}]"
-                                                    aria-label="{{ $allocation->federation->federation_name }} — {{ $critere['label'] }} (sur {{ $critere['max'] }})"
-                                                    value="{{ $allocation->criteres_scores[$critere['slug']] ?? '' }}"
-                                                    data-allocation="{{ $allocation->id }}" data-rubrique="{{ $rubriqueIndex }}"
-                                                    class="critere-input">
-                                            </td>
-                                        @endforeach
-                                    </tr>
-                                @endforeach
-                                <tr class="pg-total-row">
-                                    <td colspan="3" class="pg-libelle-total">Total {{ $rubrique['rubrique'] }}</td>
-                                    <td class="pg-bareme">{{ $points($rubrique['rubrique_max']) }}</td>
-                                    @foreach ($campaign->allocations as $allocation)
-                                        <td class="pg-fede" data-total-rubrique="{{ $rubriqueIndex }}" data-allocation="{{ $allocation->id }}">0</td>
+                            @foreach ($campaign->allocations as $allocation)
+                                <tr data-allocation-row data-allocation-id="{{ $allocation->id }}">
+                                    <td>{{ $allocation->federation->federation_name }}</td>
+                                    @foreach ($criteres as $critere)
+                                        <td>
+                                            <input type="number" step="0.5" min="0" max="{{ $critere['max'] }}"
+                                                name="scores[{{ $allocation->id }}][{{ $critere['slug'] }}]"
+                                                aria-label="{{ $allocation->federation->federation_name }} — {{ $critere['label'] }} (sur {{ $critere['max'] }})"
+                                                value="{{ $allocation->criteres_scores[$critere['slug']] ?? '' }}"
+                                                class="pb-num critere-input">
+                                        </td>
                                     @endforeach
+                                    <td class="ponderation-total" data-total>{{ $allocation->score_total ?? 0 }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
-                        <tfoot>
-                            <tr class="pg-grand-total">
-                                <td colspan="3" class="pg-libelle-total">Total</td>
-                                <td class="pg-bareme">{{ $points($pointsMax) }}</td>
-                                @foreach ($campaign->allocations as $allocation)
-                                    <td class="pg-fede" data-total-general data-allocation="{{ $allocation->id }}">{{ $points($allocation->score_total ?? 0) }}</td>
-                                @endforeach
-                            </tr>
-                            <tr class="pg-categorie-row">
-                                <td colspan="3" class="pg-libelle-total">Catégorie</td>
-                                <td class="pg-bareme"></td>
-                                @foreach ($campaign->allocations as $allocation)
-                                    <td class="pg-fede {{ $allocation->categorie ? 'cat-'.strtolower($allocation->categorie) : '' }}"
-                                        data-categorie data-allocation="{{ $allocation->id }}">{{ $allocation->categorie ?? '—' }}</td>
-                                @endforeach
-                            </tr>
-                        </tfoot>
                     </table>
                     </div>
                     <div class="btn-group">
                         <button type="submit" class="btn primary">Enregistrer les scores</button>
                     </div>
                 </form>
+
+                @if ($campaign->allocations->contains(fn ($allocation) => filled($allocation->criteres_scores)))
+                    <div class="btn-group" style="margin-top: 12px;">
+                        <button type="button" class="btn js-open-ponderation-grille">Pondération par activité par fédération</button>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('campagnes.ponderation.confirm', $campaign) }}" class="btn-group" style="margin-top: 12px;">
                     @csrf
                     <button type="submit" class="btn">Valider la pondération et calculer les catégories</button>
@@ -437,68 +414,65 @@
             </div>
         @endif
     </div>
+    {{-- Grille officielle, en consultation : elle reprend les scores enregistrés,
+         pas ceux en cours de saisie. --}}
+    @if ($campaign->etape >= 4 && $user->isDshn() && $campaign->allocations->isNotEmpty())
+        <div class="modal-overlay" id="ponderationGrilleModal" role="dialog" aria-modal="true" aria-labelledby="ponderationGrilleTitre">
+            <div class="modal-box modal-box-large">
+                <div class="modal-head">
+                    <h3 id="ponderationGrilleTitre">Pondération par activité par fédération</h3>
+                    <div class="modal-head-actions">
+                        <a href="{{ route('campagnes.ponderation.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                        <button type="button" class="btn btn-sm js-close-ponderation-grille">Fermer</button>
+                    </div>
+                </div>
+                <x-ponderation-grille :rubriques="$rubriques" :allocations="$campaign->allocations" :points-max="$pointsMax" />
+            </div>
+        </div>
+    @endif
 @endsection
 
 @push('scripts')
-    <script id="ponderationPaliers" type="application/json">@json($paliersDetail ?? [])</script>
     <script>
         (function () {
+            // Total par federation pendant la saisie des scores.
             const table = document.getElementById('ponderationTable');
-            if (!table) return;
 
-            // Paliers tries par seuil croissant : la categorie d'un score est
-            // celle du dernier palier dont le seuil ne le depasse pas.
-            const paliers = JSON.parse(document.getElementById('ponderationPaliers').textContent)
-                .slice().sort((a, b) => a.seuil_min - b.seuil_min);
-
-            const formate = (valeur) => (Math.round(valeur * 100) / 100).toString().replace('.', ',');
-
-            function categoriePour(total) {
-                if (total <= 0) return null;
-
-                let trouve = null;
-                paliers.forEach(function (palier) {
-                    if (total >= palier.seuil_min) trouve = palier;
-                });
-
-                return trouve ? trouve.categorie : null;
-            }
-
-            function recalculer(allocationId) {
-                const inputs = table.querySelectorAll('.critere-input[data-allocation="' + allocationId + '"]');
-                const totauxRubrique = {};
-                let total = 0;
-
-                inputs.forEach(function (input) {
-                    const valeur = parseFloat(input.value) || 0;
-                    const rubrique = input.dataset.rubrique;
-                    totauxRubrique[rubrique] = (totauxRubrique[rubrique] || 0) + valeur;
-                    total += valeur;
-                });
-
-                Object.keys(totauxRubrique).forEach(function (rubrique) {
-                    const cellule = table.querySelector('[data-total-rubrique="' + rubrique + '"][data-allocation="' + allocationId + '"]');
-                    if (cellule) cellule.textContent = formate(totauxRubrique[rubrique]);
-                });
-
-                const cellTotal = table.querySelector('[data-total-general][data-allocation="' + allocationId + '"]');
-                if (cellTotal) cellTotal.textContent = formate(total);
-
-                const cellCategorie = table.querySelector('[data-categorie][data-allocation="' + allocationId + '"]');
-                if (cellCategorie) {
-                    const categorie = categoriePour(total);
-                    cellCategorie.textContent = categorie || '—';
-                    cellCategorie.className = 'pg-fede' + (categorie ? ' cat-' + categorie.toLowerCase() : '');
+            if (table) {
+                function updateRowTotal(row) {
+                    let total = 0;
+                    row.querySelectorAll('.critere-input').forEach(function (input) {
+                        total += parseFloat(input.value) || 0;
+                    });
+                    const cell = row.querySelector('[data-total]');
+                    if (cell) cell.textContent = total.toFixed(2).replace(/\.00$/, '');
                 }
+
+                table.querySelectorAll('[data-allocation-row]').forEach(updateRowTotal);
+
+                table.addEventListener('input', function (e) {
+                    if (!e.target.classList.contains('critere-input')) return;
+                    const row = e.target.closest('[data-allocation-row]');
+                    if (row) updateRowTotal(row);
+                });
             }
 
-            const allocations = new Set();
-            table.querySelectorAll('.critere-input').forEach((input) => allocations.add(input.dataset.allocation));
-            allocations.forEach(recalculer);
+            // Grille officielle en consultation.
+            const modale = document.getElementById('ponderationGrilleModal');
+            if (!modale) return;
 
-            table.addEventListener('input', function (e) {
-                if (!e.target.classList.contains('critere-input')) return;
-                recalculer(e.target.dataset.allocation);
+            const ouvrir = () => { modale.classList.add('active'); document.body.style.overflow = 'hidden'; };
+            const fermer = () => { modale.classList.remove('active'); document.body.style.overflow = ''; };
+
+            document.querySelectorAll('.js-open-ponderation-grille').forEach((bouton) => bouton.addEventListener('click', ouvrir));
+            modale.querySelectorAll('.js-close-ponderation-grille').forEach((bouton) => bouton.addEventListener('click', fermer));
+
+            modale.addEventListener('click', function (e) {
+                if (e.target === modale) fermer();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modale.classList.contains('active')) fermer();
             });
         })();
     </script>

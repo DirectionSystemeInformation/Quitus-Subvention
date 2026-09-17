@@ -1524,6 +1524,34 @@
 .cat-d { background: #FFC7CE; color: #9C0006; }
 
 /* ========================================
+   Modale large (tableau consulté en plein écran)
+======================================== */
+.modal-box.modal-box-large {
+    max-width: min(1600px, 95vw);
+    width: 95%;
+    padding: 20px 24px 24px;
+}
+
+.modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.modal-head h3 {
+    margin-bottom: 0;
+}
+
+.modal-head-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ========================================
    Classement par fédération
    La feuille « CLASSEMENT PAR FEDERATION » utilise ses propres couleurs
    de catégorie, plus sourdes que celles du récapitulatif : on les reprend

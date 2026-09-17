@@ -11,6 +11,12 @@ use App\Support\PonderationGrille;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class CampaignController extends Controller
 {
@@ -137,6 +143,138 @@ class CampaignController extends Controller
         ActivityLog::record('updated', "a mis à jour la pondération de la campagne {$campaign->annee_n1}", $campaign->id, (string) $campaign->annee_n1);
 
         return back()->with('status', 'Pondération enregistrée.');
+    }
+
+    /**
+     * Grille de pondération au format Excel, sur le modèle de la feuille
+     * officielle « PONDERATION PAR ACTI PAR FEDE » : critères en lignes,
+     * une colonne par fédération, sous-totaux de rubrique en vert.
+     */
+    public function exportPonderation(Campaign $campaign)
+    {
+        abort_unless(Auth::user()->isDshn(), 403);
+
+        $grille = $campaign->grille();
+        $rubriques = $grille->rubriques();
+        $allocations = $campaign->allocations()->with('federation')->orderByDesc('score_total')->get();
+
+        $vert = 'FF92D050';
+        $couleursCategorie = ['A' => 'FF92D050', 'B' => 'FFFFFF00', 'C' => 'FF00B0F0', 'D' => 'FFFFC7CE'];
+
+        $classeur = new Spreadsheet();
+        $feuille = $classeur->getActiveSheet();
+        $feuille->setTitle('Pondération');
+
+        $derniereColonne = Coordinate::stringFromColumnIndex(4 + $allocations->count());
+
+        $feuille->setCellValue('A1', 'Pondération par activité par fédération — Campagne '.$campaign->annee_n1);
+        $feuille->mergeCells('A1:'.$derniereColonne.'1');
+        $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $ligne = 3;
+        $feuille->fromArray(['N°', 'Rubriques', 'Critères', 'Pondération'], null, 'A'.$ligne);
+        foreach ($allocations as $index => $allocation) {
+            $feuille->setCellValue(Coordinate::stringFromColumnIndex(5 + $index).$ligne, $allocation->federation->federation_name);
+        }
+        $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getFont()->setBold(true);
+        $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_BOTTOM)->setWrapText(true);
+        $feuille->getRowDimension($ligne)->setRowHeight(60);
+
+        $numero = 1;
+        $lignesTotaux = [];
+
+        foreach ($rubriques as $rubrique) {
+            $premiereLigneRubrique = $ligne + 1;
+
+            foreach ($rubrique['criteres'] as $critere) {
+                $ligne++;
+                $feuille->setCellValue('A'.$ligne, $numero++);
+                $feuille->setCellValue('C'.$ligne, $critere['label']);
+                $feuille->setCellValue('D'.$ligne, (float) $critere['max']);
+
+                foreach ($allocations as $index => $allocation) {
+                    $feuille->setCellValue(
+                        Coordinate::stringFromColumnIndex(5 + $index).$ligne,
+                        (float) ($allocation->criteres_scores[$critere['slug']] ?? 0)
+                    );
+                }
+            }
+
+            // Libellé de la rubrique fusionné en face de ses critères.
+            $feuille->setCellValue('B'.$premiereLigneRubrique, $rubrique['rubrique']);
+            if ($ligne > $premiereLigneRubrique) {
+                $feuille->mergeCells('B'.$premiereLigneRubrique.':B'.$ligne);
+            }
+            $feuille->getStyle('B'.$premiereLigneRubrique)->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+
+            $ligne++;
+            $feuille->setCellValue('A'.$ligne, 'Total '.$rubrique['rubrique']);
+            $feuille->mergeCells('A'.$ligne.':C'.$ligne);
+            $feuille->setCellValue('D'.$ligne, (float) $rubrique['rubrique_max']);
+
+            foreach ($allocations as $index => $allocation) {
+                $colonne = Coordinate::stringFromColumnIndex(5 + $index);
+                $feuille->setCellValue(
+                    $colonne.$ligne,
+                    '=SUM('.$colonne.$premiereLigneRubrique.':'.$colonne.($ligne - 1).')'
+                );
+            }
+
+            $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getFill()
+                ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($vert);
+            $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getFont()->setBold(true);
+
+            $lignesTotaux[] = $ligne;
+        }
+
+        $ligne++;
+        $feuille->setCellValue('A'.$ligne, 'TOTAL');
+        $feuille->mergeCells('A'.$ligne.':C'.$ligne);
+        $feuille->setCellValue('D'.$ligne, (float) $grille->pointsMax());
+        foreach ($allocations as $index => $allocation) {
+            $colonne = Coordinate::stringFromColumnIndex(5 + $index);
+            $cellules = array_map(fn ($l) => $colonne.$l, $lignesTotaux);
+            $feuille->setCellValue($colonne.$ligne, '=SUM('.implode(',', $cellules).')');
+        }
+        $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getFill()
+            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($vert);
+        $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getFont()->setBold(true);
+
+        $ligne++;
+        $feuille->setCellValue('A'.$ligne, 'CATEGORIE');
+        $feuille->mergeCells('A'.$ligne.':C'.$ligne);
+        foreach ($allocations as $index => $allocation) {
+            $colonne = Coordinate::stringFromColumnIndex(5 + $index);
+            $feuille->setCellValue($colonne.$ligne, $allocation->categorie ?? '');
+
+            if (isset($couleursCategorie[$allocation->categorie])) {
+                $feuille->getStyle($colonne.$ligne)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($couleursCategorie[$allocation->categorie]);
+            }
+        }
+        $feuille->getStyle('A'.$ligne.':'.$derniereColonne.$ligne)->getFont()->setBold(true);
+
+        $feuille->getStyle('A3:'.$derniereColonne.$ligne)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $feuille->getStyle('D3:'.$derniereColonne.$ligne)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $feuille->getColumnDimension('A')->setWidth(5);
+        $feuille->getColumnDimension('B')->setWidth(22);
+        $feuille->getColumnDimension('C')->setWidth(45);
+        $feuille->getColumnDimension('D')->setWidth(12);
+        foreach ($allocations as $index => $allocation) {
+            $feuille->getColumnDimension(Coordinate::stringFromColumnIndex(5 + $index))->setWidth(14);
+        }
+        $feuille->freezePane('E4');
+
+        $fichier = 'ponderation-campagne-'.$campaign->annee_n1.'.xlsx';
+        $chemin = tempnam(sys_get_temp_dir(), 'pond');
+
+        (new Xlsx($classeur))->save($chemin);
+        $classeur->disconnectWorksheets();
+
+        return response()->download($chemin, $fichier)->deleteFileAfterSend(true);
     }
 
     public function confirmPonderation(Campaign $campaign)
