@@ -277,6 +277,110 @@ class CampaignController extends Controller
         return response()->download($chemin, $fichier)->deleteFileAfterSend(true);
     }
 
+    /**
+     * Récapitulatif par rubrique au format Excel, sur le modèle de la feuille
+     * officielle « RECAP PAR RUBRIQUE PAR FEDE » : une colonne par rubrique,
+     * la ligne des barèmes, le total et les catégories.
+     */
+    public function exportRecap(Campaign $campaign)
+    {
+        abort_unless(Auth::user()->isDshn(), 403);
+
+        $grille = $campaign->grille();
+        $rubriques = $grille->rubriques();
+        $allocations = $campaign->allocations()->with('federation')->orderByDesc('score_total')->get();
+
+        $orange = 'FFF4B183';
+        $couleursCategorie = ['A' => 'FF92D050', 'B' => 'FFFFFF00', 'C' => 'FF00B0F0', 'D' => 'FFFFC7CE'];
+
+        $classeur = new Spreadsheet();
+        $feuille = $classeur->getActiveSheet();
+        $feuille->setTitle('Récap par rubrique');
+
+        // N° + Structures + rubriques + Total + Catégories + Catégories ajustées + Montant
+        $nombreColonnes = 2 + count($rubriques) + 4;
+        $derniereColonne = Coordinate::stringFromColumnIndex($nombreColonnes);
+
+        $feuille->setCellValue('A1', 'Récapitulatif par rubrique par fédération — Campagne '.$campaign->annee_n1);
+        $feuille->mergeCells('A1:'.$derniereColonne.'1');
+        $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $ligneEntete = 3;
+        $entetes = array_merge(
+            ['N°', 'Structures'],
+            array_column($rubriques, 'rubrique'),
+            ['Total points', 'Catégories', 'Catégories ajustées', 'Montant']
+        );
+        $feuille->fromArray($entetes, null, 'A'.$ligneEntete);
+        $feuille->getStyle('A'.$ligneEntete.':'.$derniereColonne.$ligneEntete)->getFont()->setBold(true);
+        $feuille->getStyle('A'.$ligneEntete.':'.$derniereColonne.$ligneEntete)->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $feuille->getRowDimension($ligneEntete)->setRowHeight(45);
+
+        // Ligne des barèmes, sur le fond orange du document.
+        $ligneBaremes = $ligneEntete + 1;
+        foreach ($rubriques as $index => $rubrique) {
+            $feuille->setCellValue(Coordinate::stringFromColumnIndex(3 + $index).$ligneBaremes, (float) $rubrique['rubrique_max']);
+        }
+        $colonneTotal = Coordinate::stringFromColumnIndex(3 + count($rubriques));
+        $feuille->setCellValue($colonneTotal.$ligneBaremes, (float) $grille->pointsMax());
+        $feuille->getStyle('C'.$ligneBaremes.':'.$colonneTotal.$ligneBaremes)->getFill()
+            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($orange);
+        $feuille->getStyle('A'.$ligneBaremes.':'.$derniereColonne.$ligneBaremes)->getFont()->setBold(true);
+
+        $ligne = $ligneBaremes;
+        foreach ($allocations as $index => $allocation) {
+            $ligne++;
+            $scores = $allocation->criteres_scores ?? [];
+
+            $feuille->setCellValue('A'.$ligne, $index + 1);
+            $feuille->setCellValue('B'.$ligne, $allocation->federation->federation_name);
+
+            foreach ($rubriques as $rubriqueIndex => $rubrique) {
+                $sousTotal = collect($rubrique['criteres'])->sum(fn ($critere) => (float) ($scores[$critere['slug']] ?? 0));
+                $feuille->setCellValue(Coordinate::stringFromColumnIndex(3 + $rubriqueIndex).$ligne, $sousTotal);
+            }
+
+            $feuille->setCellValue($colonneTotal.$ligne, (float) ($allocation->score_total ?? 0));
+
+            $colonneCategorie = Coordinate::stringFromColumnIndex(4 + count($rubriques));
+            $feuille->setCellValue($colonneCategorie.$ligne, $allocation->categorie ?? '');
+            $feuille->setCellValue(Coordinate::stringFromColumnIndex(5 + count($rubriques)).$ligne, $allocation->categorie_ajustee ?? '');
+
+            $montant = $allocation->montant_final ?? $allocation->montant_arbitre ?? $allocation->montant_propose;
+            if ($montant !== null) {
+                $feuille->setCellValue(Coordinate::stringFromColumnIndex(6 + count($rubriques)).$ligne, (float) $montant);
+            }
+
+            if (isset($couleursCategorie[$allocation->categorie])) {
+                $feuille->getStyle($colonneCategorie.$ligne)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($couleursCategorie[$allocation->categorie]);
+            }
+            $feuille->getStyle($colonneCategorie.$ligne)->getFont()->setBold(true);
+        }
+
+        $feuille->getStyle('A'.$ligneEntete.':'.$derniereColonne.$ligne)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $feuille->getStyle('C'.$ligneEntete.':'.$derniereColonne.$ligne)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $feuille->getStyle(Coordinate::stringFromColumnIndex($nombreColonnes).($ligneBaremes + 1).':'.$derniereColonne.$ligne)
+            ->getNumberFormat()->setFormatCode('# ##0');
+
+        $feuille->getColumnDimension('A')->setWidth(5);
+        $feuille->getColumnDimension('B')->setWidth(42);
+        for ($colonne = 3; $colonne <= $nombreColonnes; $colonne++) {
+            $feuille->getColumnDimension(Coordinate::stringFromColumnIndex($colonne))->setWidth(16);
+        }
+        $feuille->freezePane('C'.($ligneBaremes + 1));
+
+        $fichier = 'recap-rubriques-campagne-'.$campaign->annee_n1.'.xlsx';
+        $chemin = tempnam(sys_get_temp_dir(), 'recap');
+
+        (new Xlsx($classeur))->save($chemin);
+        $classeur->disconnectWorksheets();
+
+        return response()->download($chemin, $fichier)->deleteFileAfterSend(true);
+    }
+
     public function confirmPonderation(Campaign $campaign)
     {
         abort_unless(Auth::user()->isDshn(), 403);

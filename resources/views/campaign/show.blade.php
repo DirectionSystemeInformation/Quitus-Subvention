@@ -111,7 +111,8 @@
 
                 @if ($campaign->allocations->contains(fn ($allocation) => filled($allocation->criteres_scores)))
                     <div class="btn-group" style="margin-top: 12px;">
-                        <button type="button" class="btn js-open-ponderation-grille">Pondération par activité par fédération</button>
+                        <button type="button" class="btn js-open-modal" data-modal="ponderationGrilleModal">Pondération par activité par fédération</button>
+                        <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
                     </div>
                 @endif
 
@@ -123,20 +124,27 @@
         </div>
     @endif
 
-    {{-- Étape 5 et suivantes : récapitulatif par rubrique --}}
+    {{-- Étape 5 et suivantes : documents de référence de la campagne --}}
     @if ($campaign->etape >= 5 && $user->isDshn() && $campaign->allocations->isNotEmpty())
         <div class="card" style="margin-bottom: 24px;">
             <div class="card-header">
-                <h2 class="card-title">{{ $campaign->etape === 5 ? 'Catégorisation des fédérations' : 'Récapitulatif par rubrique' }}</h2>
+                <h2 class="card-title">{{ $campaign->etape === 5 ? 'Catégorisation des fédérations' : 'Documents de la campagne' }}</h2>
             </div>
             <p class="strength-text" style="margin-bottom: 16px;">
-                Sous-total de chaque rubrique, score sur {{ 0 + $pointsMax }} points et catégorie qui en découle.
+                @if ($campaign->etape === 5)
+                    Les catégories sont calculées à partir du score de pondération, sur {{ 0 + $pointsMax }} points. Consultez le détail avant de confirmer.
+                @else
+                    Les tableaux de référence de la campagne, consultables et téléchargeables au format Excel.
+                @endif
             </p>
 
-            <x-ponderation-recap :rubriques="$rubriques" :lignes="$recapLignes" :points-max="$pointsMax" />
+            <div class="btn-group">
+                <button type="button" class="btn js-open-modal" data-modal="ponderationGrilleModal">Pondération par activité par fédération</button>
+                <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
+            </div>
 
             @if ($campaign->etape === 5)
-                <form method="POST" action="{{ route('campagnes.categorisation.confirm', $campaign) }}" class="btn-group" style="margin-top: 20px;">
+                <form method="POST" action="{{ route('campagnes.categorisation.confirm', $campaign) }}" class="btn-group" style="margin-top: 16px;">
                     @csrf
                     <button type="submit" class="btn primary">Confirmer et passer à la répartition</button>
                 </form>
@@ -417,16 +425,29 @@
     {{-- Grille officielle, en consultation : elle reprend les scores enregistrés,
          pas ceux en cours de saisie. --}}
     @if ($campaign->etape >= 4 && $user->isDshn() && $campaign->allocations->isNotEmpty())
-        <div class="modal-overlay" id="ponderationGrilleModal" role="dialog" aria-modal="true" aria-labelledby="ponderationGrilleTitre">
+        <div class="modal-overlay js-table-modal" id="ponderationGrilleModal" role="dialog" aria-modal="true" aria-labelledby="ponderationGrilleTitre">
             <div class="modal-box modal-box-large">
                 <div class="modal-head">
                     <h3 id="ponderationGrilleTitre">Pondération par activité par fédération</h3>
                     <div class="modal-head-actions">
                         <a href="{{ route('campagnes.ponderation.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
-                        <button type="button" class="btn btn-sm js-close-ponderation-grille">Fermer</button>
+                        <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
                     </div>
                 </div>
                 <x-ponderation-grille :rubriques="$rubriques" :allocations="$campaign->allocations" :points-max="$pointsMax" />
+            </div>
+        </div>
+
+        <div class="modal-overlay js-table-modal" id="ponderationRecapModal" role="dialog" aria-modal="true" aria-labelledby="ponderationRecapTitre">
+            <div class="modal-box modal-box-large">
+                <div class="modal-head">
+                    <h3 id="ponderationRecapTitre">Récapitulatif par rubrique par fédération</h3>
+                    <div class="modal-head-actions">
+                        <a href="{{ route('campagnes.recap.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                        <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
+                    </div>
+                </div>
+                <x-ponderation-recap :rubriques="$rubriques" :lignes="$recapLignes" :points-max="$pointsMax" />
             </div>
         </div>
     @endif
@@ -457,23 +478,29 @@
                 });
             }
 
-            // Grille officielle en consultation.
-            const modale = document.getElementById('ponderationGrilleModal');
-            if (!modale) return;
+            // Tableaux de reference consultes en modale.
+            const ouvrir = (modale) => { modale.classList.add('active'); document.body.style.overflow = 'hidden'; };
+            const fermer = (modale) => { modale.classList.remove('active'); document.body.style.overflow = ''; };
 
-            const ouvrir = () => { modale.classList.add('active'); document.body.style.overflow = 'hidden'; };
-            const fermer = () => { modale.classList.remove('active'); document.body.style.overflow = ''; };
+            document.querySelectorAll('.js-open-modal').forEach(function (bouton) {
+                bouton.addEventListener('click', function () {
+                    const modale = document.getElementById(bouton.dataset.modal);
+                    if (modale) ouvrir(modale);
+                });
+            });
 
-            document.querySelectorAll('.js-open-ponderation-grille').forEach((bouton) => bouton.addEventListener('click', ouvrir));
-            modale.querySelectorAll('.js-close-ponderation-grille').forEach((bouton) => bouton.addEventListener('click', fermer));
-
-            modale.addEventListener('click', function (e) {
-                if (e.target === modale) fermer();
+            document.querySelectorAll('.modal-overlay.js-table-modal').forEach(function (modale) {
+                modale.querySelectorAll('.js-close-modal').forEach((bouton) => bouton.addEventListener('click', () => fermer(modale)));
+                modale.addEventListener('click', function (e) {
+                    if (e.target === modale) fermer(modale);
+                });
             });
 
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && modale.classList.contains('active')) fermer();
+                if (e.key !== 'Escape') return;
+                document.querySelectorAll('.modal-overlay.js-table-modal.active').forEach(fermer);
             });
+
         })();
     </script>
 @endpush
