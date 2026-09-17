@@ -162,6 +162,7 @@ Route::middleware(['auth', 'role:dshn,admin,dg,comite_arbitrage,ministre'])
         Route::post('/{campaign}/ponderation/confirmer', [CampaignController::class, 'confirmPonderation'])->name('ponderation.confirm');
         Route::get('/{campaign}/ponderation/export', [CampaignController::class, 'exportPonderation'])->name('ponderation.export');
         Route::get('/{campaign}/recapitulatif/export', [CampaignController::class, 'exportRecap'])->name('recap.export');
+        Route::get('/{campaign}/classement/export', [CampaignController::class, 'exportClassement'])->name('classement.export');
         Route::post('/{campaign}/categorisation/confirmer', [CampaignController::class, 'advanceToRepartition'])->name('categorisation.confirm');
         Route::post('/{campaign}/repartition', [CampaignController::class, 'updateRepartition'])->name('repartition.update');
         Route::post('/{campaign}/soumettre-dg', [CampaignController::class, 'submitToDg'])->name('submit-dg');

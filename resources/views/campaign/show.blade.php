@@ -4,6 +4,9 @@
 
 @php
     $user = auth()->user();
+
+    // Le classement n'est un document qu'une fois les montants repartis.
+    $repartitionEnregistree = $campaign->allocations->contains(fn ($allocation) => $allocation->montant_propose !== null);
 @endphp
 
 @push('styles')
@@ -141,6 +144,9 @@
             <div class="btn-group">
                 <button type="button" class="btn js-open-modal" data-modal="ponderationGrilleModal">Pondération par activité par fédération</button>
                 <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
+                @if ($repartitionEnregistree)
+                    <button type="button" class="btn js-open-modal" data-modal="classementModal">Classement par fédération</button>
+                @endif
             </div>
 
             @if ($campaign->etape === 5)
@@ -182,34 +188,7 @@
                     @endforeach
                 </div>
 
-                <div class="table-responsive">
-                <table class="market-table classement-federations">
-                    <thead>
-                        <tr>
-                            <th class="cl-num">N°</th>
-                            <th>Fédérations sportives et de loisirs</th>
-                            <th class="cl-points">Nbre de points</th>
-                            <th class="cl-cat">Catégories</th>
-                            <th class="cl-cat">Catégorie ajustée</th>
-                            <th class="cl-montant">Montant proposé</th>
-                            <th class="cl-override">Surcharge manuelle (optionnel)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($campaign->allocations as $index => $allocation)
-                            <tr>
-                                <td class="cl-num">{{ $index + 1 }}</td>
-                                <td>{{ $allocation->federation->federation_name }}</td>
-                                <td class="cl-points">{{ rtrim(rtrim(number_format((float) ($allocation->score_total ?? 0), 2, ',', ' '), '0'), ',') }}</td>
-                                <td class="cl-cat {{ $allocation->categorie ? 'cat-'.strtolower($allocation->categorie) : '' }}">{{ $allocation->categorie ?? '—' }}</td>
-                                <td class="cl-cat">{{ $allocation->categorie_ajustee ?? '—' }}</td>
-                                <td class="cl-montant">{{ $allocation->montant_propose !== null ? number_format($allocation->montant_propose, 0, ',', ' ').' FCFA' : '—' }}</td>
-                                <td class="cl-override"><input type="number" name="overrides[{{ $allocation->id }}]" class="form-input" min="0" step="1000" placeholder="Barème par défaut" aria-label="Surcharge manuelle du montant pour {{ $allocation->federation->federation_name }}"></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                </div>
+                <x-classement-federations :allocations="$campaign->allocations" :avec-surcharge="true" />
 
                 <div class="btn-group">
                     <button type="submit" class="btn primary">Enregistrer la répartition</button>
@@ -450,6 +429,21 @@
                 <x-ponderation-recap :rubriques="$rubriques" :lignes="$recapLignes" :points-max="$pointsMax" />
             </div>
         </div>
+
+        @if ($repartitionEnregistree)
+            <div class="modal-overlay js-table-modal" id="classementModal" role="dialog" aria-modal="true" aria-labelledby="classementTitre">
+                <div class="modal-box modal-box-large">
+                    <div class="modal-head">
+                        <h3 id="classementTitre">Classement par fédération</h3>
+                        <div class="modal-head-actions">
+                            <a href="{{ route('campagnes.classement.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                            <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
+                        </div>
+                    </div>
+                    <x-classement-federations :allocations="$campaign->allocations" />
+                </div>
+            </div>
+        @endif
     @endif
 @endsection
 

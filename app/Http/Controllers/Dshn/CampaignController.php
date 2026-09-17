@@ -381,6 +381,90 @@ class CampaignController extends Controller
         return response()->download($chemin, $fichier)->deleteFileAfterSend(true);
     }
 
+    /**
+     * Classement au format Excel, sur le modèle de la feuille officielle
+     * « CLASSEMENT PAR FEDERATION » : fédérations classées par points, avec
+     * leur catégorie et le montant proposé.
+     */
+    public function exportClassement(Campaign $campaign)
+    {
+        abort_unless(Auth::user()->isDshn(), 403);
+
+        $allocations = $campaign->allocations()->with('federation')->orderByDesc('score_total')->get();
+
+        // Cette feuille a ses propres couleurs, plus sourdes que celles du
+        // récapitulatif : elles sont reprises telles quelles.
+        $couleursCategorie = [
+            'A' => ['fond' => 'FFC6EFCE', 'texte' => 'FF006100'],
+            'B' => ['fond' => 'FFFFEB9C', 'texte' => 'FF9C6500'],
+            'C' => ['fond' => 'FF0070C0', 'texte' => 'FFFFFFFF'],
+            'D' => ['fond' => 'FFFFC7CE', 'texte' => 'FF9C0006'],
+        ];
+
+        $classeur = new Spreadsheet();
+        $feuille = $classeur->getActiveSheet();
+        $feuille->setTitle('Classement');
+
+        $feuille->setCellValue('A1', 'Classement par fédération — Campagne '.$campaign->annee_n1);
+        $feuille->mergeCells('A1:F1');
+        $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $ligneEntete = 3;
+        $feuille->fromArray(
+            ['N°', 'Fédérations sportives et de loisirs', 'Nbre de points', 'Catégories', 'Catégories ajustée', 'Montant proposé'],
+            null,
+            'A'.$ligneEntete
+        );
+        $feuille->getStyle('A'.$ligneEntete.':F'.$ligneEntete)->getFont()->setBold(true);
+        $feuille->getStyle('A'.$ligneEntete.':F'.$ligneEntete)->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $feuille->getRowDimension($ligneEntete)->setRowHeight(32);
+
+        $ligne = $ligneEntete;
+        foreach ($allocations as $index => $allocation) {
+            $ligne++;
+
+            $feuille->setCellValue('A'.$ligne, $index + 1);
+            $feuille->setCellValue('B'.$ligne, $allocation->federation->federation_name);
+            $feuille->setCellValue('C'.$ligne, (float) ($allocation->score_total ?? 0));
+            $feuille->setCellValue('D'.$ligne, $allocation->categorie ?? '');
+            $feuille->setCellValue('E'.$ligne, $allocation->categorie_ajustee ?? '');
+
+            if ($allocation->montant_propose !== null) {
+                $feuille->setCellValue('F'.$ligne, (float) $allocation->montant_propose);
+            }
+
+            if (isset($couleursCategorie[$allocation->categorie])) {
+                $style = $feuille->getStyle('D'.$ligne);
+                $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()
+                    ->setARGB($couleursCategorie[$allocation->categorie]['fond']);
+                $style->getFont()->setBold(true)->getColor()
+                    ->setARGB($couleursCategorie[$allocation->categorie]['texte']);
+            }
+        }
+
+        $feuille->getStyle('A'.$ligneEntete.':F'.$ligne)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $feuille->getStyle('A'.$ligneEntete.':A'.$ligne)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $feuille->getStyle('C'.$ligneEntete.':E'.$ligne)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $feuille->getStyle('F'.($ligneEntete + 1).':F'.$ligne)->getNumberFormat()->setFormatCode('# ##0');
+
+        $feuille->getColumnDimension('A')->setWidth(5);
+        $feuille->getColumnDimension('B')->setWidth(45);
+        foreach (['C', 'D', 'E', 'F'] as $colonne) {
+            $feuille->getColumnDimension($colonne)->setWidth(18);
+        }
+        $feuille->freezePane('A'.($ligneEntete + 1));
+
+        $fichier = 'classement-campagne-'.$campaign->annee_n1.'.xlsx';
+        $chemin = tempnam(sys_get_temp_dir(), 'classement');
+
+        (new Xlsx($classeur))->save($chemin);
+        $classeur->disconnectWorksheets();
+
+        return response()->download($chemin, $fichier)->deleteFileAfterSend(true);
+    }
+
     public function confirmPonderation(Campaign $campaign)
     {
         abort_unless(Auth::user()->isDshn(), 403);
