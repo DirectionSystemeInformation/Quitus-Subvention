@@ -50,6 +50,9 @@ class CampaignController extends Controller
             'rubriques' => $grille->rubriques(),
             'criteres' => $grille->criteres(),
             'paliers' => $grille->paliers(),
+            // Détail des paliers pour le calcul en direct de la catégorie
+            // pendant la saisie de la pondération.
+            'paliersDetail' => $grille->paliersDetail(),
             'pointsMax' => $grille->pointsMax(),
             // Récapitulatif par rubrique : sous-total de chaque rubrique pour
             // chaque fédération, à partir des scores saisis en pondération.

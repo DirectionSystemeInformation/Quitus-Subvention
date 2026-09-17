@@ -187,9 +187,19 @@ class PonderationGrille
      */
     public function paliers(): array
     {
+        return array_column($this->paliersDetail(), 'code');
+    }
+
+    /**
+     * Paliers complets (code, catégorie, seuil), du plus faible au plus élevé.
+     *
+     * @return array<int, array{code: string, categorie: string, seuil_min: float}>
+     */
+    public function paliersDetail(): array
+    {
         $paliers = $this->paliers;
         usort($paliers, fn ($a, $b) => $a['seuil_min'] <=> $b['seuil_min']);
 
-        return array_column($paliers, 'code');
+        return $paliers;
     }
 }

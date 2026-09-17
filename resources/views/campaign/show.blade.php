@@ -62,46 +62,76 @@
             @if ($campaign->allocations->isEmpty())
                 <x-empty-state icon="list" title="Aucune fédération retenue pour cette campagne." />
             @else
+                @php
+                    $points = fn ($valeur) => rtrim(rtrim(number_format((float) $valeur, 2, ',', ' '), '0'), ',');
+                @endphp
+                <p class="strength-text" style="margin-bottom: 16px;">Saisissez les points obtenus par chaque fédération, critère par critère. Les totaux de rubrique et la catégorie se recalculent à mesure.</p>
                 <form method="POST" action="{{ route('campagnes.ponderation.update', $campaign) }}" id="ponderationForm">
                     @csrf
                     <div class="table-responsive">
-                    <table class="market-table pb-table ponderation-table" id="ponderationTable">
+                    <table class="ponderation-grille" id="ponderationTable">
                         <thead>
                             <tr>
-                                <th rowspan="2">Fédération</th>
-                                @foreach ($rubriques as $rubrique)
-                                    <th colspan="{{ count($rubrique['criteres']) }}">{{ $rubrique['rubrique'] }} ({{ $rubrique['rubrique_max'] }})</th>
-                                @endforeach
-                                <th rowspan="2">Total</th>
-                            </tr>
-                            <tr>
-                                @foreach ($criteres as $critere)
-                                    <th scope="col" class="criterion-heading">
-                                        <details>
-                                            <summary>{{ \Illuminate\Support\Str::limit($critere['label'], 36) }} · /{{ rtrim(rtrim(number_format($critere['max'], 1), '0'), '.') }}</summary>
-                                            <span>{{ $critere['label'] }}</span>
-                                        </details>
+                                <th class="pg-num">N°</th>
+                                <th class="pg-rubrique">Rubriques</th>
+                                <th class="pg-critere">Critères</th>
+                                <th class="pg-bareme">Pondération</th>
+                                @foreach ($campaign->allocations as $allocation)
+                                    <th class="pg-fede" title="{{ $allocation->federation->federation_name }}">
+                                        <span>{{ $allocation->federation->federation_name }}</span>
                                     </th>
                                 @endforeach
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($campaign->allocations as $allocation)
-                                <tr data-allocation-row data-allocation-id="{{ $allocation->id }}">
-                                    <td>{{ $allocation->federation->federation_name }}</td>
-                                    @foreach ($criteres as $critere)
-                                        <td>
-                                            <input type="number" step="0.5" min="0" max="{{ $critere['max'] }}"
-                                                name="scores[{{ $allocation->id }}][{{ $critere['slug'] }}]"
-                                                aria-label="{{ $allocation->federation->federation_name }} — {{ $critere['label'] }} (sur {{ $critere['max'] }})"
-                                                value="{{ $allocation->criteres_scores[$critere['slug']] ?? '' }}"
-                                                class="pb-num critere-input">
-                                        </td>
+                            @php $numero = 1; @endphp
+                            @foreach ($rubriques as $rubriqueIndex => $rubrique)
+                                @foreach ($rubrique['criteres'] as $critereIndex => $critere)
+                                    <tr>
+                                        <td class="pg-num">{{ $numero++ }}</td>
+                                        @if ($critereIndex === 0)
+                                            <td class="pg-rubrique" rowspan="{{ count($rubrique['criteres']) }}">{{ $rubrique['rubrique'] }}</td>
+                                        @endif
+                                        <td class="pg-critere">{{ $critere['label'] }}</td>
+                                        <td class="pg-bareme">{{ $points($critere['max']) }}</td>
+                                        @foreach ($campaign->allocations as $allocation)
+                                            <td class="pg-fede">
+                                                <input type="number" step="0.5" min="0" max="{{ $critere['max'] }}"
+                                                    name="scores[{{ $allocation->id }}][{{ $critere['slug'] }}]"
+                                                    aria-label="{{ $allocation->federation->federation_name }} — {{ $critere['label'] }} (sur {{ $critere['max'] }})"
+                                                    value="{{ $allocation->criteres_scores[$critere['slug']] ?? '' }}"
+                                                    data-allocation="{{ $allocation->id }}" data-rubrique="{{ $rubriqueIndex }}"
+                                                    class="critere-input">
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                                <tr class="pg-total-row">
+                                    <td colspan="3" class="pg-libelle-total">Total {{ $rubrique['rubrique'] }}</td>
+                                    <td class="pg-bareme">{{ $points($rubrique['rubrique_max']) }}</td>
+                                    @foreach ($campaign->allocations as $allocation)
+                                        <td class="pg-fede" data-total-rubrique="{{ $rubriqueIndex }}" data-allocation="{{ $allocation->id }}">0</td>
                                     @endforeach
-                                    <td class="ponderation-total" data-total>{{ $allocation->score_total ?? 0 }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
+                        <tfoot>
+                            <tr class="pg-grand-total">
+                                <td colspan="3" class="pg-libelle-total">Total</td>
+                                <td class="pg-bareme">{{ $points($pointsMax) }}</td>
+                                @foreach ($campaign->allocations as $allocation)
+                                    <td class="pg-fede" data-total-general data-allocation="{{ $allocation->id }}">{{ $points($allocation->score_total ?? 0) }}</td>
+                                @endforeach
+                            </tr>
+                            <tr class="pg-categorie-row">
+                                <td colspan="3" class="pg-libelle-total">Catégorie</td>
+                                <td class="pg-bareme"></td>
+                                @foreach ($campaign->allocations as $allocation)
+                                    <td class="pg-fede {{ $allocation->categorie ? 'cat-'.strtolower($allocation->categorie) : '' }}"
+                                        data-categorie data-allocation="{{ $allocation->id }}">{{ $allocation->categorie ?? '—' }}</td>
+                                @endforeach
+                            </tr>
+                        </tfoot>
                     </table>
                     </div>
                     <div class="btn-group">
@@ -404,27 +434,65 @@
 @endsection
 
 @push('scripts')
+    <script id="ponderationPaliers" type="application/json">@json($paliersDetail ?? [])</script>
     <script>
         (function () {
             const table = document.getElementById('ponderationTable');
             if (!table) return;
 
-            function updateRowTotal(row) {
-                const inputs = row.querySelectorAll('.critere-input');
-                let total = 0;
-                inputs.forEach(function (input) {
-                    total += parseFloat(input.value) || 0;
+            // Paliers tries par seuil croissant : la categorie d'un score est
+            // celle du dernier palier dont le seuil ne le depasse pas.
+            const paliers = JSON.parse(document.getElementById('ponderationPaliers').textContent)
+                .slice().sort((a, b) => a.seuil_min - b.seuil_min);
+
+            const formate = (valeur) => (Math.round(valeur * 100) / 100).toString().replace('.', ',');
+
+            function categoriePour(total) {
+                if (total <= 0) return null;
+
+                let trouve = null;
+                paliers.forEach(function (palier) {
+                    if (total >= palier.seuil_min) trouve = palier;
                 });
-                const cell = row.querySelector('[data-total]');
-                if (cell) cell.textContent = total.toFixed(2).replace(/\.00$/, '');
+
+                return trouve ? trouve.categorie : null;
             }
 
-            table.querySelectorAll('[data-allocation-row]').forEach(updateRowTotal);
+            function recalculer(allocationId) {
+                const inputs = table.querySelectorAll('.critere-input[data-allocation="' + allocationId + '"]');
+                const totauxRubrique = {};
+                let total = 0;
+
+                inputs.forEach(function (input) {
+                    const valeur = parseFloat(input.value) || 0;
+                    const rubrique = input.dataset.rubrique;
+                    totauxRubrique[rubrique] = (totauxRubrique[rubrique] || 0) + valeur;
+                    total += valeur;
+                });
+
+                Object.keys(totauxRubrique).forEach(function (rubrique) {
+                    const cellule = table.querySelector('[data-total-rubrique="' + rubrique + '"][data-allocation="' + allocationId + '"]');
+                    if (cellule) cellule.textContent = formate(totauxRubrique[rubrique]);
+                });
+
+                const cellTotal = table.querySelector('[data-total-general][data-allocation="' + allocationId + '"]');
+                if (cellTotal) cellTotal.textContent = formate(total);
+
+                const cellCategorie = table.querySelector('[data-categorie][data-allocation="' + allocationId + '"]');
+                if (cellCategorie) {
+                    const categorie = categoriePour(total);
+                    cellCategorie.textContent = categorie || '—';
+                    cellCategorie.className = 'pg-fede' + (categorie ? ' cat-' + categorie.toLowerCase() : '');
+                }
+            }
+
+            const allocations = new Set();
+            table.querySelectorAll('.critere-input').forEach((input) => allocations.add(input.dataset.allocation));
+            allocations.forEach(recalculer);
 
             table.addEventListener('input', function (e) {
                 if (!e.target.classList.contains('critere-input')) return;
-                const row = e.target.closest('[data-allocation-row]');
-                if (row) updateRowTotal(row);
+                recalculer(e.target.dataset.allocation);
             });
         })();
     </script>

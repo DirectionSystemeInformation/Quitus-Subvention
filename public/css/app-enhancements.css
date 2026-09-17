@@ -1522,3 +1522,184 @@
 .cat-b { background: #FFFF00; color: #1c1c1e; }
 .cat-c { background: #00B0F0; color: #1c1c1e; }
 .cat-d { background: #FFC7CE; color: #9C0006; }
+
+/* ========================================
+   Grille de saisie de la pondération
+   Reprend la feuille « PONDERATION PAR ACTI PAR FEDE » : les critères
+   en lignes, une colonne par fédération, et les totaux de rubrique sur
+   le vert du document (#92D050). Les quatre premières colonnes restent
+   visibles au défilement horizontal.
+======================================== */
+.ponderation-grille {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+}
+
+.ponderation-grille th,
+.ponderation-grille td {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 8px;
+    background: var(--bg-card);
+}
+
+.ponderation-grille thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--bg-secondary, #f5f5f7);
+    border-top: 1px solid var(--border);
+    font-weight: 700;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.ponderation-grille tbody td,
+.ponderation-grille tfoot td {
+    vertical-align: middle;
+}
+
+/* Colonnes figées : les décalages suivent les largeurs ci-dessous. */
+.ponderation-grille .pg-num,
+.ponderation-grille .pg-rubrique,
+.ponderation-grille .pg-critere,
+.ponderation-grille .pg-bareme {
+    position: sticky;
+    z-index: 2;
+}
+
+.ponderation-grille thead .pg-num,
+.ponderation-grille thead .pg-rubrique,
+.ponderation-grille thead .pg-critere,
+.ponderation-grille thead .pg-bareme {
+    z-index: 4;
+}
+
+.ponderation-grille .pg-num {
+    left: 0;
+    width: 44px;
+    min-width: 44px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.ponderation-grille .pg-rubrique {
+    left: 44px;
+    width: 150px;
+    min-width: 150px;
+    font-weight: 600;
+}
+
+.ponderation-grille tbody .pg-rubrique {
+    vertical-align: top;
+    padding-top: 10px;
+}
+
+.ponderation-grille .pg-critere {
+    left: 194px;
+    width: 250px;
+    min-width: 250px;
+    white-space: normal;
+    line-height: 1.35;
+}
+
+.ponderation-grille .pg-bareme {
+    left: 444px;
+    width: 72px;
+    min-width: 72px;
+    text-align: center;
+    font-weight: 700;
+    border-right: 2px solid var(--border);
+}
+
+/* Colonnes fédération : en-tête vertical pour rester lisible à 30 colonnes. */
+.ponderation-grille .pg-fede {
+    width: 46px;
+    min-width: 46px;
+    text-align: center;
+    padding: 4px 2px;
+}
+
+.ponderation-grille thead .pg-fede {
+    height: 190px;
+    vertical-align: bottom;
+}
+
+.ponderation-grille thead .pg-fede span {
+    display: block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    max-height: 178px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    margin: 0 auto;
+}
+
+.ponderation-grille .critere-input {
+    width: 40px;
+    padding: 4px 2px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.ponderation-grille .critere-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.ponderation-grille .pg-total-row td,
+.ponderation-grille .pg-grand-total td {
+    background: #92D050;
+    color: #1c1c1e;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Le libellé « Total … » couvre les trois premières colonnes : il doit rester
+   figé comme elles, sinon les scores défilent par-dessous. */
+.ponderation-grille .pg-libelle-total {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    width: 444px;
+    min-width: 444px;
+    text-align: left;
+    padding-left: 12px;
+}
+
+.ponderation-grille tfoot .pg-libelle-total {
+    z-index: 3;
+}
+
+.ponderation-grille tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+}
+
+.ponderation-grille tfoot .pg-num,
+.ponderation-grille tfoot .pg-rubrique,
+.ponderation-grille tfoot .pg-critere,
+.ponderation-grille tfoot .pg-bareme {
+    z-index: 3;
+}
+
+.ponderation-grille .pg-categorie-row td {
+    background: var(--bg-secondary, #f5f5f7);
+    font-weight: 700;
+    text-align: center;
+}
+
+
+.ponderation-grille .pg-categorie-row td.cat-a { background: #92D050; }
+.ponderation-grille .pg-categorie-row td.cat-b { background: #FFFF00; }
+.ponderation-grille .pg-categorie-row td.cat-c { background: #00B0F0; }
+.ponderation-grille .pg-categorie-row td.cat-d { background: #FFC7CE; color: #9C0006; }
