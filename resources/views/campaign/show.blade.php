@@ -198,22 +198,28 @@
                 </div>
 
                 <div class="table-responsive">
-                <table class="market-table">
+                <table class="market-table classement-federations">
                     <thead>
                         <tr>
-                            <th>Fédération</th>
-                            <th>Catégorie ajustée</th>
-                            <th>Montant proposé (barème)</th>
-                            <th>Surcharge manuelle (optionnel)</th>
+                            <th class="cl-num">N°</th>
+                            <th>Fédérations sportives et de loisirs</th>
+                            <th class="cl-points">Nbre de points</th>
+                            <th class="cl-cat">Catégories</th>
+                            <th class="cl-cat">Catégorie ajustée</th>
+                            <th class="cl-montant">Montant proposé</th>
+                            <th class="cl-override">Surcharge manuelle (optionnel)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($campaign->allocations as $allocation)
+                        @foreach ($campaign->allocations as $index => $allocation)
                             <tr>
+                                <td class="cl-num">{{ $index + 1 }}</td>
                                 <td>{{ $allocation->federation->federation_name }}</td>
-                                <td>{{ $allocation->categorie_ajustee ?? '—' }}</td>
-                                <td>{{ $allocation->montant_propose !== null ? number_format($allocation->montant_propose, 0, ',', ' ').' FCFA' : '—' }}</td>
-                                <td><input type="number" name="overrides[{{ $allocation->id }}]" class="form-input" min="0" step="1000" placeholder="Laisser vide pour utiliser le barème"></td>
+                                <td class="cl-points">{{ rtrim(rtrim(number_format((float) ($allocation->score_total ?? 0), 2, ',', ' '), '0'), ',') }}</td>
+                                <td class="cl-cat {{ $allocation->categorie ? 'cat-'.strtolower($allocation->categorie) : '' }}">{{ $allocation->categorie ?? '—' }}</td>
+                                <td class="cl-cat">{{ $allocation->categorie_ajustee ?? '—' }}</td>
+                                <td class="cl-montant">{{ $allocation->montant_propose !== null ? number_format($allocation->montant_propose, 0, ',', ' ').' FCFA' : '—' }}</td>
+                                <td class="cl-override"><input type="number" name="overrides[{{ $allocation->id }}]" class="form-input" min="0" step="1000" placeholder="Barème par défaut" aria-label="Surcharge manuelle du montant pour {{ $allocation->federation->federation_name }}"></td>
                             </tr>
                         @endforeach
                     </tbody>

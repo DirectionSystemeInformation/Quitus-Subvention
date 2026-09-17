@@ -1524,6 +1524,44 @@
 .cat-d { background: #FFC7CE; color: #9C0006; }
 
 /* ========================================
+   Classement par fédération
+   La feuille « CLASSEMENT PAR FEDERATION » utilise ses propres couleurs
+   de catégorie, plus sourdes que celles du récapitulatif : on les reprend
+   telles quelles pour rester fidèle au document.
+======================================== */
+.classement-federations .cat-a { background: #C6EFCE; color: #006100; }
+.classement-federations .cat-b { background: #FFEB9C; color: #9C6500; }
+.classement-federations .cat-c { background: #0070C0; color: #ffffff; }
+.classement-federations .cat-d { background: #FFC7CE; color: #9C0006; }
+
+.classement-federations .cl-num {
+    width: 44px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.classement-federations .cl-points,
+.classement-federations .cl-cat,
+.classement-federations .cl-montant {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.classement-federations .cl-points,
+.classement-federations .cl-cat {
+    font-weight: 700;
+}
+
+.classement-federations .cl-override {
+    width: 190px;
+}
+
+.classement-federations .cl-override .form-input {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+/* ========================================
    Grille de saisie de la pondération
    Reprend la feuille « PONDERATION PAR ACTI PAR FEDE » : les critères
    en lignes, une colonne par fédération, et les totaux de rubrique sur
