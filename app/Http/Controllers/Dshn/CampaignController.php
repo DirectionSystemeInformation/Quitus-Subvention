@@ -418,7 +418,7 @@ class CampaignController extends Controller
 
         $derniereColonne = $avecMontantsFinaux ? 'H' : 'F';
 
-        $feuille->setCellValue('A1', ($avecMontantsFinaux ? 'Répartition définitive par fédération' : 'Classement par fédération').' — Campagne '.$campaign->annee_n1);
+        $feuille->setCellValue('A1', ($avecMontantsFinaux ? 'Répartition définitive par fédération' : 'Classement et montant proposé par fédérations').' — Campagne '.$campaign->annee_n1);
         $feuille->mergeCells('A1:'.$derniereColonne.'1');
         $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

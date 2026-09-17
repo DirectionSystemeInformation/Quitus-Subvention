@@ -149,7 +149,7 @@
                 <button type="button" class="btn js-open-modal" data-modal="ponderationGrilleModal">Pondération par activité par fédération</button>
                 <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
                 @if ($repartitionEnregistree)
-                    <button type="button" class="btn js-open-modal" data-modal="classementModal">Classement par fédération</button>
+                    <button type="button" class="btn js-open-modal" data-modal="classementModal">Classement et montant proposé par fédérations</button>
                 @endif
                 @if ($repartitionValideeMinistre)
                     <button type="button" class="btn js-open-modal" data-modal="repartitionDefinitiveModal">Répartition définitive par fédération</button>
@@ -441,7 +441,7 @@
             <div class="modal-overlay js-table-modal" id="classementModal" role="dialog" aria-modal="true" aria-labelledby="classementTitre">
                 <div class="modal-box modal-box-large">
                     <div class="modal-head">
-                        <h3 id="classementTitre">Classement par fédération</h3>
+                        <h3 id="classementTitre">Classement et montant proposé par fédérations</h3>
                         <div class="modal-head-actions">
                             <a href="{{ route('campagnes.classement.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
                             <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
