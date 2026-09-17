@@ -386,7 +386,18 @@ class CampaignController extends Controller
      * « CLASSEMENT PAR FEDERATION » : fédérations classées par points, avec
      * leur catégorie et le montant proposé.
      */
-    public function exportClassement(Campaign $campaign)
+    /**
+     * Répartition définitive : le classement complété des montants arbitré et
+     * final, disponible une fois la validation du Ministre acquise.
+     */
+    public function exportRepartitionDefinitive(Campaign $campaign)
+    {
+        abort_unless($campaign->ministre_decision === 'valide', 404);
+
+        return $this->exportClassement($campaign, true);
+    }
+
+    public function exportClassement(Campaign $campaign, bool $avecMontantsFinaux = false)
     {
         abort_unless(Auth::user()->isDshn(), 403);
 
@@ -405,19 +416,23 @@ class CampaignController extends Controller
         $feuille = $classeur->getActiveSheet();
         $feuille->setTitle('Classement');
 
-        $feuille->setCellValue('A1', 'Classement par fédération — Campagne '.$campaign->annee_n1);
-        $feuille->mergeCells('A1:F1');
+        $derniereColonne = $avecMontantsFinaux ? 'H' : 'F';
+
+        $feuille->setCellValue('A1', ($avecMontantsFinaux ? 'Répartition définitive par fédération' : 'Classement par fédération').' — Campagne '.$campaign->annee_n1);
+        $feuille->mergeCells('A1:'.$derniereColonne.'1');
         $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $ligneEntete = 3;
-        $feuille->fromArray(
-            ['N°', 'Fédérations sportives et de loisirs', 'Nbre de points', 'Catégories', 'Catégories ajustée', 'Montant proposé'],
-            null,
-            'A'.$ligneEntete
-        );
-        $feuille->getStyle('A'.$ligneEntete.':F'.$ligneEntete)->getFont()->setBold(true);
-        $feuille->getStyle('A'.$ligneEntete.':F'.$ligneEntete)->getAlignment()
+        $entetes = ['N°', 'Fédérations sportives et de loisirs', 'Nbre de points', 'Catégories', 'Catégories ajustée', 'Montant proposé'];
+        if ($avecMontantsFinaux) {
+            $entetes[] = 'Montant arbitré';
+            $entetes[] = 'Montant final';
+        }
+
+        $feuille->fromArray($entetes, null, 'A'.$ligneEntete);
+        $feuille->getStyle('A'.$ligneEntete.':'.$derniereColonne.$ligneEntete)->getFont()->setBold(true);
+        $feuille->getStyle('A'.$ligneEntete.':'.$derniereColonne.$ligneEntete)->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
         $feuille->getRowDimension($ligneEntete)->setRowHeight(32);
 
@@ -435,6 +450,15 @@ class CampaignController extends Controller
                 $feuille->setCellValue('F'.$ligne, (float) $allocation->montant_propose);
             }
 
+            if ($avecMontantsFinaux) {
+                if ($allocation->montant_arbitre !== null) {
+                    $feuille->setCellValue('G'.$ligne, (float) $allocation->montant_arbitre);
+                }
+                if ($allocation->montant_final !== null) {
+                    $feuille->setCellValue('H'.$ligne, (float) $allocation->montant_final);
+                }
+            }
+
             if (isset($couleursCategorie[$allocation->categorie])) {
                 $style = $feuille->getStyle('D'.$ligne);
                 $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()
@@ -444,19 +468,23 @@ class CampaignController extends Controller
             }
         }
 
-        $feuille->getStyle('A'.$ligneEntete.':F'.$ligne)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $feuille->getStyle('A'.$ligneEntete.':'.$derniereColonne.$ligne)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $feuille->getStyle('A'.$ligneEntete.':A'.$ligne)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $feuille->getStyle('C'.$ligneEntete.':E'.$ligne)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $feuille->getStyle('F'.($ligneEntete + 1).':F'.$ligne)->getNumberFormat()->setFormatCode('# ##0');
+        $feuille->getStyle('F'.($ligneEntete + 1).':'.$derniereColonne.$ligne)->getNumberFormat()->setFormatCode('# ##0');
+
+        if ($avecMontantsFinaux) {
+            $feuille->getStyle('H'.$ligneEntete.':H'.$ligne)->getFont()->setBold(true);
+        }
 
         $feuille->getColumnDimension('A')->setWidth(5);
         $feuille->getColumnDimension('B')->setWidth(45);
-        foreach (['C', 'D', 'E', 'F'] as $colonne) {
+        foreach (range('C', $derniereColonne) as $colonne) {
             $feuille->getColumnDimension($colonne)->setWidth(18);
         }
         $feuille->freezePane('A'.($ligneEntete + 1));
 
-        $fichier = 'classement-campagne-'.$campaign->annee_n1.'.xlsx';
+        $fichier = ($avecMontantsFinaux ? 'repartition-definitive' : 'classement').'-campagne-'.$campaign->annee_n1.'.xlsx';
         $chemin = tempnam(sys_get_temp_dir(), 'classement');
 
         (new Xlsx($classeur))->save($chemin);

@@ -7,6 +7,10 @@
 
     // Le classement n'est un document qu'une fois les montants repartis.
     $repartitionEnregistree = $campaign->allocations->contains(fn ($allocation) => $allocation->montant_propose !== null);
+
+    // Les montants ne sont definitifs qu'une fois le Ministre passe : c'est sa
+    // validation qui reporte l'arbitrage en montant final.
+    $repartitionValideeMinistre = $campaign->ministre_decision === 'valide';
 @endphp
 
 @push('styles')
@@ -146,6 +150,9 @@
                 <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
                 @if ($repartitionEnregistree)
                     <button type="button" class="btn js-open-modal" data-modal="classementModal">Classement par fédération</button>
+                @endif
+                @if ($repartitionValideeMinistre)
+                    <button type="button" class="btn js-open-modal" data-modal="repartitionDefinitiveModal">Répartition définitive par fédération</button>
                 @endif
             </div>
 
@@ -441,6 +448,24 @@
                         </div>
                     </div>
                     <x-classement-federations :allocations="$campaign->allocations" />
+                </div>
+            </div>
+        @endif
+
+        @if ($repartitionValideeMinistre)
+            <div class="modal-overlay js-table-modal" id="repartitionDefinitiveModal" role="dialog" aria-modal="true" aria-labelledby="repartitionDefinitiveTitre">
+                <div class="modal-box modal-box-large">
+                    <div class="modal-head">
+                        <h3 id="repartitionDefinitiveTitre">Répartition définitive par fédération</h3>
+                        <div class="modal-head-actions">
+                            <a href="{{ route('campagnes.repartition-definitive.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                            <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
+                        </div>
+                    </div>
+                    <p class="strength-text" style="margin-bottom: 16px;">
+                        Validée par le Ministre le {{ optional($campaign->ministre_decided_at)->locale('fr')->translatedFormat('d F Y') }}.
+                    </p>
+                    <x-classement-federations :allocations="$campaign->allocations" :avec-montants-finaux="true" />
                 </div>
             </div>
         @endif
