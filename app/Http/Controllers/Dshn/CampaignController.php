@@ -50,6 +50,13 @@ class CampaignController extends Controller
             'rubriques' => $grille->rubriques(),
             'criteres' => $grille->criteres(),
             'paliers' => $grille->paliers(),
+            'pointsMax' => $grille->pointsMax(),
+            // Récapitulatif par rubrique : sous-total de chaque rubrique pour
+            // chaque fédération, à partir des scores saisis en pondération.
+            'recapLignes' => $campaign->allocations->map(fn (CampaignAllocation $allocation) => [
+                'allocation' => $allocation,
+                'sous_totaux' => $grille->sousTotauxParRubrique($allocation->criteres_scores ?? []),
+            ]),
         ]);
     }
 

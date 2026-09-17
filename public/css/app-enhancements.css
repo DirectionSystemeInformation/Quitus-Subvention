@@ -1469,3 +1469,56 @@
     color: var(--text-primary);
     font-size: 15px;
 }
+
+/* ========================================
+   Récapitulatif de pondération par rubrique
+   Couleurs reprises du document officiel de la plénière
+   (feuille « RECAP PAR RUBRIQUE PAR FEDE ») : elles ne suivent
+   volontairement pas la charte de l'application.
+======================================== */
+.recap-rubriques th,
+.recap-rubriques td {
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.recap-rubriques thead th {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.recap-col-num {
+    width: 44px;
+    text-align: center;
+}
+
+.recap-col-structure {
+    min-width: 220px;
+}
+
+.recap-col-rubrique,
+.recap-col-total,
+.recap-col-cat,
+.recap-col-montant {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.recap-col-total,
+.recap-col-cat {
+    font-weight: 700;
+}
+
+.recap-rubriques .recap-max-row .recap-max-cell {
+    background: #F4B183;
+    color: #1c1c1e;
+    font-weight: 700;
+    text-align: center;
+}
+
+.cat-a { background: #92D050; color: #1c1c1e; }
+.cat-b { background: #FFFF00; color: #1c1c1e; }
+.cat-c { background: #00B0F0; color: #1c1c1e; }
+.cat-d { background: #FFC7CE; color: #9C0006; }

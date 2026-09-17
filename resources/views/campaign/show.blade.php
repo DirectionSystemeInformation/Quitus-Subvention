@@ -116,14 +116,32 @@
         </div>
     @endif
 
-    {{-- Étape 5 : Catégorisation --}}
-    @if ($campaign->etape === 5 && $user->isDshn())
+    {{-- Étape 5 et suivantes : récapitulatif par rubrique --}}
+    @if ($campaign->etape >= 5 && $user->isDshn() && $campaign->allocations->isNotEmpty())
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2 class="card-title">{{ $campaign->etape === 5 ? 'Catégorisation des fédérations' : 'Récapitulatif par rubrique' }}</h2>
+            </div>
+            <p class="strength-text" style="margin-bottom: 16px;">
+                Sous-total de chaque rubrique, score sur {{ 0 + $pointsMax }} points et catégorie qui en découle.
+            </p>
+
+            <x-ponderation-recap :rubriques="$rubriques" :lignes="$recapLignes" :points-max="$pointsMax" />
+
+            @if ($campaign->etape === 5)
+                <form method="POST" action="{{ route('campagnes.categorisation.confirm', $campaign) }}" class="btn-group" style="margin-top: 20px;">
+                    @csrf
+                    <button type="submit" class="btn primary">Confirmer et passer à la répartition</button>
+                </form>
+            @endif
+        </div>
+    @elseif ($campaign->etape === 5 && $user->isDshn())
         <div class="card" style="margin-bottom: 24px;">
             <div class="card-header">
                 <h2 class="card-title">Catégorisation des fédérations</h2>
             </div>
-            <p class="strength-text">Catégories calculées automatiquement à partir du score total de pondération.</p>
-            <form method="POST" action="{{ route('campagnes.categorisation.confirm', $campaign) }}" class="btn-group">
+            <x-empty-state icon="users" title="Aucune fédération retenue pour cette campagne." :compact="true" />
+            <form method="POST" action="{{ route('campagnes.categorisation.confirm', $campaign) }}" class="btn-group" style="margin-top: 16px;">
                 @csrf
                 <button type="submit" class="btn primary">Confirmer et passer à la répartition</button>
             </form>
