@@ -328,7 +328,7 @@ body.auth-page {
 .submit-btn {
     width: 100%;
     padding: 16px;
-    background: #047857;
+    background: var(--brand-600);
     border: none;
     border-radius: 12px;
     font-size: 16px;
@@ -341,7 +341,7 @@ body.auth-page {
 }
 
 .submit-btn:hover {
-    background: #065f46;
+    background: var(--brand-700);
 }
 
 /* ========================================

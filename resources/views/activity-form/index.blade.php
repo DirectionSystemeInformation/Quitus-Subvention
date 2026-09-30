@@ -51,7 +51,7 @@
     <div class="content-grid" style="margin-bottom: {{ $hasOtherYears ? '24px' : '0' }};">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">{{ $shortTitle }} — {{ $selectedYear }}</h2>
+                <h2 class="card-title">{{ $shortTitle }} : {{ $selectedYear }}</h2>
             </div>
 
             <div style="display:flex; align-items:center; gap:16px; flex-wrap: wrap; margin-bottom: 16px;">
@@ -140,7 +140,7 @@
     @if ($hasOtherYears)
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Historique — {{ $shortTitle }}</h2>
+                <h2 class="card-title">Historique : {{ $shortTitle }}</h2>
             </div>
 
             <div class="table-responsive">

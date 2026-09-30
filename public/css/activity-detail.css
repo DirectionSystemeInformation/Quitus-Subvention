@@ -40,7 +40,7 @@
 .ad-page .ad-eyebrow {
     margin: 0 0 6px;
     color: var(--color-primary);
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
@@ -88,7 +88,7 @@
     border-radius: 999px;
     background: #f1f6f3;
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
 }
 
@@ -125,7 +125,7 @@
     border-radius: 14px;
 }
 
-.ad-page .ad-next.is-success { --ton: #08664f; --ton-fond: #edf7f1; --ton-bord: #c9e4d5; }
+.ad-page .ad-next.is-success { --ton: var(--brand-600); --ton-fond: #edf7f1; --ton-bord: #c9e4d5; }
 .ad-page .ad-next.is-danger { --ton: #b42318; --ton-fond: #fef3f2; --ton-bord: #f6cfca; }
 .ad-page .ad-next.is-warning { --ton: #b7791f; --ton-fond: #fff7e8; --ton-bord: #f1dcad; }
 .ad-page .ad-next.is-info { --ton: #1f5f8b; --ton-fond: #eef5fb; --ton-bord: #cadff0; }
@@ -156,7 +156,7 @@
 .ad-page .ad-next-label {
     margin: 0 0 2px;
     color: var(--ton);
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 800;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -245,7 +245,7 @@
     border-radius: 999px;
     background: #eef2ef;
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
 }
 
@@ -277,7 +277,7 @@
 .ad-page .ad-facts dt {
     margin-bottom: 4px;
     color: var(--text-secondary);
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 700;
     letter-spacing: .06em;
     text-transform: uppercase;
@@ -449,7 +449,7 @@
 .ad-page .is-erreur .ad-dot::before {
     content: "!";
     color: #fff;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 900;
     line-height: 1;
 }
@@ -521,7 +521,7 @@
 .ad-page .ad-note {
     margin: 12px 0 0;
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.5;
 }
 

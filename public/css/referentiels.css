@@ -25,7 +25,7 @@
     border-radius: 999px;
     background: #fff;
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .ref-page .ref-summary strong {
@@ -80,7 +80,7 @@
 .ref-page .ref-group-title p {
     margin: 2px 0 0;
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 /* --- Codes, points, pastilles ---------------------------------------------- */
@@ -96,7 +96,7 @@
     border-radius: 7px;
     background: #eef4f0;
     color: var(--color-primary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -249,7 +249,7 @@
 .ref-page .ref-field label {
     margin: 0;
     color: var(--text-primary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 650;
 }
 
@@ -272,7 +272,7 @@
 
 .ref-page .ref-field .field-error {
     margin: 0;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .ref-page .ref-form-actions {
@@ -353,7 +353,7 @@
 
 .ref-page .ref-group.is-new .ref-add-toggle small {
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
 }
 

@@ -3,7 +3,7 @@
     $navigationBadges = ['reports' => $sidebarSoumisReports ?? 0, 'federations' => $sidebarPendingFederations ?? 0];
 @endphp
 <aside class="platform-sidebar" id="sidebar" aria-label="Navigation principale">
-    <a class="platform-brand" href="{{ route(home_route_name($navigationUser)) }}" aria-label="Quitus — Accueil">
+    <a class="platform-brand" href="{{ route(home_route_name($navigationUser)) }}" aria-label="Quitus : Accueil">
         <img src="{{ asset('img/armoiries.png') }}" alt="" width="38" height="46">
         <span><strong>QUITUS<span class="brand-point">.</span></strong><small>Subventions sportives</small></span>
     </a>

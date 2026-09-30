@@ -186,7 +186,7 @@
             @endif
             <form method="POST" action="{{ route('campagnes.arbitrage.update', $campaign) }}" data-campaign-edit>
                 @csrf
-                <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne — défilement horizontal">
+                <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne : défilement horizontal">
                 <table class="market-table">
                     <thead>
                         <tr>
@@ -269,7 +269,7 @@
             <div class="card-header">
                 <h2 class="card-title">Programmes réaménagés et délivrance du quitus</h2>
             </div>
-            <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne — défilement horizontal">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne : défilement horizontal">
             <table class="market-table">
                 <thead>
                     <tr>
@@ -319,7 +319,7 @@
         @if ($campaign->allocations->isEmpty())
             <x-empty-state icon="users" title="Aucune fédération retenue pour cette campagne." />
         @else
-            <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne — défilement horizontal">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne : défilement horizontal">
             <table class="market-table">
                 <thead>
                     <tr>

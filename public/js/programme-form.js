@@ -239,7 +239,7 @@
     form.querySelectorAll('[data-money]').forEach(formater);
     if (dirty) {
         saveState.textContent = form.querySelector('.server-field-error, [aria-invalid="true"]') || document.getElementById('flashErrors')
-            ? 'Modifications non enregistrées — corrigez les erreurs puis enregistrez.'
+            ? 'Modifications non enregistrées : corrigez les erreurs puis enregistrez.'
             : 'Modifications non enregistrées';
         saveState.classList.add('is-dirty');
     }

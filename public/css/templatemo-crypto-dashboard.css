@@ -412,8 +412,8 @@ https://templatemo.com/tm-609-crypto-vault
 
 .legend-dot.btc { background-color: #f7931a; }
 .legend-dot.eth { background-color: #627eea; }
-.legend-dot.usdt { background-color: #26a17b; }
-.legend-dot.other { background-color: #129850; }
+.legend-dot.usdt { background-color: var(--brand-500); }
+.legend-dot.other { background-color: var(--brand-500); }
 
 /* Gauge */
 .gauge-container {

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $title }} {{ $report->year }} — {{ $report->user->federation_name }}</title>
+    <title>{{ $title }} {{ $report->year }} : {{ $report->user->federation_name }}</title>
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
@@ -173,11 +173,11 @@
 
     @foreach ($axeGroups as $axeGroup)
         <h2 class="axe-title">
-            Axe {{ $axeGroup['number'] ?? $axeGroup['axe'] }}@if ($axeGroup['label_parts']['description']) — {{ $axeGroup['label_parts']['description'] }}@endif
+            Axe {{ $axeGroup['number'] ?? $axeGroup['axe'] }}@if ($axeGroup['label_parts']['description']) : {{ $axeGroup['label_parts']['description'] }}@endif
         </h2>
 
         @foreach ($axeGroup['sous_axes'] as $sousAxe)
-            <h3 class="sousaxe-title">{{ $sousAxe['sous_axe_code'] }} — {{ $sousAxe['sous_axe_label'] }}</h3>
+            <h3 class="sousaxe-title">{{ $sousAxe['sous_axe_code'] }} : {{ $sousAxe['sous_axe_label'] }}</h3>
             <table class="lines">
                 <thead>
                     <tr>
@@ -217,7 +217,7 @@
     </table>
 
     <div class="footer">
-        Ministère des Sports, de la Jeunesse et de l'Emploi — Direction du Sport de Haut Niveau — Document généré électroniquement le {{ now()->locale('fr')->translatedFormat('d F Y') }}
+        Ministère des Sports, de la Jeunesse et de l'Emploi : Direction du Sport de Haut Niveau : Document généré électroniquement le {{ now()->locale('fr')->translatedFormat('d F Y') }}
     </div>
 </body>
 </html>

@@ -51,7 +51,7 @@
                     @foreach ($campaigns as $campaign)
                         <tr>
                             <td>{{ $campaign->annee_n1 }}</td>
-                            <td>Étape {{ $campaign->etape }} — {{ $campaign->etapeLabel() }}</td>
+                            <td>Étape {{ $campaign->etape }} : {{ $campaign->etapeLabel() }}</td>
                             <td>
                                 <span class="status-badge {{ $campaign->statut === 'termine' ? 'status-gain' : 'status-neutral' }}">
                                     {{ $campaign->statut === 'termine' ? 'Terminée' : 'En cours' }}

@@ -10,7 +10,7 @@
     $ecart = $quitus->ecart();
 @endphp
 
-@section('title', 'Quitus — '.$federation->federation_name)
+@section('title', 'Quitus : '.$federation->federation_name)
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
@@ -85,7 +85,7 @@
             @if ($quitus->lignes->isEmpty())
                 <x-empty-state icon="list" title="Le programme réaménagé ne contient aucune activité." :compact="true" />
             @else
-                <div class="table-responsive" tabindex="0" role="region" aria-label="Activités du quitus — défilement horizontal">
+                <div class="table-responsive" tabindex="0" role="region" aria-label="Activités du quitus : défilement horizontal">
                     <table class="quitus-table">
                         <thead>
                             <tr>

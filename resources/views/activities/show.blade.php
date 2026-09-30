@@ -178,7 +178,7 @@
                                 <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"/><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/>
                                 </svg>
-                                <div class="dropzone-text"><strong>{{ $sansPiece ? 'Ajoutez votre premier justificatif' : 'Ajouter d’autres pièces' }}</strong> — cliquez ou glissez-déposez</div>
+                                <div class="dropzone-text"><strong>{{ $sansPiece ? 'Ajoutez votre premier justificatif' : 'Ajouter d’autres pièces' }}</strong> : cliquez ou glissez-déposez</div>
                                 <div class="dropzone-hint">PDF, JPG ou PNG · 5 Mo maximum par fichier · plusieurs fichiers possibles</div>
                                 <input type="file" name="pieces[]" id="showPiecesInput" class="js-file-input" data-preview-target="showPiecesPreview" multiple accept=".pdf,.jpg,.jpeg,.png" required>
                             </label>

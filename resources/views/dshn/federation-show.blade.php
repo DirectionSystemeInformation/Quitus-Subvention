@@ -39,7 +39,7 @@
             {{ $federation->federation_name }}
             <x-status-badge :status="$federation->status" />
         </h1>
-        <p>Responsable : {{ $federation->name }} — {{ $federation->email }} — inscrite le {{ $federation->created_at->format('d/m/Y') }}</p>
+        <p>Responsable : {{ $federation->name }} : {{ $federation->email }} : inscrite le {{ $federation->created_at->format('d/m/Y') }}</p>
         @if ($federation->status === 'rejected' && $federation->rejection_reason)
             <p style="color: var(--color-danger, #E5484D); margin-top: 8px;">Motif du rejet : {{ $federation->rejection_reason }}</p>
         @endif

@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/platform.css') }}">
@@ -33,41 +34,44 @@
 
         <!-- Main Content -->
         <main class="platform-main" id="mainContent" tabindex="-1">
-            @if (session('status'))
-                <div id="flashStatus" class="notice notice-success" role="status">{{ session('status') }}</div>
-            @endif
-            @if ($errors->any())
-                <section id="flashErrors" class="notice notice-error" role="alert" tabindex="-1" aria-labelledby="errorSummaryTitle">
-                    <h2 id="errorSummaryTitle">Vérifiez les informations saisies</h2>
-                    <ul>
-                        @foreach ($errors->getMessages() as $field => $messages)
-                            @foreach ($messages as $error)
-                                <li data-error-field="{{ $field }}">{{ $error }}</li>
-                            @endforeach
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+            <header class="platform-topbar">
+                <div class="platform-institution-wrap"><x-flag :width="33" /><div class="platform-institution">Ministère des Sports, de la Jeunesse et de l’Emploi<span>Direction du Sport de Haut Niveau</span></div></div>
+                <div class="platform-topbar-tools">
+                    @if (auth()->user()->isDshn())
+                        <form method="GET" action="{{ role_route('search.index') }}" class="platform-search" role="search">
+                            <x-ui-icon name="search" />
+                            <input type="search" name="q" aria-label="Rechercher dans la plateforme" placeholder="Rechercher une fédération, un document…" value="{{ request()->routeIs('*.search.index') ? request('q') : '' }}">
+                            <button type="submit" aria-label="Lancer la recherche"><x-ui-icon name="arrow" /></button>
+                        </form>
+                    @else
+                        <span class="platform-topbar-label"><span class="workspace-indicator" aria-hidden="true"></span>{{ \App\Support\PlatformNavigation::roleLabel(auth()->user()) }}</span>
+                    @endif
+                </div>
+            </header>
 
-            <div class="platform-topbar">
-                <div class="platform-institution">Ministère des Sports, de la Jeunesse et de l’Emploi<span>Direction du Sport de Haut Niveau</span></div>
-                @if (auth()->user()->isDshn())
-                    <form method="GET" action="{{ role_route('search.index') }}" class="platform-search">
-                        <x-ui-icon name="search" />
-                        <input type="search" name="q" aria-label="Rechercher dans la plateforme" placeholder="Rechercher dans la plateforme…" value="{{ request()->routeIs('*.search.index') ? request('q') : '' }}">
-                        <button type="submit" aria-label="Lancer la recherche"><x-ui-icon name="arrow" /></button>
-                    </form>
-                @else
-                    <span class="platform-topbar-label">{{ \App\Support\PlatformNavigation::roleLabel(auth()->user()) }}</span>
+            <div class="platform-content">
+                @if (session('status'))
+                    <div id="flashStatus" class="notice notice-success" role="status">{{ session('status') }}</div>
                 @endif
+                @if ($errors->any())
+                    <section id="flashErrors" class="notice notice-error" role="alert" tabindex="-1" aria-labelledby="errorSummaryTitle">
+                        <h2 id="errorSummaryTitle">Vérifiez les informations saisies</h2>
+                        <ul>
+                            @foreach ($errors->getMessages() as $field => $messages)
+                                @foreach ($messages as $error)
+                                    <li data-error-field="{{ $field }}">{{ $error }}</li>
+                                @endforeach
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+
+                @yield('content')
+
+                <footer class="copyright">
+                    <x-flag :width="21" label="" /> &copy; {{ date('Y') }} Ministère des Sports, de la Jeunesse et de l'Emploi : Direction du Sport de Haut Niveau
+                </footer>
             </div>
-
-            @yield('content')
-
-            <!-- Copyright -->
-            <footer class="copyright">
-                &copy; {{ date('Y') }} Ministère des Sports, de la Jeunesse et de l'Emploi &mdash; Direction du Sport de Haut Niveau
-            </footer>
         </main>
     </div>
 

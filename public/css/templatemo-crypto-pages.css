@@ -169,7 +169,7 @@ https://templatemo.com/tm-609-crypto-vault
 
 .wallet-icon.btc { background: linear-gradient(135deg, #f7931a, #c77b15); }
 .wallet-icon.eth { background: linear-gradient(135deg, #627eea, #4a5fc1); }
-.wallet-icon.usdt { background: linear-gradient(135deg, #26a17b, #1a7a5c); }
+.wallet-icon.usdt { background: linear-gradient(135deg, var(--brand-500), var(--brand-600)); }
 .wallet-icon.sol { background: linear-gradient(135deg, #9945ff, #14f195); }
 
 .wallet-info {
@@ -483,7 +483,7 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .dashboard-section-label {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -626,7 +626,7 @@ https://templatemo.com/tm-609-crypto-vault
 .market-table th {
     text-align: left;
     padding: 12px 16px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -741,7 +741,7 @@ https://templatemo.com/tm-609-crypto-vault
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--accent-copper);
 }
@@ -761,7 +761,7 @@ https://templatemo.com/tm-609-crypto-vault
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 13px;
     color: #fff;
 }
 
@@ -772,7 +772,7 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .trending-symbol {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -818,7 +818,7 @@ https://templatemo.com/tm-609-crypto-vault
 .fear-greed-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -961,7 +961,7 @@ https://templatemo.com/tm-609-crypto-vault
     padding: 4px 12px;
     background: var(--accent-gradient);
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #1c1c1e;
     margin-top: 8px;
@@ -1043,8 +1043,8 @@ https://templatemo.com/tm-609-crypto-vault
 }
 
 .security-btn.primary:hover {
-    background: var(--color-primary-hover, #047857);
-    border-color: var(--color-primary-hover, #047857);
+    background: var(--color-primary-hover, var(--brand-600));
+    border-color: var(--color-primary-hover, var(--brand-600));
 }
 
 /* ========================================

@@ -1,0 +1,53 @@
+/* Quitus : variables du système de design, partagées par toutes les pages
+   (plateforme, connexion, accueil, erreurs). */
+:root {
+    /* Couleurs nationales du Burkina Faso (drapeau : rouge, vert, étoile jaune) */
+    --flag-red: #ef2b2d; --flag-green: #009e49; --flag-yellow: #fcd116;
+    --flag-band: linear-gradient(180deg, var(--flag-red) 0 50%, var(--flag-green) 50% 100%);
+    --flag-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10.9 5.7 8.2 7.8'%3E%3Cpolygon fill='%23FCD116' points='15.00,5.70 16.01,8.61 19.09,8.67 16.64,10.53 17.53,13.48 15.00,11.72 12.47,13.48 13.36,10.53 10.91,8.67 13.99,8.61'/%3E%3C/svg%3E");
+    --flag-ribbon: linear-gradient(90deg, var(--flag-red) 0 45%, var(--flag-yellow) 45% 55%, var(--flag-green) 55% 100%);
+
+    /* Marque : nuances du vert du drapeau (600 = vert d'action, lisible sur blanc) */
+    --brand-950: #00210f; --brand-900: #003019; --brand-800: #004322; --brand-700: #00602f;
+    --brand-600: #007a3d; --brand-500: #009e49; --brand-200: #a9dfc1; --brand-100: #d9f1e3; --brand-50: #eef8f2;
+    /* Accent : jaune de l'étoile (600 = version foncée pour du texte sur fond clair) */
+    --gold-600: #8a6d00; --gold-500: #fcd116; --gold-100: #fff5c7;
+    /* Rouge du drapeau, décliné pour l'identité (bandeaux, repères) */
+    --red-600: #c8191c; --red-50: #fdeeee;
+
+    /* Neutres légèrement teintés de vert */
+    --ink: #10231a; --ink-2: #3a4c43; --ink-3: #5a6a62; --ink-4: #88968f;
+    --line: #dfe7e2; --line-soft: #ecf1ee; --canvas: #f3f6f4; --surface: #fff; --surface-2: #f7faf8;
+
+    /* Sémantique */
+    --success: #007a3d; --success-bg: #e6f5ec; --success-line: #bfe3cd;
+    --warning: #7a5c00; --warning-bg: #fff8d9; --warning-line: #f3e19a;
+    --danger: #c8191c; --danger-strong: #9e1316; --danger-bg: #fdefef; --danger-line: #f5cfcf;
+    --info: #1d5aa6; --info-bg: #edf3fb; --info-line: #cfdef3;
+
+    /* Rythme */
+    --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-full: 999px;
+    --shadow-xs: 0 1px 2px rgb(16 40 30 / .05);
+    --shadow-sm: 0 1px 2px rgb(16 40 30 / .05), 0 2px 8px rgb(16 40 30 / .04);
+    --shadow-md: 0 6px 24px rgb(16 40 30 / .08);
+    --shadow-lg: 0 24px 64px rgb(10 30 22 / .18);
+    --ring: 0 0 0 3px rgb(0 122 61 / .22);
+    --sidebar-w: 268px; --topbar-h: 64px;
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    /* Correspondance avec les variables historiques utilisées par les écrans */
+    --bg-primary: var(--canvas); --bg-secondary: var(--surface); --bg-card: var(--surface); --bg-card-hover: var(--surface-2);
+    --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3);
+    --border: var(--line); --shadow: rgb(16 40 30 / .06);
+    --color-primary: var(--brand-600); --color-primary-hover: var(--brand-700); --color-primary-light: var(--brand-200);
+    --color-primary-gradient: linear-gradient(var(--brand-600), var(--brand-600));
+    --color-primary-gradient-hover: linear-gradient(var(--brand-700), var(--brand-700));
+    --color-success: var(--success); --color-danger: var(--danger); --color-danger-hover: var(--danger-strong);
+    --color-accent-gold: var(--gold-500); --color-accent-gold-soft: var(--gold-100);
+    --focus-ring: var(--ring);
+    --radius-md: var(--radius); --radius-xl: 20px;
+}
+
+/* Drapeau et motifs nationaux, communs à toutes les pages */
+.bf-flag { display: inline-block; flex-shrink: 0; border-radius: 3px; box-shadow: 0 0 0 1px rgb(0 0 0 / .08), 0 1px 3px rgb(0 0 0 / .12); vertical-align: middle; }
+.bf-band { display: block; height: 6px; background: var(--flag-band); }

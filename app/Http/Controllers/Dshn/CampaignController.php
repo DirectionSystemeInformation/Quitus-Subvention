@@ -111,7 +111,7 @@ class CampaignController extends Controller
             (string) $campaign->annee_n1
         );
 
-        return back()->with('status', $federations->count().' fédération(s) retenue(s) — pondération ouverte.');
+        return back()->with('status', $federations->count().' fédération(s) retenue(s) : pondération ouverte.');
     }
 
     public function updatePonderation(Request $request, Campaign $campaign)
@@ -177,7 +177,7 @@ class CampaignController extends Controller
 
         $derniereColonne = Coordinate::stringFromColumnIndex(4 + $allocations->count());
 
-        $feuille->setCellValue('A1', 'Pondération par activité par fédération — Campagne '.$campaign->annee_n1);
+        $feuille->setCellValue('A1', 'Pondération par activité par fédération : Campagne '.$campaign->annee_n1);
         $feuille->mergeCells('A1:'.$derniereColonne.'1');
         $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -311,7 +311,7 @@ class CampaignController extends Controller
         $nombreColonnes = 2 + count($rubriques) + 4;
         $derniereColonne = Coordinate::stringFromColumnIndex($nombreColonnes);
 
-        $feuille->setCellValue('A1', 'Récapitulatif par rubrique par fédération — Campagne '.$campaign->annee_n1);
+        $feuille->setCellValue('A1', 'Récapitulatif par rubrique par fédération : Campagne '.$campaign->annee_n1);
         $feuille->mergeCells('A1:'.$derniereColonne.'1');
         $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -428,7 +428,7 @@ class CampaignController extends Controller
 
         $derniereColonne = $avecMontantsFinaux ? 'H' : 'F';
 
-        $feuille->setCellValue('A1', ($avecMontantsFinaux ? 'Répartition définitive par fédération' : 'Classement et montant proposé par fédérations').' — Campagne '.$campaign->annee_n1);
+        $feuille->setCellValue('A1', ($avecMontantsFinaux ? 'Répartition définitive par fédération' : 'Classement et montant proposé par fédérations').' : Campagne '.$campaign->annee_n1);
         $feuille->mergeCells('A1:'.$derniereColonne.'1');
         $feuille->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $feuille->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -512,7 +512,7 @@ class CampaignController extends Controller
 
         ActivityLog::record('updated', "a validé la pondération de la campagne {$campaign->annee_n1}", $campaign->id, (string) $campaign->annee_n1);
 
-        return back()->with('status', 'Pondération validée — catégorisation calculée.');
+        return back()->with('status', 'Pondération validée : catégorisation calculée.');
     }
 
     public function advanceToRepartition(Campaign $campaign)
@@ -524,7 +524,7 @@ class CampaignController extends Controller
 
         ActivityLog::record('updated', "a confirmé la catégorisation de la campagne {$campaign->annee_n1}", $campaign->id, (string) $campaign->annee_n1);
 
-        return back()->with('status', 'Catégorisation confirmée — passage à la répartition.');
+        return back()->with('status', 'Catégorisation confirmée : passage à la répartition.');
     }
 
     public function updateRepartition(Request $request, Campaign $campaign)
@@ -613,7 +613,7 @@ class CampaignController extends Controller
 
         ActivityLog::record('rejected', "a rejeté la répartition de la campagne {$campaign->annee_n1} (motif : {$data['rejection_reason']})", $campaign->id, (string) $campaign->annee_n1);
 
-        return back()->with('status', 'Répartition rejetée — retour à la DSHN.');
+        return back()->with('status', 'Répartition rejetée : retour à la DSHN.');
     }
 
     public function updateArbitrage(Request $request, Campaign $campaign)
@@ -656,7 +656,7 @@ class CampaignController extends Controller
 
         ActivityLog::record('updated', "a finalisé l'arbitrage de la campagne {$campaign->annee_n1}", $campaign->id, (string) $campaign->annee_n1);
 
-        return back()->with('status', 'Arbitrage finalisé — soumis au Ministre.');
+        return back()->with('status', 'Arbitrage finalisé : soumis au Ministre.');
     }
 
     public function ministreValidate(Campaign $campaign)
@@ -698,7 +698,7 @@ class CampaignController extends Controller
 
         ActivityLog::record('rejected', "a rejeté la répartition de la campagne {$campaign->annee_n1} (motif : {$data['rejection_reason']})", $campaign->id, (string) $campaign->annee_n1);
 
-        return back()->with('status', 'Répartition rejetée — retour au Comité d\'arbitrage.');
+        return back()->with('status', 'Répartition rejetée : retour au Comité d\'arbitrage.');
     }
 
     public function organizeSession(Request $request, Campaign $campaign)

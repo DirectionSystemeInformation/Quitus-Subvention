@@ -11,7 +11,7 @@
         extract($dossier);
     @endphp
     <header class="page-header dossier-header">
-        <div><p class="dossier-eyebrow">{{ $user->federation_name }}</p><h1>Mon dossier — Campagne {{ $programmeYear }}</h1><p>Rapport {{ $rapportYear }} et programme {{ $programmeYear }}</p></div>
+        <div><p class="dossier-eyebrow">{{ $user->federation_name }}</p><h1>Mon dossier : Campagne {{ $programmeYear }}</h1><p>Rapport {{ $rapportYear }} et programme {{ $programmeYear }}</p></div>
         <form method="GET" action="{{ route('dashboard') }}" class="dossier-year">
             <label for="dossierYear">Campagne</label>
             <select id="dossierYear" name="annee" class="form-select">
@@ -40,7 +40,7 @@
         @endforeach
     </ol>
     @if ($lastEvent)
-        <p class="dossier-event"><strong>Dernière mise à jour</strong> · {{ $lastEvent['date']->format('d/m/Y à H:i') }} — @if ($lastEvent['url'])<a href="{{ $lastEvent['url'] }}">{{ $lastEvent['label'] }}</a>@else{{ $lastEvent['label'] }}@endif</p>
+        <p class="dossier-event"><strong>Dernière mise à jour</strong> · {{ $lastEvent['date']->format('d/m/Y à H:i') }} : @if ($lastEvent['url'])<a href="{{ $lastEvent['url'] }}">{{ $lastEvent['label'] }}</a>@else{{ $lastEvent['label'] }}@endif</p>
     @endif
     <div class="dossier-section-heading"><h2>Les documents de mon dossier</h2><a href="{{ $documentsUrl }}">Tous mes documents</a></div>
     <div class="dossier-documents">
@@ -59,7 +59,7 @@
                 @if ($document['report']?->status === 'rejete' && $document['report']->rejection_reason)<p class="dossier-rejection"><strong>À corriger :</strong> {{ $document['report']->rejection_reason }}</p>@endif
                 <div class="btn-group">
                     @if ($document['report'])<a class="btn" href="{{ route('activity-form.show', $document['report']) }}">Consulter</a>@endif
-                    @if ($document['report']?->status !== 'valide')<a class="btn" href="{{ $document['edit'] }}">{{ $document['action'] }}</a>@endif
+                    @if ($document['report']?->status !== 'valide')<a class="btn primary" href="{{ $document['edit'] }}">{{ $document['action'] }}</a>@endif
                 </div>
             </article>
         @endforeach

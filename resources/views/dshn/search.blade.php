@@ -100,7 +100,7 @@
                                 </div>
                                 <div class="transaction-details">
                                     <span class="transaction-title">{{ $activity->designation }}</span>
-                                    <span class="transaction-date">{{ $activity->user->federation_name }} — {{ $activity->year }}</span>
+                                    <span class="transaction-date">{{ $activity->user->federation_name }} : {{ $activity->year }}</span>
                                 </div>
                                 <div class="transaction-amount">
                                     <x-status-badge :status="$activity->status" />

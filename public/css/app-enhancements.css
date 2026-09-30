@@ -313,7 +313,7 @@
 }
 
 .year-select-label {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -477,7 +477,7 @@
 }
 
 .dropzone-hint {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     margin-top: 4px;
 }
@@ -587,7 +587,7 @@
 }
 
 .donut-chart-label {
-    font-size: 11px;
+    font-size: 12.5px;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -766,7 +766,7 @@
    Waiting-time tag (priority queues)
 ======================================== */
 .waiting-tag {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--color-accent-gold, #FCD116);
     background: var(--color-accent-gold-soft, rgba(252, 209, 22, 0.15));
     padding: 2px 8px;
@@ -798,24 +798,24 @@
 .dashboard .nav-item:hover, .dashboard .btn:active, .dashboard .security-btn:active { transform: none; }
 .dashboard .card.reveal, .dashboard .market-stat.reveal { animation: none; }
 .dashboard .btn.primary, .dashboard .security-btn.primary {
-    background: #047857;
+    background: var(--brand-600);
     color: #fff;
     text-decoration: none;
 }
-.dashboard .btn.primary:hover, .dashboard .security-btn.primary:hover { background: #065f46; }
+.dashboard .btn.primary:hover, .dashboard .security-btn.primary:hover { background: var(--brand-700); }
 .dashboard .btn, .dashboard .security-btn { min-height: 44px; text-decoration: none; }
 .dashboard .waiting-tag { color: #765c05; }
 :where(a, button, input, select, textarea, summary):focus-visible {
-    outline: 3px solid #047857;
+    outline: 3px solid var(--brand-600);
     outline-offset: 3px;
 }
-.skip-link { position: fixed; top: 8px; left: 8px; z-index: 4000; padding: 10px 16px; background: #fff; color: #064e3b; transform: translateY(-150%); }
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 4000; padding: 10px 16px; background: #fff; color: var(--brand-800); transform: translateY(-150%); }
 .skip-link:focus { transform: translateY(0); }
 .notice { border: 1px solid; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; font-size: 15px; overflow-wrap: anywhere; }
 .notice h2 { font-size: 17px; margin: 0 0 8px; }
 .notice ul { padding-left: 22px; }
 .notice a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-.notice-success { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.notice-success { background: #ecfdf5; border-color: #a7f3d0; color: var(--brand-700); }
 .notice-error { background: #fff5f5; border-color: #fecaca; color: #991b1b; }
 .notice-warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
 .server-field-error { max-width: 100%; white-space: normal; }
@@ -825,10 +825,10 @@
 .queue-filters .form-group:first-of-type { flex-grow: 2; }
 .queue-filters .form-select { width: 100%; }
 .ponderation-table .criterion-heading { white-space: normal; min-width: 130px; max-width: 160px; vertical-align: top; }
-.criterion-heading summary { cursor: pointer; line-height: 1.45; color: #064e3b; padding: 6px 2px; }
+.criterion-heading summary { cursor: pointer; line-height: 1.45; color: var(--brand-800); padding: 6px 2px; }
 .criterion-heading details > span { display: block; margin-top: 8px; font-weight: 400; }
 .ponderation-table th:first-child, .ponderation-table td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
-.dashboard .campaign-step.is-current { background: #047857; color: #fff; }
+.dashboard .campaign-step.is-current { background: var(--brand-600); color: #fff; }
 .date-range-group { display: flex; align-items: flex-end; gap: 8px; }
 .date-range-group .form-input { min-width: 0; }
 .date-range-sep { flex-shrink: 0; font-size: 13px; color: var(--text-muted); padding-bottom: 12px; }
@@ -886,7 +886,7 @@
 }
 
 .cell-datetime-time {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -951,7 +951,7 @@
 }
 
 .details-grid dt {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -999,7 +999,7 @@
     background: var(--bg-primary);
     border: 1px solid var(--border);
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -1015,7 +1015,7 @@
 }
 
 .axe-cell-axe {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -1118,7 +1118,7 @@
 }
 
 .document-card-meta {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     margin-top: 6px;
     display: flex;
@@ -1156,7 +1156,7 @@
     border-radius: var(--radius-md);
     background: rgba(16, 185, 129, 0.08);
     border: 1px solid rgba(16, 185, 129, 0.25);
-    color: #047857;
+    color: var(--brand-600);
     font-size: 14px;
     margin-bottom: 24px;
 }
@@ -1253,7 +1253,7 @@
     justify-content: space-between;
     gap: 8px;
     margin-top: 6px;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -1289,7 +1289,7 @@
 }
 
 .period-field-label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     margin-bottom: 4px;
     display: block;
@@ -1343,7 +1343,7 @@
 }
 
 .doc-tab-status {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
 }
 
@@ -1368,7 +1368,7 @@
 .workflow-step {
     padding: 6px 12px;
     border-radius: var(--radius-full);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-muted);
     background: var(--bg-card-hover);
@@ -1402,7 +1402,7 @@
 }
 
 .report-summary-stat-label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     margin-top: 2px;
 }
@@ -1485,7 +1485,7 @@
 .recap-rubriques thead th {
     text-align: center;
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 12.5px;
     line-height: 1.3;
 }
 
@@ -1599,7 +1599,7 @@
 .ponderation-grille {
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .ponderation-grille th,
@@ -1708,7 +1708,7 @@
     width: 40px;
     padding: 4px 2px;
     text-align: center;
-    font-size: 12px;
+    font-size: 13px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: var(--bg-primary);

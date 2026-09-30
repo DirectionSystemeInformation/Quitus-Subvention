@@ -8,9 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/creation-forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
 <body class="auth-page">
     @php
@@ -21,6 +23,7 @@
     <div class="auth-branding">
         <div class="branding-content">
             <img src="{{ asset('img/armoiries.png') }}" alt="Armoiries du Burkina Faso" class="branding-logo branding-crest">
+            <p class="branding-country"><x-flag :width="27" label="" />Burkina Faso</p>
             <h2 class="branding-title branding-title-ministry">Ministère des Sports, de la Jeunesse et de l'Emploi</h2>
             <p class="branding-subtitle">Quitus de subvention : votre espace pour déclarer vos activités, préparer votre programme et suivre votre dossier.</p>
 

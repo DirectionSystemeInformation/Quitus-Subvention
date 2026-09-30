@@ -10,7 +10,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Quitus {{ $federation->federation_name }} — saison {{ $campaign->annee_n1 }}</title>
+    <title>Quitus {{ $federation->federation_name }} : saison {{ $campaign->annee_n1 }}</title>
     {{-- Reprend le modèle officiel « QUITUS POUR LE RETRAIT D'UNE SUBVENTION » :
          variante avec observations du Directeur de la gestion des finances ;
          visas et dates apposés à la main sur le document imprimé. --}}
@@ -147,9 +147,9 @@
 
     <div class="pied">
         @if ($apercu)
-            Aperçu — document non délivré
+            Aperçu : document non délivré
         @else
-            Réf. {{ $allocation->quitus_reference }} — délivré le {{ $allocation->quitus_delivered_at?->format('d/m/Y') }}
+            Réf. {{ $allocation->quitus_reference }} : délivré le {{ $allocation->quitus_delivered_at?->format('d/m/Y') }}
         @endif
     </div>
 </body>

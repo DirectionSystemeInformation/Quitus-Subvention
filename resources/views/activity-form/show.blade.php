@@ -23,10 +23,10 @@
                 @else
                     @foreach ($axeGroups as $axeGroup)
                         <article class="platform-panel" style="margin-bottom: 22px;">
-                            <h2 class="axe-heading">Axe {{ $axeGroup['number'] ?? $axeGroup['axe'] }}@if ($axeGroup['label_parts']['description']) — {{ $axeGroup['label_parts']['description'] }}@endif</h2>
+                            <h2 class="axe-heading">Axe {{ $axeGroup['number'] ?? $axeGroup['axe'] }}@if ($axeGroup['label_parts']['description']) : {{ $axeGroup['label_parts']['description'] }}@endif</h2>
                             @foreach ($axeGroup['sous_axes'] as $sousAxe)
-                                <h3 class="sousaxe-heading">{{ $sousAxe['sous_axe_code'] }} — {{ $sousAxe['sous_axe_label'] }}</h3>
-                                <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau — défilement horizontal disponible"><table class="pb-table"><thead><tr><th scope="col">Activité</th><th scope="col">Montant (FCFA)</th><th scope="col">Partenaires (FCFA)</th><th scope="col">Date</th><th scope="col">Observations</th></tr></thead><tbody>
+                                <h3 class="sousaxe-heading">{{ $sousAxe['sous_axe_code'] }} : {{ $sousAxe['sous_axe_label'] }}</h3>
+                                <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau : défilement horizontal disponible"><table class="pb-table"><thead><tr><th scope="col">Activité</th><th scope="col">Montant (FCFA)</th><th scope="col">Partenaires (FCFA)</th><th scope="col">Date</th><th scope="col">Observations</th></tr></thead><tbody>
                                     @foreach ($sousAxe['lines'] as $line)
                                         <tr><td>{{ $line->designation ?: 'Non renseignée' }}</td><td>{{ $line->montant !== null ? number_format((float) $line->montant, 0, ',', ' ') : '—' }}</td><td>{{ is_numeric($line->contribution_partenaires) ? number_format((float) $line->contribution_partenaires, 0, ',', ' ') : ($line->contribution_partenaires ?: '—') }}</td><td>{{ optional($line->date)->format('d/m/Y') ?? '—' }}</td><td>{{ $line->observations ?: '—' }}</td></tr>
                                     @endforeach
