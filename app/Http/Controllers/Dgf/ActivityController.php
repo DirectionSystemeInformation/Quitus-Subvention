@@ -153,12 +153,16 @@ class ActivityController extends Controller
     {
         abort_unless($document->federation_activity_id === $activity->id, 404);
 
+        abort_unless(Storage::disk('local')->exists($document->file_path), 404, 'Le fichier demandé est introuvable.');
+
         return Storage::disk('local')->download($document->file_path, $document->original_filename);
     }
 
     public function viewDocument(FederationActivity $activity, FederationActivityDocument $document)
     {
         abort_unless($document->federation_activity_id === $activity->id, 404);
+
+        abort_unless(Storage::disk('local')->exists($document->file_path), 404, 'Le fichier demandé est introuvable.');
 
         return Storage::disk('local')->response($document->file_path, $document->original_filename);
     }

@@ -41,6 +41,8 @@ class ReportController extends Controller
         abort_if($report->status === 'brouillon', 403);
         abort_unless($report->file_path, 404);
 
+        abort_unless(Storage::disk('local')->exists($report->file_path), 404, 'Le fichier demandé est introuvable.');
+
         return Storage::disk('local')->download($report->file_path, $report->original_filename);
     }
 
@@ -66,6 +68,8 @@ class ReportController extends Controller
 
     public function reject(Request $request, Report $report)
     {
+        // Un brouillon reste privé à sa fédération, comme pour la validation.
+        abort_if($report->status === 'brouillon', 403);
         abort_unless($report->status === 'soumis', 404);
         $data = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],
