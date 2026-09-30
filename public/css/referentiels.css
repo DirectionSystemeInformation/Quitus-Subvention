@@ -1,0 +1,396 @@
+/* ==========================================================================
+   Référentiel DSHN : canevas des activités (axes et sous-axes).
+   Lecture par défaut, édition en ligne à la demande (public/js/referentiels.js).
+   Chargée avant platform.css : les sélecteurs sont qualifiés par .ref-page.
+   ========================================================================== */
+
+.ref-page [hidden] {
+    display: none !important;
+}
+
+/* --- Synthèse sous le titre ------------------------------------------------ */
+
+.ref-page .ref-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: -10px 0 24px;
+    padding: 0;
+    list-style: none;
+}
+
+.ref-page .ref-summary li {
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.ref-page .ref-summary strong {
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.ref-page .ref-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Carte d'axe ------------------------------------------------------------ */
+
+.ref-page .ref-group {
+    min-width: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px #163c2b08;
+    scroll-margin-top: 24px;
+}
+
+.ref-page .ref-group-head {
+    padding: 14px 14px 14px 18px;
+    background: #f7faf8;
+    border-bottom: 1px solid var(--border);
+    border-radius: 13px 13px 0 0;
+}
+
+.ref-page .ref-group-view {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.ref-page .ref-group-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.ref-page .ref-group-title :is(h2, h3) {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: -.01em;
+}
+
+.ref-page .ref-group-title p {
+    margin: 2px 0 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* --- Codes, points, pastilles ---------------------------------------------- */
+
+.ref-page .ref-code {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    min-width: 46px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid #d6e4db;
+    border-radius: 7px;
+    background: #eef4f0;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.ref-page .ref-code.is-axe {
+    min-width: 42px;
+    height: 42px;
+    border-color: var(--color-primary);
+    border-radius: 11px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 14px;
+}
+
+/* --- Lignes ------------------------------------------------------------------ */
+
+.ref-page .ref-list {
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+}
+
+.ref-page .ref-row {
+    scroll-margin-top: 24px;
+}
+
+.ref-page .ref-row + .ref-row {
+    border-top: 1px solid #edf2ee;
+}
+
+.ref-page .ref-row-view {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 52px;
+    padding: 8px 14px 8px 18px;
+}
+
+.ref-page .ref-row-view:hover {
+    background: #f9fbfa;
+}
+
+.ref-page .ref-label {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-primary);
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.ref-page .ref-empty {
+    margin: 0;
+    padding: 16px 18px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* Élément qui vient d'être enregistré (ancre de redirection). */
+.ref-page :is(.ref-row, .ref-group):target {
+    animation: ref-saved 2.4s ease-out;
+}
+
+@keyframes ref-saved {
+    0%, 30% { background: #e3f3ea; box-shadow: inset 3px 0 0 var(--color-primary); }
+    100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
+}
+
+/* --- Boutons d'action ---------------------------------------------------------- */
+
+.ref-page .ref-actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.ref-page .ref-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.ref-page .ref-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.ref-page .ref-icon-btn .ui-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.ref-page .ref-icon-btn:hover {
+    border-color: #d6e4db;
+    background: #eef4f0;
+    color: var(--color-primary);
+}
+
+.ref-page .ref-icon-btn.is-danger:hover {
+    border-color: #f0d3ce;
+    background: #fdf1ef;
+    color: var(--color-danger);
+}
+
+.ref-page .ref-icon-btn:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.ref-page .btn .ui-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* --- Formulaires en ligne ------------------------------------------------------ */
+
+.ref-page .ref-form {
+    display: flex;
+    flex-wrap: wrap;
+    /* Les boutons s'alignent sur le bas des champs, sur la même ligne ou à la suivante. */
+    align-items: flex-end;
+    gap: 10px 12px;
+    margin: 0;
+    padding: 12px 14px 14px 15px;
+    background: #f3f8f5;
+    border-left: 3px solid var(--color-primary);
+}
+
+.ref-page .ref-group-head .ref-form {
+    margin: -14px -14px -14px -18px;
+    border-radius: 13px 0 0 0;
+}
+
+.ref-page .ref-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ref-page .ref-field label {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.ref-page .ref-field.is-code { flex: 0 0 104px; }
+.ref-page .ref-field.is-grow { flex: 1 1 260px; }
+
+.ref-page .ref-field .form-input {
+    width: 100%;
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 13.5px;
+}
+
+.ref-page .ref-field .form-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+    outline: none;
+}
+
+.ref-page .ref-field .field-error {
+    margin: 0;
+    font-size: 12px;
+}
+
+.ref-page .ref-form-actions {
+    flex: none;
+    display: flex;
+    gap: 8px;
+}
+
+.ref-page .ref-form-actions .btn {
+    min-height: 40px;
+}
+
+/* --- Ajouts ---------------------------------------------------------------------- */
+
+.ref-page .ref-add {
+    padding: 10px 18px 14px;
+    border-top: 1px solid #edf2ee;
+}
+
+.ref-page .ref-add .ref-form {
+    margin: 0 -18px -14px;
+    border-radius: 0 0 0 13px;
+}
+
+.ref-page .ref-add-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px dashed #b9cfc2;
+    border-radius: 8px;
+    background: none;
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ref-page .ref-add-toggle .ui-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.ref-page .ref-add-toggle:hover {
+    border-color: var(--color-primary);
+    background: #f1f7f3;
+}
+
+.ref-page .ref-add-toggle:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+/* Carte « nouvel axe » en fin de liste. */
+.ref-page .ref-group.is-new {
+    border: 1.5px dashed #b9cfc2;
+    background: #fbfdfc;
+    box-shadow: none;
+}
+
+.ref-page .ref-group.is-new .ref-add-toggle {
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    min-height: 96px;
+    border: 0;
+    border-radius: 13px;
+}
+
+.ref-page .ref-group.is-new .ref-add-toggle > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ref-page .ref-group.is-new .ref-add-toggle small {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.ref-page .ref-group.is-new .ref-form {
+    border-radius: 13px;
+    border-left: 0;
+    background: #fff;
+    padding: 16px 18px 18px;
+}
+
+.ref-page .ref-form-title {
+    flex: 1 0 100%;
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* --- Petits écrans ---------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+    .ref-page .ref-group-view {
+        flex-wrap: wrap;
+        gap: 10px 12px;
+    }
+
+    .ref-page .ref-row-view {
+        gap: 10px;
+        padding: 8px 8px 8px 14px;
+    }
+
+    .ref-page .ref-field.is-grow,
+    .ref-page .ref-form-actions {
+        flex-basis: 100%;
+    }
+
+    .ref-page .ref-form-actions .btn {
+        flex: 1;
+    }
+}

@@ -11,34 +11,29 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reports = Report::with('user')->where('status', '!=', 'brouillon')->latest()->get();
-
-        $grouped = $reports->groupBy('type');
-        $reportsByType = collect(['rapport_activite', 'programme_budgetise', 'programme_reamenage'])
-            ->filter(fn ($type) => $grouped->has($type))
-            ->map(fn ($type) => [
-                'type' => $type,
-                'label' => $grouped[$type]->first()->typeLabel(),
-                'reports' => $grouped[$type],
-            ])
-            ->values();
-
+        $filters = $request->validate([
+            'statut' => ['nullable', 'in:tous,soumis,valide,rejete'],
+            'type' => ['nullable', 'in:rapport_activite,programme_budgetise,programme_reamenage'],
+            'annee' => ['nullable', 'integer', 'between:2000,2100'],
+            'q' => ['nullable', 'string', 'max:150'],
+        ]);
+        $status = $filters['statut'] ?? 'soumis';
+        $query = Report::whereIn('status', ['soumis', 'valide', 'rejete'])
+            ->when($filters['type'] ?? null, fn ($q, $type) => $q->where('type', $type))
+            ->when($filters['annee'] ?? null, fn ($q, $year) => $q->where('year', $year))
+            ->when($filters['q'] ?? null, fn ($q, $search) => $q->whereHas('user', fn ($users) => $users->where('federation_name', 'like', '%'.$search.'%')));
+        $statusCounts = (clone $query)->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $counts = ['total' => $statusCounts->sum(), 'soumis' => $statusCounts->get('soumis', 0), 'valide' => $statusCounts->get('valide', 0), 'rejete' => $statusCounts->get('rejete', 0)];
+        $reports = $query->with('user')->when($status !== 'tous', fn ($q) => $q->where('status', $status))
+            ->orderByRaw("CASE status WHEN 'soumis' THEN 0 ELSE 1 END")
+            ->orderBy('updated_at')->orderBy('id')->paginate(20)->withQueryString();
         $documentTypes = collect(['rapport_activite', 'programme_budgetise', 'programme_reamenage'])
-            ->filter(fn ($type) => $grouped->has($type))
-            ->mapWithKeys(fn ($type) => [$type => $grouped[$type]->first()->typeLabel()]);
+            ->mapWithKeys(fn ($type) => [$type => (new Report(['type' => $type]))->typeLabel()]);
+        $years = Report::whereIn('status', ['soumis', 'valide', 'rejete'])->distinct()->orderByDesc('year')->pluck('year');
 
-        $years = $reports->pluck('year')->unique()->sortDesc()->values();
-
-        $counts = [
-            'total' => $reports->count(),
-            'soumis' => $reports->where('status', 'soumis')->count(),
-            'valide' => $reports->where('status', 'valide')->count(),
-            'rejete' => $reports->where('status', 'rejete')->count(),
-        ];
-
-        return view('dshn.reports', compact('reports', 'reportsByType', 'documentTypes', 'years', 'counts'));
+        return view('dshn.reports', compact('reports', 'documentTypes', 'years', 'counts', 'status'));
     }
 
     public function download(Report $report)

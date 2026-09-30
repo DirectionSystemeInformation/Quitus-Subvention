@@ -23,13 +23,13 @@ class CanevasController extends Controller
             'label' => ['required', 'string', 'max:255'],
         ]);
 
-        CanvasAxe::create([
+        $axe = CanvasAxe::create([
             'code' => $data['code'],
             'label' => $data['label'],
             'sort_order' => CanvasAxe::max('sort_order') + 1,
         ]);
 
-        return back()->with('status', 'Axe ajouté.');
+        return back()->withFragment('axe-'.$axe->id)->with('status', 'Axe ajouté.');
     }
 
     public function updateAxe(Request $request, CanvasAxe $axe)
@@ -41,7 +41,7 @@ class CanevasController extends Controller
 
         $axe->update($data);
 
-        return back()->with('status', 'Axe mis à jour.');
+        return back()->withFragment('axe-'.$axe->id)->with('status', 'Axe mis à jour.');
     }
 
     public function destroyAxe(CanvasAxe $axe)
@@ -58,14 +58,14 @@ class CanevasController extends Controller
             'label' => ['required', 'string', 'max:255'],
         ]);
 
-        $axe->sousAxes()->create([
+        $sousAxe = $axe->sousAxes()->create([
             'code' => $data['code'],
             'label' => $data['label'],
             'lignes_count' => 1,
             'sort_order' => $axe->sousAxes()->max('sort_order') + 1,
         ]);
 
-        return back()->with('status', 'Sous-axe ajouté.');
+        return back()->withFragment('sous-axe-'.$sousAxe->id)->with('status', 'Sous-axe ajouté.');
     }
 
     public function updateSousAxe(Request $request, CanvasSousAxe $sousAxe)
@@ -77,13 +77,13 @@ class CanevasController extends Controller
 
         $sousAxe->update($data);
 
-        return back()->with('status', 'Sous-axe mis à jour.');
+        return back()->withFragment('sous-axe-'.$sousAxe->id)->with('status', 'Sous-axe mis à jour.');
     }
 
     public function destroySousAxe(CanvasSousAxe $sousAxe)
     {
         $sousAxe->delete();
 
-        return back()->with('status', 'Sous-axe supprimé. Les rapports déjà soumis conservent leurs données.');
+        return back()->withFragment('axe-'.$sousAxe->canvas_axe_id)->with('status', 'Sous-axe supprimé. Les rapports déjà soumis conservent leurs données.');
     }
 }

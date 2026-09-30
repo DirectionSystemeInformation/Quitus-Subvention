@@ -16,36 +16,24 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
     <style>
-        .ponderation-table th, .ponderation-table td { font-size: 12px; padding: 6px; white-space: nowrap; }
-        .ponderation-table .critere-input { width: 52px; text-align: center; }
-        .ponderation-table thead tr:first-child th { text-align: center; background: var(--bg-secondary); }
-        .campaign-stepper { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-        .campaign-step { padding: 6px 12px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); }
-        .campaign-step.is-done { background: rgba(29, 170, 94, 0.12); border-color: var(--color-primary-light); color: var(--color-primary); }
-        .campaign-step.is-current { background: var(--color-primary-gradient); border-color: transparent; color: #1c1c1e; }
         .repartition-bareme { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 20px; }
     </style>
 @endpush
 
 @section('content')
-    <div class="page-header">
-        <nav class="breadcrumb" aria-label="Fil d'Ariane">
-            <a href="{{ route('campagnes.index') }}">Campagnes</a>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-current">{{ $campaign->annee_n1 }}</span>
-        </nav>
-        <h1>Campagne {{ $campaign->annee_n1 }}</h1>
-        <p>Étape {{ $campaign->etape }} sur 12 — {{ $campaign->etapeLabel() }}</p>
-    </div>
-
-    <div class="campaign-stepper">
-        @foreach (range(3, 12) as $step)
-            <span class="campaign-step {{ $step < $campaign->etape ? 'is-done' : ($step === $campaign->etape ? 'is-current' : '') }}">
-                {{ $step }}. {{ \App\Models\Campaign::labelForEtape($step) }}
-            </span>
-        @endforeach
-    </div>
-
+    @php $presentation = \App\Support\CampaignPresentation::forUser($campaign, $user); @endphp
+    <div class="campaign-workspace">
+    <nav class="breadcrumb" aria-label="Fil d’Ariane"><a href="{{ route('campagnes.index') }}">← Campagnes</a><span class="breadcrumb-separator">/</span><span>{{ $campaign->annee_n1 }}</span></nav>
+    <x-page-heading :title="'Campagne '.$campaign->annee_n1" eyebrow="Répartition des subventions" :description="'Rapport '.($campaign->annee_n1 - 1).' · Programmes '.$campaign->annee_n1">
+        <span class="status-badge {{ $presentation['complete'] ? 'status-gain' : 'status-neutral' }}">{{ $presentation['complete'] ? 'Terminée' : 'En cours' }}</span>
+    </x-page-heading>
+    <x-campaign-progress :campaign="$campaign" />
+    <section class="campaign-guidance {{ $presentation['canAct'] ? 'is-actionable' : '' }}" aria-labelledby="campaignGuidanceTitle">
+        <div><p class="platform-eyebrow">{{ $presentation['label'] }} · {{ $presentation['owner'] }}</p><h2 id="campaignGuidanceTitle">{{ $campaign->etapeLabel() }}</h2><p>{{ $presentation['instruction'] }}</p></div>
+        <a class="btn {{ $presentation['canAct'] ? 'primary' : '' }}" href="{{ $presentation['canAct'] ? '#campaignWork' : '#campaignSummary' }}">{{ $presentation['canAct'] ? 'Accéder à cette étape' : 'Voir le récapitulatif' }} <x-ui-icon name="arrow" /></a>
+    </section>
+    <details class="campaign-detail-steps"><summary>Voir le circuit détaillé · étape {{ $campaign->etape }}</summary><ol start="3">@foreach (range(3, 12) as $step)<li @if ($step === (int) $campaign->etape) aria-current="step" @endif>{{ \App\Models\Campaign::labelForEtape($step) }}</li>@endforeach</ol></details>
+    <div id="campaignWork">
     {{-- Étape 3 : Traitement --}}
     @if ($campaign->etape === 3 && $user->isDshn())
         <div class="card" style="margin-bottom: 24px;">
@@ -69,63 +57,18 @@
             @if ($campaign->allocations->isEmpty())
                 <x-empty-state icon="list" title="Aucune fédération retenue pour cette campagne." />
             @else
-                <form method="POST" action="{{ route('campagnes.ponderation.update', $campaign) }}" id="ponderationForm">
-                    @csrf
-                    <div class="table-responsive">
-                    <table class="market-table pb-table ponderation-table" id="ponderationTable">
-                        <thead>
-                            <tr>
-                                <th rowspan="2">Fédération</th>
-                                @foreach ($rubriques as $rubrique)
-                                    <th colspan="{{ count($rubrique['criteres']) }}">{{ $rubrique['rubrique'] }} ({{ $rubrique['rubrique_max'] }})</th>
-                                @endforeach
-                                <th rowspan="2">Total</th>
-                            </tr>
-                            <tr>
-                                @foreach ($criteres as $critere)
-                                    <th scope="col" class="criterion-heading">
-                                        <details>
-                                            <summary>{{ \Illuminate\Support\Str::limit($critere['label'], 36) }} · /{{ rtrim(rtrim(number_format($critere['max'], 1), '0'), '.') }}</summary>
-                                            <span>{{ $critere['label'] }}</span>
-                                        </details>
-                                    </th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($campaign->allocations as $allocation)
-                                <tr data-allocation-row data-allocation-id="{{ $allocation->id }}">
-                                    <td>{{ $allocation->federation->federation_name }}</td>
-                                    @foreach ($criteres as $critere)
-                                        <td>
-                                            <input type="number" step="0.5" min="0" max="{{ $critere['max'] }}"
-                                                name="scores[{{ $allocation->id }}][{{ $critere['slug'] }}]"
-                                                aria-label="{{ $allocation->federation->federation_name }} — {{ $critere['label'] }} (sur {{ $critere['max'] }})"
-                                                value="{{ $allocation->criteres_scores[$critere['slug']] ?? '' }}"
-                                                class="pb-num critere-input">
-                                        </td>
-                                    @endforeach
-                                    <td class="ponderation-total" data-total>{{ $allocation->score_total ?? 0 }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    </div>
-                    <div class="btn-group">
-                        <button type="submit" class="btn primary">Enregistrer les scores</button>
-                    </div>
-                </form>
+                @include('campaign.partials.score-form')
 
                 @if ($campaign->allocations->contains(fn ($allocation) => filled($allocation->criteres_scores)))
                     <div class="btn-group" style="margin-top: 12px;">
-                        <button type="button" class="btn js-open-modal" data-modal="ponderationGrilleModal">Pondération par activité par fédération</button>
-                        <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
+                        <button type="button" class="btn info js-open-modal" data-modal="ponderationGrilleModal"><x-ui-icon name="file" /> Pondération par activité par fédération</button>
+                        <button type="button" class="btn info js-open-modal" data-modal="ponderationRecapModal"><x-ui-icon name="file" /> Récapitulatif par rubrique par fédération</button>
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('campagnes.ponderation.confirm', $campaign) }}" class="btn-group" style="margin-top: 12px;">
+                <form method="POST" action="{{ route('campagnes.ponderation.confirm', $campaign) }}" data-campaign-advance data-confirm="Confirmer les scores enregistrés et calculer les catégories ?" class="btn-group" style="margin-top: 12px;">
                     @csrf
-                    <button type="submit" class="btn">Valider la pondération et calculer les catégories</button>
+                    <button type="submit" class="btn primary">Valider la pondération et calculer les catégories</button>
                 </form>
             @endif
         </div>
@@ -146,13 +89,13 @@
             </p>
 
             <div class="btn-group">
-                <button type="button" class="btn js-open-modal" data-modal="ponderationGrilleModal">Pondération par activité par fédération</button>
-                <button type="button" class="btn js-open-modal" data-modal="ponderationRecapModal">Récapitulatif par rubrique par fédération</button>
+                <button type="button" class="btn info js-open-modal" data-modal="ponderationGrilleModal"><x-ui-icon name="file" /> Pondération par activité par fédération</button>
+                <button type="button" class="btn info js-open-modal" data-modal="ponderationRecapModal"><x-ui-icon name="file" /> Récapitulatif par rubrique par fédération</button>
                 @if ($repartitionEnregistree)
-                    <button type="button" class="btn js-open-modal" data-modal="classementModal">Classement et montant proposé par fédérations</button>
+                    <button type="button" class="btn info js-open-modal" data-modal="classementModal"><x-ui-icon name="file" /> Classement et montant proposé par fédérations</button>
                 @endif
                 @if ($repartitionValideeMinistre)
-                    <button type="button" class="btn js-open-modal" data-modal="repartitionDefinitiveModal">Répartition définitive par fédération</button>
+                    <button type="button" class="btn info js-open-modal" data-modal="repartitionDefinitiveModal"><x-ui-icon name="file" /> Répartition définitive par fédération</button>
                 @endif
             </div>
 
@@ -183,14 +126,14 @@
                 <h2 class="card-title">Répartition de la subvention</h2>
             </div>
             <p class="strength-text">Définissez le montant attribué à chaque catégorie ajustée ; le montant proposé de chaque fédération en est déduit automatiquement.</p>
-            <form method="POST" action="{{ route('campagnes.repartition.update', $campaign) }}">
+            <form method="POST" action="{{ route('campagnes.repartition.update', $campaign) }}" data-campaign-edit>
                 @csrf
                 <div class="repartition-bareme">
                     @foreach ($paliers as $palier)
                         <div class="form-group">
-                            <label class="form-label">{{ $palier }}</label>
-                            <input type="number" name="bareme[{{ $palier }}]" class="form-input" min="0" step="1000"
-                                value="{{ $campaign->bareme_repartition[$palier] ?? '' }}">
+                            <label class="form-label" for="bareme-{{ $loop->index }}">{{ $palier }} · FCFA</label>
+                            <input id="bareme-{{ $loop->index }}" type="number" name="bareme[{{ $palier }}]" class="form-input" min="0" step="1000"
+                                value="{{ old('bareme.'.$palier, $campaign->bareme_repartition[$palier] ?? '') }}">
                         </div>
                     @endforeach
                 </div>
@@ -198,10 +141,10 @@
                 <x-classement-federations :allocations="$campaign->allocations" :avec-surcharge="true" />
 
                 <div class="btn-group">
-                    <button type="submit" class="btn primary">Enregistrer la répartition</button>
+                    <p data-campaign-save-state role="status">Enregistrez avant de poursuivre.</p><button type="submit" class="btn primary">Enregistrer la répartition</button>
                 </div>
             </form>
-            <form method="POST" action="{{ route('campagnes.submit-dg', $campaign) }}" class="btn-group" style="margin-top: 12px;"
+            <form method="POST" action="{{ route('campagnes.submit-dg', $campaign) }}" data-campaign-advance class="btn-group" style="margin-top: 12px;"
                 data-confirm="Soumettre la répartition au Directeur Général ? Cette action est irréversible sans son avis.">
                 @csrf
                 <button type="submit" class="btn">Soumettre au Directeur Général</button>
@@ -241,9 +184,9 @@
             @if ($campaign->ministre_rejection_reason && $campaign->ministre_decision === 'rejete')
                 <p class="strength-text" style="color: var(--color-danger, #E5484D);">Précédent motif de rejet du Ministre : {{ $campaign->ministre_rejection_reason }}</p>
             @endif
-            <form method="POST" action="{{ route('campagnes.arbitrage.update', $campaign) }}">
+            <form method="POST" action="{{ route('campagnes.arbitrage.update', $campaign) }}" data-campaign-edit>
                 @csrf
-                <div class="table-responsive">
+                <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne — défilement horizontal">
                 <table class="market-table">
                     <thead>
                         <tr>
@@ -260,8 +203,8 @@
                                 <td>{{ $allocation->categorie_ajustee ?? '—' }}</td>
                                 <td>{{ $allocation->montant_propose !== null ? number_format($allocation->montant_propose, 0, ',', ' ').' FCFA' : '—' }}</td>
                                 <td>
-                                    <input type="number" name="montants[{{ $allocation->id }}]" class="form-input" min="0" step="1000"
-                                        value="{{ $allocation->montant_arbitre ?? $allocation->montant_propose }}">
+                                    <input aria-label="Montant arbitré pour {{ $allocation->federation->federation_name }} en FCFA" type="number" name="montants[{{ $allocation->id }}]" class="form-input" min="0" step="1000"
+                                        value="{{ old('montants.'.$allocation->id, $allocation->montant_arbitre ?? $allocation->montant_propose) }}">
                                 </td>
                             </tr>
                         @endforeach
@@ -269,10 +212,10 @@
                 </table>
                 </div>
                 <div class="btn-group">
-                    <button type="submit" class="btn primary">Enregistrer l'arbitrage</button>
+                    <p data-campaign-save-state role="status">Enregistrez avant de poursuivre.</p><button type="submit" class="btn primary">Enregistrer l'arbitrage</button>
                 </div>
             </form>
-            <form method="POST" action="{{ route('campagnes.arbitrage.finalize', $campaign) }}" class="btn-group" style="margin-top: 12px;"
+            <form method="POST" action="{{ route('campagnes.arbitrage.finalize', $campaign) }}" data-campaign-advance class="btn-group" style="margin-top: 12px;"
                 data-confirm="Finaliser l'arbitrage et soumettre au Ministre ?">
                 @csrf
                 <button type="submit" class="btn">Finaliser l'arbitrage</button>
@@ -310,8 +253,8 @@
             <form method="POST" action="{{ route('campagnes.session.organize', $campaign) }}" class="form-grid">
                 @csrf
                 <div class="form-group">
-                    <label class="form-label">Date de la session</label>
-                    <input type="date" name="session_arbitrage_date" class="form-input" required>
+                    <label class="form-label" for="sessionDate">Date de la session</label>
+                    <input id="sessionDate" value="{{ old('session_arbitrage_date') }}" type="date" name="session_arbitrage_date" class="form-input" required>
                 </div>
                 <div class="form-group full-width">
                     <button type="submit" class="btn primary">Marquer la session comme organisée</button>
@@ -326,7 +269,7 @@
             <div class="card-header">
                 <h2 class="card-title">Programmes réaménagés et délivrance du quitus</h2>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne — défilement horizontal">
             <table class="market-table">
                 <thead>
                     <tr>
@@ -351,13 +294,10 @@
                             </td>
                             <td>
                                 @if ($allocation->quitus_delivered_at)
-                                    <a href="{{ route('campagnes.quitus.download', [$campaign, $allocation->federation]) }}" class="security-btn primary">Télécharger le quitus</a>
+                                    <a href="{{ route('campagnes.quitus.download', [$campaign, $allocation->federation]) }}" class="security-btn info"><x-ui-icon name="download" /> Télécharger le quitus</a>
+                                    <a href="{{ route('campagnes.quitus.prepare', [$campaign, $allocation->federation]) }}" class="security-btn">Détail</a>
                                 @elseif ($reamenage && $reamenage->status === 'valide')
-                                    <form method="POST" action="{{ route('campagnes.quitus.deliver', [$campaign, $allocation->federation]) }}"
-                                        data-confirm="Délivrer le quitus de déblocage de subvention à {{ $allocation->federation->federation_name }} ?">
-                                        @csrf
-                                        <button type="submit" class="security-btn primary">Délivrer le quitus</button>
-                                    </form>
+                                    <a href="{{ route('campagnes.quitus.prepare', [$campaign, $allocation->federation]) }}" class="security-btn primary">Préparer le quitus</a>
                                 @else
                                     <span class="strength-text">En attente du réaménagement</span>
                                 @endif
@@ -370,15 +310,16 @@
         </div>
     @endif
 
+    </div>
     {{-- Tableau récapitulatif, toujours visible --}}
-    <div class="card">
+    <div class="card" id="campaignSummary">
         <div class="card-header">
             <h2 class="card-title">Récapitulatif des fédérations</h2>
         </div>
         @if ($campaign->allocations->isEmpty())
             <x-empty-state icon="users" title="Aucune fédération retenue pour cette campagne." />
         @else
-            <div class="table-responsive">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Tableau de campagne — défilement horizontal">
             <table class="market-table">
                 <thead>
                     <tr>
@@ -416,7 +357,7 @@
                 <div class="modal-head">
                     <h3 id="ponderationGrilleTitre">Pondération par activité par fédération</h3>
                     <div class="modal-head-actions">
-                        <a href="{{ route('campagnes.ponderation.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                        <a href="{{ route('campagnes.ponderation.export', $campaign) }}" class="btn btn-sm info"><x-ui-icon name="download" /> Télécharger en Excel</a>
                         <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
                     </div>
                 </div>
@@ -429,7 +370,7 @@
                 <div class="modal-head">
                     <h3 id="ponderationRecapTitre">Récapitulatif par rubrique par fédération</h3>
                     <div class="modal-head-actions">
-                        <a href="{{ route('campagnes.recap.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                        <a href="{{ route('campagnes.recap.export', $campaign) }}" class="btn btn-sm info"><x-ui-icon name="download" /> Télécharger en Excel</a>
                         <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
                     </div>
                 </div>
@@ -443,7 +384,7 @@
                     <div class="modal-head">
                         <h3 id="classementTitre">Classement et montant proposé par fédérations</h3>
                         <div class="modal-head-actions">
-                            <a href="{{ route('campagnes.classement.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                            <a href="{{ route('campagnes.classement.export', $campaign) }}" class="btn btn-sm info"><x-ui-icon name="download" /> Télécharger en Excel</a>
                             <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
                         </div>
                     </div>
@@ -458,7 +399,7 @@
                     <div class="modal-head">
                         <h3 id="repartitionDefinitiveTitre">Répartition définitive par fédération</h3>
                         <div class="modal-head-actions">
-                            <a href="{{ route('campagnes.repartition-definitive.export', $campaign) }}" class="btn btn-sm">Télécharger en Excel</a>
+                            <a href="{{ route('campagnes.repartition-definitive.export', $campaign) }}" class="btn btn-sm info"><x-ui-icon name="download" /> Télécharger en Excel</a>
                             <button type="button" class="btn btn-sm js-close-modal">Fermer</button>
                         </div>
                     </div>
@@ -470,33 +411,13 @@
             </div>
         @endif
     @endif
+    </div>
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/campaign-workspace.js') }}"></script>
     <script>
         (function () {
-            // Total par federation pendant la saisie des scores.
-            const table = document.getElementById('ponderationTable');
-
-            if (table) {
-                function updateRowTotal(row) {
-                    let total = 0;
-                    row.querySelectorAll('.critere-input').forEach(function (input) {
-                        total += parseFloat(input.value) || 0;
-                    });
-                    const cell = row.querySelector('[data-total]');
-                    if (cell) cell.textContent = total.toFixed(2).replace(/\.00$/, '');
-                }
-
-                table.querySelectorAll('[data-allocation-row]').forEach(updateRowTotal);
-
-                table.addEventListener('input', function (e) {
-                    if (!e.target.classList.contains('critere-input')) return;
-                    const row = e.target.closest('[data-allocation-row]');
-                    if (row) updateRowTotal(row);
-                });
-            }
-
             // Tableaux de reference consultes en modale.
             const ouvrir = (modale) => { modale.classList.add('active'); document.body.style.overflow = 'hidden'; };
             const fermer = (modale) => { modale.classList.remove('active'); document.body.style.overflow = ''; };

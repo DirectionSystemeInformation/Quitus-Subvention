@@ -114,6 +114,69 @@
     </div>
 
     @if (auth()->user()->isAdmin())
+        @php
+            $saisies = \App\Support\PeriodeSaisie::LIBELLES;
+            $droit = fn ($type) => \App\Support\PeriodeSaisie::anneeDeDroit($type);
+        @endphp
+        {{-- Saisie hors exercice : seule l'administration peut rouvrir une autre année. --}}
+        <section class="card ouv-card" id="ouvertures" aria-labelledby="ouverturesTitre">
+            <div class="card-header">
+                <h2 class="card-title" id="ouverturesTitre">Saisie hors exercice</h2>
+            </div>
+            <p class="ouv-intro">De droit, la fédération déclare ses activités réalisées pour <strong>{{ $droit('activites') }}</strong> et prépare ses programmes pour <strong>{{ $droit('programme_budgetise') }}</strong>. Vous pouvez rouvrir exceptionnellement une autre année, pour une saisie précise.</p>
+
+            @if ($ouvertures->isEmpty())
+                <p class="ouv-empty">Aucune ouverture exceptionnelle pour cette fédération.</p>
+            @else
+                <ul class="ouv-list">
+                    @foreach ($ouvertures as $ouverture)
+                        @php $expiree = $ouverture->expires_on && $ouverture->expires_on->lt(today()); @endphp
+                        <li @class(['is-expired' => $expiree])>
+                            <div class="ouv-body">
+                                <strong>{{ $saisies[$ouverture->type] ?? $ouverture->type }} {{ $ouverture->year }}</strong>
+                                <span>{{ $ouverture->expires_on ? ($expiree ? 'Expirée le ' : 'Jusqu’au ').$ouverture->expires_on->format('d/m/Y') : 'Sans date limite' }} · accordée le {{ $ouverture->created_at->format('d/m/Y') }}{{ $ouverture->grantedBy ? ' par '.$ouverture->grantedBy->name : '' }}</span>
+                                <span class="ouv-motif">Motif : {{ $ouverture->motif }}</span>
+                            </div>
+                            <span class="status-badge {{ $expiree ? 'status-muted' : 'status-gain' }}">{{ $expiree ? 'Expirée' : 'Active' }}</span>
+                            <form method="POST" action="{{ route('admin.ouvertures.destroy', $ouverture) }}" data-confirm="Refermer la saisie « {{ $saisies[$ouverture->type] ?? $ouverture->type }} » {{ $ouverture->year }} pour {{ $federation->federation_name }} ? La fédération ne pourra plus rien y saisir." data-confirm-tone="danger" data-confirm-label="Refermer">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm danger">Refermer</button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
+            <form method="POST" action="{{ route('admin.ouvertures.store', $federation) }}" class="ouv-form">
+                @csrf
+                <p class="ouv-form-title">Ouvrir une année</p>
+                <div class="form-group">
+                    <label class="form-label" for="ouvType">Saisie</label>
+                    <select id="ouvType" name="type" class="form-select" required>
+                        @foreach ($saisies as $cle => $libelle)
+                            <option value="{{ $cle }}" @selected(old('type') === $cle)>{{ $libelle }} (de droit : {{ $droit($cle) }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="ouvAnnee">Année à rouvrir</label>
+                    <input id="ouvAnnee" type="number" name="year" class="form-input" min="2000" max="2100" value="{{ old('year', $droit('activites') - 1) }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="ouvLimite">Date limite <span class="optional">(facultatif)</span></label>
+                    <input id="ouvLimite" type="date" name="expires_on" class="form-input" min="{{ today()->format('Y-m-d') }}" value="{{ old('expires_on') }}">
+                </div>
+                <div class="form-group ouv-motif-field">
+                    <label class="form-label" for="ouvMotif">Motif</label>
+                    <input id="ouvMotif" type="text" name="motif" class="form-input" maxlength="255" placeholder="Ex. Rapport 2025 incomplet, pièces reçues tardivement" value="{{ old('motif') }}" required>
+                </div>
+                <div class="ouv-form-actions">
+                    <button type="submit" class="btn primary"><x-ui-icon name="lock" /> Ouvrir la saisie</button>
+                </div>
+            </form>
+        </section>
+
         <div class="card" style="margin-bottom: 24px;">
             <div class="card-header">
                 <h2 class="card-title">Modifier le compte</h2>

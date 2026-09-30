@@ -24,8 +24,10 @@ https://templatemo.com/tm-609-crypto-vault
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
         function syncSidebarAccess() {
             if (sidebar) sidebar.inert = window.innerWidth <= 1024 && !sidebar.classList.contains('active');
+            if (mainContent && sidebar) mainContent.inert = window.innerWidth <= 1024 && sidebar.classList.contains('active');
         }
         syncSidebarAccess();
 
@@ -38,6 +40,11 @@ https://templatemo.com/tm-609-crypto-vault
                 mobileMenuToggle.setAttribute('aria-expanded', String(sidebar.classList.contains('active')));
                 mobileMenuToggle.setAttribute('aria-label', sidebar.classList.contains('active') ? 'Fermer le menu' : 'Ouvrir le menu');
                 syncSidebarAccess();
+                if (sidebar.classList.contains('active')) {
+                    sidebar.querySelector('a[href]')?.focus();
+                } else {
+                    mobileMenuToggle.focus();
+                }
             }
         }
 
@@ -49,6 +56,16 @@ https://templatemo.com/tm-609-crypto-vault
             sidebarOverlay.addEventListener('click', toggleMobileMenu);
         }
         document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab' && window.innerWidth <= 1024 && sidebar?.classList.contains('active')) {
+                const links = [mobileMenuToggle, ...sidebar.querySelectorAll('a[href], button:not([disabled])')];
+                const first = links[0];
+                const last = links[links.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault(); last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault(); first.focus();
+                }
+            }
             if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
                 toggleMobileMenu();
                 mobileMenuToggle.focus();
@@ -56,7 +73,7 @@ https://templatemo.com/tm-609-crypto-vault
         });
 
         // Close menu when clicking nav items
-        document.querySelectorAll('.nav-item').forEach(function(item) {
+        document.querySelectorAll('.nav-item, .platform-nav-link').forEach(function(item) {
             item.addEventListener('click', function() {
                 if (window.innerWidth <= 1024 && sidebar && sidebar.classList.contains('active')) {
                     toggleMobileMenu();
@@ -262,7 +279,8 @@ https://templatemo.com/tm-609-crypto-vault
 
         document.querySelectorAll('form[data-confirm]').forEach(function(form) {
             form.addEventListener('submit', function(e) {
-                if (form.dataset.confirmed === 'true') {
+                // Un bouton secondaire (ex. aperçu dans un nouvel onglet) ne demande pas confirmation.
+                if (form.dataset.confirmed === 'true' || (e.submitter && e.submitter.hasAttribute('data-skip-confirm'))) {
                     return;
                 }
                 e.preventDefault();
@@ -605,7 +623,9 @@ https://templatemo.com/tm-609-crypto-vault
         document.querySelectorAll('.nav-item.active').forEach(function(link) { link.setAttribute('aria-current', 'page'); });
         const summary = document.querySelector('#flashErrors.notice');
         if (!summary) return;
-        const fields = Array.from(document.querySelectorAll('input[name], select[name], textarea[name]'));
+        // Several administration forms share field names; attach errors to the submitted one.
+        const errorScope = document.querySelector('form[data-error-scope]') || document;
+        const fields = Array.from(errorScope.querySelectorAll('input[name], select[name], textarea[name]'));
         summary.querySelectorAll('[data-error-field]').forEach(function(item, index) {
             const key = item.dataset.errorField;
             const field = fields.find(function(input) {

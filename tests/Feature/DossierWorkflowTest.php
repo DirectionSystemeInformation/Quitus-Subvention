@@ -10,7 +10,9 @@ use App\Models\FederationActivity;
 use App\Models\Report;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Tests\Support\UiDatabase;
 use Tests\TestCase;
@@ -22,8 +24,21 @@ class DossierWorkflowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Les années 2026 (activités) et 2027 (programmes) sont celles ouvertes de droit à cette date.
+        $this->travelTo(now()->setDate(2026, 9, 30));
         URL::forceRootUrl('http://localhost');
         UiDatabase::create();
+        // Le schéma de test simplifié précède la période et la date de soumission des activités.
+        Schema::table('federation_activities', function (Blueprint $table) {
+            foreach (['date_debut', 'date_fin'] as $colonne) {
+                if (! Schema::hasColumn('federation_activities', $colonne)) {
+                    $table->date($colonne)->nullable();
+                }
+            }
+            if (! Schema::hasColumn('federation_activities', 'submitted_at')) {
+                $table->timestamp('submitted_at')->nullable();
+            }
+        });
         $this->federation = $this->user('federation');
         $axe = CanvasAxe::create(['code' => 'I', 'label' => 'Activités sportives', 'sort_order' => 1]);
         CanvasSousAxe::create(['canvas_axe_id' => $axe->id, 'code' => 'I.1', 'label' => 'Compétitions', 'lignes_count' => 1, 'sort_order' => 1]);

@@ -49,12 +49,12 @@ class DashboardController extends Controller
                 ]);
             });
 
-        Report::with('user')->where('status', 'soumis')->oldest()->take(10)->get()
+        Report::with('user')->where('status', 'soumis')->oldest('updated_at')->take(10)->get()
             ->each(function ($report) use ($actionItems) {
                 $actionItems->push([
-                    'type' => 'Rapport',
+                    'type' => $report->typeLabel(),
                     'federation' => $report->user->federation_name,
-                    'since' => $report->created_at,
+                    'since' => $report->updated_at,
                     'status' => 'soumis',
                     'url' => route('activity-form.show', $report),
                 ]);

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-enhancements.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/creation-forms.css') }}">
 </head>
 <body class="auth-page">
     @php
@@ -138,9 +139,10 @@
             </form>
 
             <!-- Register Form -->
-            <form class="auth-form {{ $registerHasErrors ? 'active' : '' }}" id="registerForm" method="POST" action="{{ route('register') }}">
+            <form class="auth-form creation-ui {{ $registerHasErrors ? 'active' : '' }}" id="registerForm" method="POST" action="{{ route('register') }}">
                 @csrf
                 <p class="auth-required-hint">Tous les champs sont obligatoires. Votre demande sera examinée par la DSHN avant l'activation du compte.</p>
+                <fieldset class="creation-auth-section"><legend><span aria-hidden="true">01</span> Votre fédération</legend>
                 <div class="form-group">
                     <label for="registerFederation" class="form-label">Dénomination de la fédération</label>
                     <div class="form-input-wrapper">
@@ -185,6 +187,8 @@
                     @enderror
                 </div>
 
+                </fieldset>
+                <fieldset class="creation-auth-section"><legend><span aria-hidden="true">02</span> Vos accès au compte</legend>
                 <div class="form-group">
                     <label for="registerEmail" class="form-label">Adresse e-mail</label>
                     <div class="form-input-wrapper">
@@ -206,7 +210,7 @@
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                             <path d="M7 11V7a5 5 0 0110 0v4"/>
                         </svg>
-                        <input type="password" name="password" class="form-input" id="registerPassword" placeholder="Créer un mot de passe" autocomplete="new-password" @if ($errors->has('password')) aria-invalid="true" aria-describedby="registerPasswordError" @endif required>
+                        <input type="password" name="password" class="form-input" id="registerPassword" placeholder="Au moins 8 caractères" autocomplete="new-password" @if ($errors->has('password')) aria-invalid="true" aria-describedby="registerPasswordError" @endif required>
                         <button type="button" class="password-toggle" data-target="registerPassword" aria-controls="registerPassword" aria-label="Afficher le mot de passe" aria-pressed="false">
                             <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -233,7 +237,8 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="submit-btn">Créer le compte</button>
+                </fieldset>
+                <button type="submit" class="submit-btn">Créer le compte fédération</button>
 
                 <p class="form-footer">
                     Déjà un compte ? <a href="#" id="switchToLogin">Se connecter</a>

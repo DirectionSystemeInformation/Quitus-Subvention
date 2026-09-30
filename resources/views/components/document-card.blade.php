@@ -29,6 +29,6 @@
     </div>
     <div class="document-card-actions">
         <a href="{{ $viewUrl }}" target="_blank" rel="noopener" class="btn btn-sm">Consulter</a>
-        <a href="{{ $downloadUrl }}" class="btn btn-sm">Télécharger</a>
+        <a href="{{ $downloadUrl }}" class="btn btn-sm info"><x-ui-icon name="download" /> Télécharger</a>
     </div>
 </div>

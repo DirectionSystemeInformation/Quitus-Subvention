@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dshn;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\OuvertureSaisie;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,14 +13,27 @@ use Illuminate\Validation\Rules\Password;
 
 class FederationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $federations = User::where('role', 'federation')
+        $search = mb_substr(trim((string) $request->query('q')), 0, 150);
+        $status = in_array($request->query('statut'), ['pending', 'active', 'rejected'], true) ? $request->query('statut') : 'tous';
+        $query = User::where('role', 'federation')
+            ->when($search !== '', fn ($q) => $q->where(fn ($q) => $q
+                ->where('federation_name', 'like', '%'.$search.'%')
+                ->orWhere('email', 'like', '%'.$search.'%')
+                ->orWhere('arrete_numero', 'like', '%'.$search.'%')));
+        $counts = (clone $query)->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status')->all();
+        $counts = array_replace(['pending' => 0, 'active' => 0, 'rejected' => 0], $counts);
+        $counts['total'] = array_sum($counts);
+        $federations = $query
+            ->withCount(['reports' => fn ($q) => $q->where('status', '!=', 'brouillon')])
+            ->when($status !== 'tous', fn ($q) => $q->where('status', $status))
             ->orderByRaw("CASE status WHEN 'pending' THEN 0 WHEN 'active' THEN 1 ELSE 2 END")
             ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(20)->withQueryString();
 
-        return view('dshn.federations', compact('federations'));
+        return view('dshn.federations', compact('federations', 'search', 'status', 'counts'));
     }
 
     public function show(User $federation)
@@ -35,9 +49,14 @@ class FederationController extends Controller
             'rejete' => $reports->where('status', 'rejete')->count(),
         ];
 
-        $logs = ActivityLog::where('subject_id', $federation->id)->latest()->take(20)->get();
+        $logs = ActivityLog::where('subject_id', $federation->id)
+            ->where('subject_name', $federation->federation_name)->latest()->take(20)->get();
 
-        return view('dshn.federation-show', compact('federation', 'reports', 'stats', 'logs'));
+        // Ouvertures exceptionnelles de saisie, gérées par l'administration.
+        $ouvertures = OuvertureSaisie::where('user_id', $federation->id)->with('grantedBy')
+            ->orderByDesc('year')->orderBy('type')->get();
+
+        return view('dshn.federation-show', compact('federation', 'reports', 'stats', 'logs', 'ouvertures'));
     }
 
     public function validate_(User $federation)
@@ -166,6 +185,6 @@ class FederationController extends Controller
 
         ActivityLog::record('deleted', "a supprimé le compte de {$name}", $id, $name);
 
-        return back()->with('status', "Le compte de {$name} a été supprimé.");
+        return redirect()->to(role_route('federations.index'))->with('status', "Le compte de {$name} a été supprimé.");
     }
 }

@@ -1,0 +1,429 @@
+/* ==========================================================================
+   Couleurs d'action et animations — toutes les pages connectées.
+
+   Couleurs : vert = action principale / validation, rouge = suppression /
+   rejet, bleu = consulter / télécharger un document, ambre = avertissement.
+   Mouvement : transitions entre pages, notifications, apparition et retrait
+   des éléments, retour visuel des totaux. Tout mouvement est coupé quand
+   l'utilisateur demande moins d'animations (prefers-reduced-motion).
+
+   Chargée en dernier (après platform.css et creation-forms.css).
+   ========================================================================== */
+
+.platform-app {
+    --danger-600: #b42318;
+    --danger-700: #912018;
+    --danger-50: #fef3f2;
+    --danger-200: #f6cfca;
+    --info-600: #1f5f8b;
+    --info-700: #164a6d;
+    --info-50: #eef5fb;
+    --info-200: #cadff0;
+    --warning-700: #7a4d00;
+    --warning-50: #fff6e5;
+    --warning-200: #f1dcad;
+    --success-50: #e8f4ee;
+    --success-200: #c5e2d2;
+}
+
+/* ==========================================================================
+   1. Boutons : une couleur par nature d'action
+   ========================================================================== */
+
+.platform-app :is(.btn, .security-btn) {
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .2s ease, transform .12s ease;
+}
+
+.platform-app :is(.btn, .security-btn) .ui-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.platform-app :is(.btn, .security-btn).primary:hover:not(:disabled) {
+    box-shadow: 0 6px 16px #08664f38;
+}
+
+.platform-app :is(.btn, .security-btn).danger {
+    background: var(--danger-50);
+    border-color: var(--danger-200);
+    color: var(--danger-600);
+}
+
+.platform-app :is(.btn, .security-btn).danger:hover:not(:disabled) {
+    background: var(--danger-600);
+    border-color: var(--danger-600);
+    color: #fff;
+    box-shadow: 0 6px 16px #b4231838;
+}
+
+.platform-app :is(.btn, .security-btn).info {
+    background: var(--info-50);
+    border-color: var(--info-200);
+    color: var(--info-600);
+}
+
+.platform-app :is(.btn, .security-btn).info:hover:not(:disabled) {
+    background: #e0edf8;
+    border-color: #9dc2dc;
+    color: var(--info-700);
+    box-shadow: 0 6px 16px #1f5f8b24;
+}
+
+.platform-app :is(.btn, .security-btn).warning {
+    background: var(--warning-50);
+    border-color: var(--warning-200);
+    color: var(--warning-700);
+}
+
+.platform-app :is(.btn, .security-btn).warning:hover:not(:disabled) {
+    background: #fdebc8;
+    border-color: #e4bf72;
+}
+
+/* Boutons-icônes : la corbeille est rouge d'emblée, le crayon vert. */
+.platform-app :is(.ref-icon-btn.is-danger, .gp-delete, .pf-remove, .icon-btn.danger) {
+    color: var(--danger-600);
+}
+
+.platform-app :is(.ref-icon-btn.is-danger, .gp-delete, .pf-remove, .icon-btn.danger):hover {
+    background: var(--danger-50);
+    border-color: var(--danger-200);
+    color: var(--danger-700);
+}
+
+.platform-app :is(.ref-icon-btn:not(.is-danger), .icon-btn:not(.danger)) {
+    color: var(--color-primary);
+}
+
+.platform-app :is(.ref-icon-btn:not(.is-danger), .icon-btn:not(.danger)):hover {
+    background: var(--success-50);
+    border-color: var(--success-200);
+}
+
+/* ==========================================================================
+   2. Fenêtre de confirmation : ton selon l'action (suppression ou validation)
+   ========================================================================== */
+
+#confirmModal .qt-confirm-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    background: var(--success-50);
+    color: var(--color-primary);
+    box-shadow: 0 0 0 6px #e8f4ee80;
+}
+
+#confirmModal .qt-confirm-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+#confirmModal[data-tone="danger"] .qt-confirm-icon {
+    background: var(--danger-50);
+    color: var(--danger-600);
+    box-shadow: 0 0 0 6px #fef3f280;
+}
+
+.platform-app #confirmModal #confirmModalConfirm {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+}
+
+.platform-app #confirmModal[data-tone="danger"] #confirmModalConfirm {
+    background: var(--danger-600);
+    border-color: var(--danger-600);
+}
+
+.platform-app #confirmModal[data-tone="danger"] #confirmModalConfirm:hover {
+    background: var(--danger-700);
+    border-color: var(--danger-700);
+}
+
+.platform-app #rejectReasonModal button[type="submit"] {
+    background: var(--danger-600);
+    border-color: var(--danger-600);
+    color: #fff;
+}
+
+/* ==========================================================================
+   3. Notifications (toasts) : confirmations visibles quel que soit le défilement
+   ========================================================================== */
+
+.qt-toasts {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 4000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(400px, calc(100vw - 36px));
+    pointer-events: none;
+}
+
+.qt-toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    overflow: hidden;
+    padding: 14px 14px 16px 16px;
+    background: #fff;
+    border: 1px solid #dfe7e1;
+    border-radius: 12px;
+    box-shadow: 0 18px 40px #102c2924, 0 2px 6px #102c290f;
+    color: #193e33;
+    font-size: 13.5px;
+    line-height: 1.5;
+    pointer-events: auto;
+}
+
+.qt-toast::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: var(--qt-accent, #08664f);
+}
+
+.qt-toast.is-error { --qt-accent: #b42318; }
+.qt-toast.is-info { --qt-accent: #1f5f8b; }
+
+.qt-toast-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--qt-accent, #08664f) 12%, #fff);
+    color: var(--qt-accent, #08664f);
+}
+
+.qt-toast-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.qt-toast-body {
+    flex: 1;
+    min-width: 0;
+    padding-top: 3px;
+}
+
+.qt-toast-title {
+    display: block;
+    font-weight: 700;
+}
+
+.qt-toast-close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin: -2px -4px 0 0;
+    border: 0;
+    border-radius: 7px;
+    background: none;
+    color: #62756b;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.qt-toast-close:hover {
+    background: #f1f5f2;
+    color: #193e33;
+}
+
+.qt-toast-close:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px #08765740;
+}
+
+/* Barre de temps restant avant disparition ; se met en pause au survol. */
+.qt-toast-timer {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: color-mix(in srgb, var(--qt-accent, #08664f) 45%, #fff);
+    transform-origin: left;
+}
+
+/* ==========================================================================
+   4. Barre de chargement lors d'une navigation ou d'un enregistrement
+   ========================================================================== */
+
+.qt-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #08664f, #3d9b6f 55%, #d4a72c);
+    box-shadow: 0 0 10px #08664f66;
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.qt-progress.is-running {
+    opacity: 1;
+    transform: scaleX(.82);
+    transition: transform 8s cubic-bezier(.08, .82, .17, 1), opacity .15s ease;
+}
+
+/* ==========================================================================
+   5. Animations — seulement si l'utilisateur n'a pas demandé moins de mouvement
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+
+    /* 5.1 Transition entre les pages : le menu reste en place, le contenu glisse. */
+    @view-transition {
+        navigation: auto;
+    }
+
+    .platform-sidebar {
+        view-transition-name: qt-sidebar;
+    }
+
+    ::view-transition-group(qt-sidebar) {
+        animation: none;
+    }
+
+    ::view-transition-old(root) {
+        animation: qt-page-out .14s cubic-bezier(.65, 0, .35, 1) both;
+    }
+
+    ::view-transition-new(root) {
+        animation: qt-page-in .3s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    /* 5.2 Boutons : léger enfoncement au clic. */
+    .platform-app :is(.btn, .security-btn, .ref-icon-btn, .gp-delete, .pf-remove, .icon-btn):active:not(:disabled) {
+        transform: scale(.96);
+    }
+
+    /* 5.3 Notifications : entrée ressort, sortie en glissant. */
+    .qt-toast {
+        animation: qt-toast-in .5s cubic-bezier(.16, 1.2, .3, 1) both;
+    }
+
+    .qt-toast.is-leaving {
+        animation: qt-toast-out .28s cubic-bezier(.65, 0, .35, 1) both;
+    }
+
+    .qt-toast-timer {
+        animation: qt-timer linear forwards;
+        animation-duration: var(--qt-duration, 6s);
+    }
+
+    .qt-toast:hover .qt-toast-timer,
+    .qt-toast:focus-within .qt-toast-timer {
+        animation-play-state: paused;
+    }
+
+    /* Coche dessinée au trait. */
+    .qt-toast-icon .qt-draw {
+        stroke-dasharray: 30;
+        stroke-dashoffset: 30;
+        animation: qt-draw .45s .22s cubic-bezier(.65, 0, .35, 1) forwards;
+    }
+
+    .qt-toast-icon {
+        animation: qt-pop .45s .08s cubic-bezier(.16, 1.4, .3, 1) both;
+    }
+
+    /* 5.4 Fenêtres : apparition en douceur, icône qui « respire » une fois. */
+    .modal-overlay.active {
+        animation: qt-fade .2s ease both;
+    }
+
+    .modal-overlay.active .modal-box {
+        animation: qt-modal-in .32s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    #confirmModal.active .qt-confirm-icon {
+        animation: qt-pop .5s .1s cubic-bezier(.16, 1.4, .3, 1) both;
+    }
+
+    #confirmModal.active[data-tone="danger"] .qt-confirm-icon svg {
+        animation: qt-wiggle .5s .35s ease both;
+    }
+
+    /* 5.5 Élément ajouté : apparaît en glissant, surligné un instant. */
+    .qt-enter {
+        animation: qt-enter .42s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    .qt-enter :is(td, th) {
+        animation: qt-enter-cell 1.1s ease both;
+    }
+
+    /* 5.6 Suppression confirmée : la ligne s'efface pendant l'envoi. */
+    .qt-leaving {
+        animation: qt-leaving .35s cubic-bezier(.65, 0, .35, 1) forwards;
+        pointer-events: none;
+    }
+
+    .qt-leaving :is(td, th) {
+        background-color: var(--danger-50) !important;
+    }
+
+    /* 5.7 Total mis à jour : petite impulsion de couleur. */
+    .qt-bump {
+        display: inline-block;
+        animation: qt-bump .45s cubic-bezier(.16, 1.3, .3, 1);
+    }
+
+    /* 5.8 Erreurs de saisie : le résumé apparaît en secouant légèrement. */
+    #flashErrors {
+        animation: qt-enter .4s cubic-bezier(.16, 1, .3, 1) both, qt-shake .45s .4s ease both;
+    }
+
+    .server-field-error {
+        animation: qt-enter .3s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    /* 5.9 Survol des lignes de tableau et des cartes cliquables. */
+    .platform-app :is(.market-table, .gp-table, .quitus-table) tbody tr {
+        transition: background-color .15s ease;
+    }
+
+    .platform-app :is(.form-input, .form-select, textarea) {
+        transition: border-color .16s ease, box-shadow .2s ease, background-color .16s ease;
+    }
+
+    /* 5.10 Jauges et barres de progression : remplissage progressif. */
+    .platform-app :is(.pf-gauge span, .gp-share > span, .campaign-progress li::after) {
+        transition: width .45s cubic-bezier(.16, 1, .3, 1), background-color .2s ease;
+    }
+}
+
+@keyframes qt-page-out { to { opacity: 0; transform: translateY(-4px); } }
+@keyframes qt-page-in { from { opacity: 0; transform: translateY(10px); } }
+@keyframes qt-fade { from { opacity: 0; } }
+@keyframes qt-modal-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+@keyframes qt-toast-in { from { opacity: 0; transform: translateX(32px) scale(.96); } }
+@keyframes qt-toast-out { to { opacity: 0; transform: translateX(40px); } }
+@keyframes qt-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes qt-draw { to { stroke-dashoffset: 0; } }
+@keyframes qt-pop { from { transform: scale(.4); opacity: 0; } }
+@keyframes qt-wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-9deg); } 60% { transform: rotate(7deg); } }
+@keyframes qt-enter { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes qt-enter-cell { 0%, 35% { background-color: #e3f3ea; } }
+@keyframes qt-leaving { to { opacity: .25; transform: translateX(18px); } }
+@keyframes qt-bump { 40% { transform: scale(1.08); color: #0a7a5c; } }
+@keyframes qt-shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }

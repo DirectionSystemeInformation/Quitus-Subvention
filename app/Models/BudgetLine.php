@@ -19,6 +19,7 @@ class BudgetLine extends Model
         'montant',
         'contribution_partenaires',
         'date',
+        'delai_justification',
         'observations',
     ];
 
@@ -26,6 +27,7 @@ class BudgetLine extends Model
     {
         return [
             'date' => 'date',
+            'delai_justification' => 'date',
             'montant' => 'decimal:2',
         ];
     }

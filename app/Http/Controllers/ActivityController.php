@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\FederationActivity;
 use App\Support\ActivityCanvasStructure;
+use App\Support\PeriodeSaisie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,26 +16,61 @@ class ActivityController extends Controller
     public function index(Request $request)
     {
         $year = $request->query('annee');
+        $search = mb_substr(trim((string) $request->query('q')), 0, 150);
+        $status = in_array($request->query('statut'), ['a_faire', 'en_examen', 'brouillon', 'soumis', 'valide', 'rejete'], true) ? $request->query('statut') : 'tous';
 
-        $activities = Auth::user()->activities()
-            ->with('documents')
+        // « À faire » : ce qui attend la fédération (brouillon, rejet à corriger,
+        // activité soumise que la DGF ne peut pas examiner faute de justificatif).
+        $aFaire = fn ($query) => $query->where(fn ($q) => $q
+            ->whereIn('status', ['brouillon', 'rejete'])
+            ->orWhere(fn ($soumis) => $soumis->where('status', 'soumis')->doesntHave('documents')));
+        $enExamen = fn ($query) => $query->where('status', 'soumis')->has('documents');
+
+        $query = Auth::user()->activities()
             ->when($year, fn ($q) => $q->where('year', $year))
+            ->when($search !== '', fn ($q) => $q->where('designation', 'like', '%'.$search.'%'));
+        $counts = (clone $query)->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status')->all();
+        $counts = array_replace(['brouillon' => 0, 'soumis' => 0, 'valide' => 0, 'rejete' => 0], $counts);
+        $counts['total'] = array_sum($counts);
+        $counts['a_faire'] = (clone $query)->where($aFaire)->count();
+        $counts['en_examen'] = (clone $query)->where($enExamen)->count();
+        $montantValide = (float) (clone $query)->where('status', 'valide')->sum('montant');
+
+        $activities = $query->withCount('documents')
+            ->when($status === 'a_faire', $aFaire)
+            ->when($status === 'en_examen', $enExamen)
+            ->when(in_array($status, ['brouillon', 'soumis', 'valide', 'rejete'], true), fn ($q) => $q->where('status', $status))
             ->orderByDesc('year')
             ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(20)->withQueryString();
+
+        // Actions à mener, toutes années confondues, les plus urgentes d'abord.
+        $anneesOuvertes = PeriodeSaisie::anneesOuvertes(Auth::user(), PeriodeSaisie::ACTIVITES);
+        $aTraiter = Auth::user()->activities()->where($aFaire)->whereIn('year', $anneesOuvertes)->withCount('documents')->get()
+            ->sortBy(fn ($activity) => [match ($activity->status) { 'soumis' => 0, 'rejete' => 1, default => 2 }, -$activity->updated_at->timestamp])
+            ->values();
 
         $availableYears = Auth::user()->activities()
             ->select('year')->distinct()->orderByDesc('year')->pluck('year');
 
-        return view('activities.index', compact('activities', 'availableYears', 'year'));
+        $ouvertures = PeriodeSaisie::ouvertures(Auth::user(), PeriodeSaisie::ACTIVITES);
+
+        return view('activities.index', compact('activities', 'availableYears', 'year', 'search', 'status', 'counts', 'aTraiter', 'montantValide', 'anneesOuvertes', 'ouvertures'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        // L'année en cours, ou une année rouverte par l'administration.
+        $annees = PeriodeSaisie::anneesOuvertes(Auth::user(), PeriodeSaisie::ACTIVITES);
+        $demandee = (int) $request->query('annee');
+
         return view('activities.create', [
             'axes' => ActivityCanvasStructure::axes(),
             'activity' => new FederationActivity(),
-            'year' => now()->year,
+            'year' => $annees->contains($demandee) ? $demandee : PeriodeSaisie::anneeDeDroit(PeriodeSaisie::ACTIVITES),
+            'anneesOuvertes' => $annees,
+            'ouvertures' => PeriodeSaisie::ouvertures(Auth::user(), PeriodeSaisie::ACTIVITES),
         ]);
     }
 
@@ -66,14 +102,18 @@ class ActivityController extends Controller
         abort_unless($activity->user_id === Auth::id(), 403);
 
         $activity->load('documents');
+        $exerciceOuvert = PeriodeSaisie::estOuverte(Auth::user(), PeriodeSaisie::ACTIVITES, $activity->year);
 
-        return view('activities.show', compact('activity'));
+        return view('activities.show', compact('activity', 'exerciceOuvert'));
     }
 
     public function edit(FederationActivity $activity)
     {
         abort_unless($activity->user_id === Auth::id(), 403);
         abort_unless($activity->status !== 'valide', 403);
+        if ($refus = $this->exerciceClos($activity)) {
+            return $refus;
+        }
 
         $activity->load('documents');
 
@@ -81,6 +121,8 @@ class ActivityController extends Controller
             'axes' => ActivityCanvasStructure::axes(),
             'activity' => $activity,
             'year' => $activity->year,
+            'anneesOuvertes' => collect([$activity->year]),
+            'ouvertures' => collect(),
         ]);
     }
 
@@ -88,6 +130,9 @@ class ActivityController extends Controller
     {
         abort_unless($activity->user_id === Auth::id(), 403);
         abort_unless($activity->status !== 'valide', 403);
+        if ($refus = $this->exerciceClos($activity)) {
+            return $refus;
+        }
 
         $wasSubmittable = in_array($activity->status, ['brouillon', 'rejete'], true);
 
@@ -116,6 +161,9 @@ class ActivityController extends Controller
     {
         abort_unless($activity->user_id === Auth::id(), 403);
         abort_unless($activity->status !== 'valide', 403);
+        if ($refus = $this->exerciceClos($activity)) {
+            return $refus;
+        }
 
         $request->validate([
             'pieces' => ['required', 'array'],
@@ -131,6 +179,9 @@ class ActivityController extends Controller
     {
         abort_unless($activity->user_id === Auth::id(), 403);
         abort_unless($activity->status !== 'valide', 403);
+        if ($refus = $this->exerciceClos($activity)) {
+            return $refus;
+        }
 
         $activity->update(['status' => 'soumis', 'rejection_reason' => null, 'submitted_at' => now()]);
 
@@ -194,6 +245,20 @@ class ActivityController extends Controller
         return [];
     }
 
+    /**
+     * Une activité d'une année close ne peut plus être modifiée, complétée ni
+     * soumise, sauf ouverture exceptionnelle accordée par l'administration.
+     */
+    private function exerciceClos(FederationActivity $activity)
+    {
+        if (PeriodeSaisie::estOuverte(Auth::user(), PeriodeSaisie::ACTIVITES, $activity->year)) {
+            return null;
+        }
+
+        return redirect()->route('activities.show', $activity)
+            ->withErrors(['year' => PeriodeSaisie::messageFerme(PeriodeSaisie::ACTIVITES, $activity->year)]);
+    }
+
     private function validateActivity(Request $request): array
     {
         $request->merge([
@@ -213,6 +278,11 @@ class ActivityController extends Controller
         ]);
 
         $validator->after(function ($validator) use ($request) {
+            // Seules l'année en cours et les années rouvertes par l'administration sont acceptées.
+            if (filled($request->input('year')) && ! PeriodeSaisie::estOuverte(Auth::user(), PeriodeSaisie::ACTIVITES, $request->input('year'))) {
+                $validator->errors()->add('year', PeriodeSaisie::messageFerme(PeriodeSaisie::ACTIVITES, $request->input('year')));
+            }
+
             $montant = $request->input('montant');
             $contribution = $request->input('contribution_partenaires');
 

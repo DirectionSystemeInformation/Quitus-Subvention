@@ -52,6 +52,7 @@ final class UiDatabase
             '2026_07_22_094249_create_activity_logs_table.php',
             '2026_09_07_133908_create_federation_activities_table.php',
             '2026_09_07_133909_create_federation_activity_documents_table.php',
+            '2026_09_30_120000_create_ouvertures_saisie_table.php',
         ] as $migration) {
             (require database_path('migrations/'.$migration))->up();
         }

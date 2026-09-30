@@ -1,0 +1,564 @@
+/* ==========================================================================
+   Fiche d'une activité réalisée (espace fédération) : prochaine étape,
+   détails, pièces justificatives, suivi et actions.
+   Chargée avant platform.css : sélecteurs qualifiés par .ad-page.
+   ========================================================================== */
+
+.ad-page .ui-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.ad-page [hidden] {
+    display: none !important;
+}
+
+.ad-page .breadcrumb {
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+
+.ad-page .breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.ad-page .breadcrumb a:hover {
+    color: var(--color-primary);
+}
+
+/* --- En-tête --------------------------------------------------------------------- */
+
+.ad-page .ad-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px 24px;
+    margin-bottom: 20px;
+}
+
+.ad-page .ad-eyebrow {
+    margin: 0 0 6px;
+    color: var(--color-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.ad-page .ad-heading h1 {
+    margin: 0 0 10px;
+    color: var(--text-primary);
+    font-size: clamp(26px, 2.6vw, 34px);
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -.03em;
+}
+
+/* Fiche DGF : la fédération déclarante, sous le titre. */
+.ad-page .ad-federation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -2px 0 10px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 650;
+}
+
+.ad-page .ad-federation .ui-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-primary);
+}
+
+.ad-page .ad-axe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+}
+
+.ad-page .ad-chip {
+    padding: 2px 9px;
+    border: 1px solid #d6e4db;
+    border-radius: 999px;
+    background: #f1f6f3;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ad-page .ad-chip.is-strong {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.ad-page .ad-sep {
+    color: #9aa8a0;
+}
+
+.ad-page .ad-heading .status-badge {
+    flex: none;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+/* --- Prochaine étape -------------------------------------------------------------------- */
+
+.ad-page .ad-next {
+    --ton: var(--color-primary);
+    --ton-fond: #eef7f1;
+    --ton-bord: #cfe5d8;
+    display: flex;
+    align-items: center;
+    gap: 16px 20px;
+    margin-bottom: 20px;
+    padding: 18px 22px;
+    background: var(--ton-fond);
+    border: 1px solid var(--ton-bord);
+    border-left: 4px solid var(--ton);
+    border-radius: 14px;
+}
+
+.ad-page .ad-next.is-success { --ton: #08664f; --ton-fond: #edf7f1; --ton-bord: #c9e4d5; }
+.ad-page .ad-next.is-danger { --ton: #b42318; --ton-fond: #fef3f2; --ton-bord: #f6cfca; }
+.ad-page .ad-next.is-warning { --ton: #b7791f; --ton-fond: #fff7e8; --ton-bord: #f1dcad; }
+.ad-page .ad-next.is-info { --ton: #1f5f8b; --ton-fond: #eef5fb; --ton-bord: #cadff0; }
+.ad-page .ad-next.is-neutral { --ton: #62756b; --ton-fond: #f5f8f6; --ton-bord: #dfe7e1; }
+
+.ad-page .ad-next-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--ton);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--ton) 12%, transparent);
+}
+
+.ad-page .ad-next-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.ad-page .ad-next-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.ad-page .ad-next-label {
+    margin: 0 0 2px;
+    color: var(--ton);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.ad-page .ad-next h2 {
+    margin: 0 0 4px;
+    color: var(--text-primary);
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.ad-page .ad-next p {
+    margin: 0;
+    color: #3e5449;
+    font-size: 13.5px;
+    line-height: 1.55;
+}
+
+.ad-page .ad-next-actions {
+    flex: none;
+    display: flex;
+    gap: 8px;
+}
+
+.ad-page .ad-next-actions form {
+    margin: 0;
+}
+
+/* --- Mise en page et cartes ----------------------------------------------------------------- */
+
+.ad-page .ad-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 20px;
+    align-items: start;
+}
+
+.ad-page .ad-main,
+.ad-page .ad-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+.ad-page .ad-aside {
+    position: sticky;
+    top: 20px;
+}
+
+.ad-page .ad-card {
+    padding: 20px 22px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px #163c2b08;
+    scroll-margin-top: 20px;
+}
+
+.ad-page .ad-card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-bottom: 14px;
+}
+
+.ad-page .ad-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 750;
+}
+
+.ad-page .ad-card-head .ad-card-title {
+    margin: 0;
+}
+
+.ad-page .ad-count {
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: #eef2ef;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ad-page .ad-muted {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* --- Détails ---------------------------------------------------------------------------------- */
+
+.ad-page .ad-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 24px;
+    margin: 0;
+}
+
+.ad-page .ad-facts div {
+    min-width: 0;
+}
+
+.ad-page .ad-facts .is-full {
+    grid-column: 1 / -1;
+    padding-top: 16px;
+    border-top: 1px solid #edf2ee;
+}
+
+.ad-page .ad-facts dt {
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.ad-page .ad-facts dd {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.ad-page .ad-facts .is-amount dd {
+    color: var(--color-primary);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Pièces justificatives -------------------------------------------------------------------- */
+
+.ad-page .documents-grid {
+    margin-bottom: 16px;
+}
+
+.ad-page .ad-upload {
+    margin: 0;
+}
+
+.ad-page .ad-upload .dropzone {
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .3s ease;
+}
+
+/* Aucune pièce : la zone de dépôt est la chose à faire, elle se signale en ambre. */
+.ad-page .ad-upload .dropzone.is-required {
+    border-color: #e0b35c;
+    background: #fffaf0;
+}
+
+.ad-page .ad-upload .dropzone.is-required .dropzone-icon {
+    background: #fdeecf;
+    color: #9a6412;
+}
+
+.ad-page .ad-upload .dropzone.is-highlighted {
+    box-shadow: 0 0 0 5px #08765733;
+    border-color: var(--color-primary);
+}
+
+.ad-page .ad-upload-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.ad-page .ad-icon-up {
+    transform: rotate(180deg);
+}
+
+.ad-page .field-error {
+    margin: 8px 0 0;
+}
+
+.ad-page .ad-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 22px 20px;
+    border: 1.5px dashed #dfe7e1;
+    border-radius: 12px;
+    background: #f8faf9;
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-align: center;
+}
+
+.ad-page .ad-empty strong {
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.ad-page .ad-empty.is-warning {
+    border-color: #e0b35c;
+    background: #fffaf0;
+}
+
+/* --- Suivi ---------------------------------------------------------------------------------------- */
+
+.ad-page .ad-timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ad-page .ad-timeline li {
+    position: relative;
+    display: grid;
+    padding: 0 0 18px 34px;
+}
+
+.ad-page .ad-timeline li:last-child {
+    padding-bottom: 0;
+}
+
+/* Trait qui relie les étapes, vert jusqu'à l'étape en cours. */
+.ad-page .ad-timeline li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 24px;
+    bottom: 2px;
+    left: 11px;
+    width: 2px;
+    border-radius: 2px;
+    background: #dfe7e1;
+}
+
+.ad-page .ad-timeline li.is-fait:not(:last-child)::after {
+    background: var(--color-primary);
+}
+
+.ad-page .ad-dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #cfdad3;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.ad-page .is-fait .ad-dot {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+}
+
+.ad-page .is-fait .ad-dot::before {
+    content: "";
+    width: 8px;
+    height: 4px;
+    margin-top: -2px;
+    border-bottom: 2px solid #fff;
+    border-left: 2px solid #fff;
+    transform: rotate(-45deg);
+}
+
+.ad-page .is-courant .ad-dot {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px #08664f1f;
+}
+
+.ad-page .is-courant .ad-dot::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+}
+
+.ad-page .is-erreur .ad-dot {
+    border-color: #b42318;
+    background: #b42318;
+}
+
+.ad-page .is-erreur .ad-dot::before {
+    content: "!";
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.ad-page .ad-timeline strong {
+    color: var(--text-primary);
+    font-size: 13.5px;
+    font-weight: 650;
+    line-height: 24px;
+}
+
+.ad-page .ad-timeline li.is-a-venir strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.ad-page .ad-timeline li > span:last-child {
+    color: var(--text-secondary);
+    font-size: 12.5px;
+}
+
+.ad-page .ad-timeline .is-courant > span:last-child {
+    color: var(--color-primary);
+    font-weight: 650;
+}
+
+.ad-page .ad-timeline .is-erreur > span:last-child {
+    color: #b42318;
+    font-weight: 650;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .ad-page .is-courant .ad-dot {
+        animation: ad-pulse 2.2s ease-in-out infinite;
+    }
+}
+
+@keyframes ad-pulse {
+    50% { box-shadow: 0 0 0 7px #08664f10; }
+}
+
+/* --- Actions ------------------------------------------------------------------------------------ */
+
+.ad-page .ad-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ad-page .ad-actions form {
+    margin: 0;
+}
+
+.ad-page .ad-actions .btn,
+.ad-page .ad-block {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 42px;
+}
+
+.ad-page .ad-actions .btn.primary {
+    justify-content: center;
+}
+
+.ad-page .ad-block {
+    margin-top: 12px;
+}
+
+.ad-page .ad-note {
+    margin: 12px 0 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* --- Écrans étroits ------------------------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+    .ad-page .ad-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ad-page .ad-aside {
+        position: static;
+    }
+}
+
+@media (max-width: 760px) {
+    .ad-page .ad-heading,
+    .ad-page .ad-next {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ad-page .ad-next-actions,
+    .ad-page .ad-next-actions .btn,
+    .ad-page .ad-next-actions form {
+        width: 100%;
+    }
+
+    .ad-page .ad-next-actions .btn {
+        justify-content: center;
+    }
+
+    .ad-page .ad-facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ad-page .ad-card {
+        padding: 18px;
+    }
+}

@@ -11,6 +11,7 @@ use App\Http\Controllers\Dshn\CanevasController;
 use App\Http\Controllers\Dshn\DashboardController as DshnDashboardController;
 use App\Http\Controllers\Dshn\FederationController;
 use App\Http\Controllers\Dshn\PonderationController;
+use App\Http\Controllers\Dshn\OuvertureSaisieController;
 use App\Http\Controllers\Dshn\ReportController as DshnReportController;
 use App\Http\Controllers\Dshn\SearchController as DshnSearchController;
 use App\Http\Controllers\Dshn\UserController as DshnUserController;
@@ -123,15 +124,8 @@ $backOfficeRoutes = function () {
     Route::delete('/canevas/sous-axes/{sousAxe}', [CanevasController::class, 'destroySousAxe'])->name('canevas.sous-axes.destroy');
 
     Route::get('/ponderation', [PonderationController::class, 'index'])->name('ponderation.index');
-    Route::post('/ponderation/rubriques', [PonderationController::class, 'storeRubrique'])->name('ponderation.rubriques.store');
-    Route::put('/ponderation/rubriques/{rubrique}', [PonderationController::class, 'updateRubrique'])->name('ponderation.rubriques.update');
-    Route::delete('/ponderation/rubriques/{rubrique}', [PonderationController::class, 'destroyRubrique'])->name('ponderation.rubriques.destroy');
-    Route::post('/ponderation/rubriques/{rubrique}/criteres', [PonderationController::class, 'storeCritere'])->name('ponderation.criteres.store');
-    Route::put('/ponderation/criteres/{critere}', [PonderationController::class, 'updateCritere'])->name('ponderation.criteres.update');
-    Route::delete('/ponderation/criteres/{critere}', [PonderationController::class, 'destroyCritere'])->name('ponderation.criteres.destroy');
+    Route::put('/ponderation/grille', [PonderationController::class, 'updateGrille'])->name('ponderation.grille.update');
     Route::put('/ponderation/paliers', [PonderationController::class, 'updatePaliers'])->name('ponderation.paliers.update');
-    Route::post('/ponderation/paliers', [PonderationController::class, 'storePalier'])->name('ponderation.paliers.store');
-    Route::delete('/ponderation/paliers/{palier}', [PonderationController::class, 'destroyPalier'])->name('ponderation.paliers.destroy');
 };
 
 Route::middleware(['auth', 'role:dshn'])->prefix('dshn')->name('dshn.')->group($backOfficeRoutes);
@@ -145,6 +139,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/comptes', [DshnUserController::class, 'store'])->name('users.store');
     Route::put('/comptes/{user}', [DshnUserController::class, 'update'])->name('users.update');
     Route::delete('/comptes/{user}', [DshnUserController::class, 'destroy'])->name('users.destroy');
+
+    // Ouvertures exceptionnelles de saisie hors exercice : administration seulement.
+    Route::post('/federations/{federation}/ouvertures', [OuvertureSaisieController::class, 'store'])->name('ouvertures.store');
+    Route::delete('/ouvertures/{ouverture}', [OuvertureSaisieController::class, 'destroy'])->name('ouvertures.destroy');
 });
 
 // Circuit de répartition budgétaire (étapes 3 à 12 du workflow officiel) — partagé
@@ -179,6 +177,8 @@ Route::middleware(['auth', 'role:dshn,admin,dg,comite_arbitrage,ministre'])
 
         Route::post('/{campaign}/session', [CampaignController::class, 'organizeSession'])->name('session.organize');
 
+        Route::get('/{campaign}/federations/{federation}/quitus/preparer', [CampaignController::class, 'prepareQuitus'])->name('quitus.prepare');
+        Route::post('/{campaign}/federations/{federation}/quitus/apercu', [CampaignController::class, 'previewQuitus'])->name('quitus.preview');
         Route::post('/{campaign}/federations/{federation}/quitus', [CampaignController::class, 'deliverQuitus'])->name('quitus.deliver');
     });
 

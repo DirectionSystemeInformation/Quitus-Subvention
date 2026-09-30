@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CampaignAllocation;
 use App\Models\Report;
 use App\Support\ActivityCanvasStructure;
+use App\Support\PeriodeSaisie;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +101,8 @@ class ActivityFormController extends Controller
             'tabReports' => $tabReports,
             'reportStats' => $reportStats,
             'workflowStep' => $workflowStep,
+            // Le rapport d'activité se remplit par les activités : seule la saisie des programmes est concernée.
+            'saisieOuverte' => $type === 'rapport_activite' || PeriodeSaisie::estOuverte(Auth::user(), $type, $selectedYear),
         ]);
     }
 
@@ -106,7 +111,16 @@ class ActivityFormController extends Controller
         abort_unless(array_key_exists($type, self::TITLES), 404);
 
         $request->validate(['annee' => ['nullable', 'integer', 'min:2000', 'max:2100']]);
-        $year = (int) $request->old('year', $request->query('annee', in_array($type, ['programme_budgetise', 'programme_reamenage'], true) ? now()->year + 1 : now()->year));
+        // Après un échec de validation, l'année de ce formulaire (et non celle d'un autre).
+        $year = (int) ($request->old('form_loaded') === '1' && $request->old('year')
+            ? $request->old('year')
+            : $request->query('annee', PeriodeSaisie::anneeDeDroit($type)));
+
+        // Programmes : année N+1, ou une année rouverte par l'administration. La page
+        // des documents explique alors que la saisie de cette année est close.
+        if (! PeriodeSaisie::estOuverte(Auth::user(), $type, $year)) {
+            return redirect()->route('documents.index', ['type' => $type, 'annee' => $year]);
+        }
 
         $report = Auth::user()->reports()
             ->where('type', $type)
@@ -124,6 +138,29 @@ class ActivityFormController extends Controller
             $existingLines = $report->budgetLines->keyBy(fn ($l) => $l->sous_axe_code.'|'.$l->numero_ligne);
         }
 
+        // Le programme réaménagé ajuste le programme budgétisé à la subvention
+        // accordée : on affiche ce montant et on propose de repartir du budgétisé.
+        $subvention = null;
+        $programmeBudgetise = null;
+        $reprise = false;
+        if ($type === 'programme_reamenage') {
+            $subvention = CampaignAllocation::where('user_id', Auth::id())
+                ->whereHas('campaign', fn ($query) => $query->where('annee_n1', $year))
+                ->value('montant_final');
+
+            $programmeBudgetise = Auth::user()->reports()
+                ->where('type', 'programme_budgetise')
+                ->where('year', $year)
+                ->whereIn('status', ['soumis', 'valide'])
+                ->with('budgetLines')
+                ->first();
+
+            if ($request->boolean('reprendre') && $programmeBudgetise && ! $request->old('form_loaded')) {
+                $existingLines = $programmeBudgetise->budgetLines->keyBy(fn ($l) => $l->sous_axe_code.'|'.$l->numero_ligne);
+                $reprise = true;
+            }
+        }
+
         return view('activity-form.create', [
             'type' => $type,
             'title' => self::TITLES[$type],
@@ -131,6 +168,11 @@ class ActivityFormController extends Controller
             'year' => $year,
             'existingLines' => $existingLines,
             'report' => $report,
+            'subvention' => $subvention !== null ? (float) $subvention : null,
+            'anneesOuvertes' => PeriodeSaisie::anneesOuvertes(Auth::user(), $type),
+            'ouvertures' => PeriodeSaisie::ouvertures(Auth::user(), $type),
+            'programmeBudgetise' => $programmeBudgetise,
+            'reprise' => $reprise,
         ]);
     }
 
@@ -221,6 +263,11 @@ class ActivityFormController extends Controller
             }
             if ($request->input('action') === 'submit' && $filledCount === 0) {
                 $validator->errors()->add('lignes', 'Ajoutez au moins une activité avec sa désignation et son montant avant de soumettre.');
+            }
+        });
+        $validator->after(function ($validator) use ($request, $type) {
+            if (filled($request->input('year')) && ! PeriodeSaisie::estOuverte(Auth::user(), $type, $request->input('year'))) {
+                $validator->errors()->add('year', PeriodeSaisie::messageFerme($type, $request->input('year')));
             }
         });
         $data = $validator->validate();
@@ -341,6 +388,16 @@ class ActivityFormController extends Controller
             fn ($line) => is_numeric($line->contribution_partenaires) ? (float) $line->contribution_partenaires : 0
         );
 
+        // One dossier combines last year's activity report and this year's programmes.
+        $campaignYear = $report->type === 'rapport_activite' ? $report->year + 1 : $report->year;
+        $relatedReports = Report::where('user_id', $report->user_id)->where('id', '!=', $report->id)
+            ->where(function ($query) use ($campaignYear) {
+                $query->where(fn ($q) => $q->where('type', 'rapport_activite')->where('year', $campaignYear - 1))
+                    ->orWhere(fn ($q) => $q->whereIn('type', ['programme_budgetise', 'programme_reamenage'])->where('year', $campaignYear));
+            })
+            ->when(Auth::id() !== $report->user_id, fn ($query) => $query->where('status', '!=', 'brouillon'))
+            ->orderBy('year')->orderBy('type')->get();
+
         return view('activity-form.show', [
             'type' => $report->type,
             'title' => self::TITLES[$report->type],
@@ -351,6 +408,8 @@ class ActivityFormController extends Controller
             'axesCount' => $axeGroups->count(),
             'totalMontant' => $totalMontant,
             'totalContribution' => $totalContribution,
+            'campaignYear' => $campaignYear,
+            'relatedReports' => $relatedReports,
         ]);
     }
 
@@ -368,7 +427,7 @@ class ActivityFormController extends Controller
 
         $axeGroups = $this->buildAxeGroups($report->budgetLines);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.rapport', [
+        $pdf = Pdf::loadView('pdf.rapport', [
             'title' => self::TITLES[$report->type],
             'report' => $report,
             'axeGroups' => $axeGroups,

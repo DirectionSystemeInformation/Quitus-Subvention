@@ -19,38 +19,60 @@ class ActivityController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate([
+            'statut' => ['nullable', 'in:soumis,brouillon,rejete,valide'],
             'justificatif' => ['nullable', 'in:avec,sans'],
             'annee' => ['nullable', 'integer', 'between:2000,2100'],
             'federation' => ['nullable', 'integer'],
+            'q' => ['nullable', 'string', 'max:150'],
         ]);
-        $justificatif = $filters['justificatif'] ?? 'avec';
+        $statut = $filters['statut'] ?? 'soumis';
+        $justificatif = $filters['justificatif'] ?? null;
+
         $query = FederationActivity::query()
-            ->whereIn('status', ['soumis', 'brouillon'])
             ->when($filters['annee'] ?? null, fn ($q, $year) => $q->where('year', $year))
-            ->when($filters['federation'] ?? null, fn ($q, $id) => $q->where('user_id', $id));
-        $counts = [
-            'avec' => (clone $query)->has('documents')->count(),
-            'sans' => (clone $query)->doesntHave('documents')->count(),
-        ];
-        $activities = $query->with('user', 'documents')
+            ->when($filters['federation'] ?? null, fn ($q, $id) => $q->where('user_id', $id))
+            ->when($filters['q'] ?? null, fn ($q, $search) => $q->where(fn ($matches) => $matches
+                ->where('designation', 'like', '%'.$search.'%')
+                ->orWhereHas('user', fn ($users) => $users->where('federation_name', 'like', '%'.$search.'%'))));
+
+        $counts = array_replace(['soumis' => 0, 'brouillon' => 0, 'rejete' => 0, 'valide' => 0],
+            (clone $query)->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status')->all());
+        $counts['avec'] = (clone $query)->where('status', $statut)->has('documents')->count();
+        $counts['sans'] = (clone $query)->where('status', $statut)->doesntHave('documents')->count();
+        $montantValide = (float) (clone $query)->where('status', 'valide')->sum('montant');
+
+        $activities = $query->where('status', $statut)
+            ->with('user')->withCount('documents')
             ->when($justificatif === 'avec', fn ($q) => $q->has('documents'))
             ->when($justificatif === 'sans', fn ($q) => $q->doesntHave('documents'))
-            ->orderByRaw("CASE status WHEN 'soumis' THEN 0 ELSE 1 END")
-            ->orderByRaw('submitted_at IS NULL')
-            ->orderBy('submitted_at')
-            ->orderBy('created_at')
+            // À traiter : d'abord ce qui peut être examiné, du plus ancien au plus récent.
+            ->when($statut === 'soumis', fn ($q) => $q->orderByRaw('documents_count = 0')->orderByRaw('submitted_at IS NULL')->orderBy('submitted_at'))
+            ->when($statut === 'valide', fn ($q) => $q->orderByDesc('validated_at'))
+            ->when(in_array($statut, ['brouillon', 'rejete'], true), fn ($q) => $q->orderByDesc('updated_at'))
+            ->orderBy('id')
             ->paginate(25)->withQueryString();
-        $federations = User::where('role', 'federation')->orderBy('federation_name')->get(['id', 'federation_name']);
-        $years = FederationActivity::whereIn('status', ['soumis', 'brouillon'])->distinct()->orderByDesc('year')->pluck('year');
 
-        return view('dgf.activities.index', compact('activities', 'justificatif', 'counts', 'federations', 'years'));
+        // File prioritaire, indépendante des filtres : les décisions en attente.
+        $aExaminer = FederationActivity::where('status', 'soumis')->has('documents')
+            ->with('user')->orderByRaw('submitted_at IS NULL')->orderBy('submitted_at')->orderBy('id')->get();
+
+        $federations = User::where('role', 'federation')->orderBy('federation_name')->get(['id', 'federation_name']);
+        $years = FederationActivity::distinct()->orderByDesc('year')->pluck('year');
+
+        return view('dgf.activities.index', compact('activities', 'statut', 'justificatif', 'counts', 'montantValide', 'aExaminer', 'federations', 'years'));
     }
 
     public function show(FederationActivity $activity)
     {
         $activity->load('user', 'documents', 'validator');
 
-        return view('dgf.activities.show', compact('activity'));
+        // File de contrôle : activités soumises avec justificatif, les plus anciennes
+        // d'abord, pour enchaîner les décisions sans repasser par la liste.
+        $aExaminer = FederationActivity::where('status', 'soumis')->whereHas('documents');
+        $suivante = (clone $aExaminer)->whereKeyNot($activity->id)->orderBy('submitted_at')->orderBy('id')->first();
+        $enAttente = $aExaminer->count();
+
+        return view('dgf.activities.show', compact('activity', 'suivante', 'enAttente'));
     }
 
     public function validate_(FederationActivity $activity)

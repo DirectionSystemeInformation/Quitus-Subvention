@@ -1,21 +1,19 @@
 @extends('layouts.dashboard', ['active' => 'users'])
 
-@section('title', 'Comptes DSHN')
+@section('title', 'Comptes agents')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/templatemo-crypto-pages.css') }}">
     <style>
         .market-table td input, .market-table td select { min-width: 140px; }
         .market-table td.password-cell { min-width: 150px; }
-        .market-table tfoot tr { border-top: 1px dashed #cbd5e1; background: var(--bg-primary); }
-        .market-table tfoot td { padding-top: 18px; padding-bottom: 18px; }
     </style>
 @endpush
 
 @section('content')
     <div class="page-header">
-        <h1>Comptes DSHN</h1>
-        <p>Gestion des comptes agents DSHN et administrateurs.</p>
+        <h1>Comptes agents</h1>
+        <p>Gérez les comptes et les rôles des intervenants de la plateforme.</p>
     </div>
 
     @php
@@ -29,6 +27,7 @@
             'ministre' => 'Ministre',
             'dgf' => 'DGF',
         ];
+        $isUserCreation = old('_creation') === 'user';
     @endphp
 
     {{-- Forms live outside the table markup (a <form> is not a valid child of <tbody>/<tr>);
@@ -43,9 +42,23 @@
             @method('DELETE')
         </form>
     @endforeach
-    <form id="add-user" method="POST" action="{{ role_route('users.store') }}" style="display:none;">
-        @csrf
-    </form>
+    <div class="creation-ui">
+        <x-form-section step="+" title="Créer un compte" description="Renseignez l’identité de l’agent et les accès nécessaires à sa mission.">
+            <form id="add-user" method="POST" action="{{ role_route('users.store') }}" @if (old('_creation') === 'user') data-error-scope @endif>
+                @csrf
+                <input type="hidden" name="_creation" value="user">
+                <p class="creation-required">Tous les champs sont obligatoires.</p>
+                <div class="creation-grid">
+                    <div class="form-group"><label class="form-label" for="newUserName">Nom complet</label><input id="newUserName" type="text" name="name" class="form-input" value="{{ $isUserCreation ? old('name') : '' }}" placeholder="Prénom et nom" autocomplete="name" maxlength="255" required></div>
+                    <div class="form-group"><label class="form-label" for="newUserEmail">Adresse e-mail</label><input id="newUserEmail" type="email" name="email" class="form-input" value="{{ $isUserCreation ? old('email') : '' }}" placeholder="prenom.nom@exemple.bf" autocomplete="email" maxlength="255" required></div>
+                    <div class="form-group full-width"><label class="form-label" for="newUserRole">Rôle dans la plateforme</label><select id="newUserRole" name="role" class="form-select" aria-describedby="newUserRoleHint" required>@foreach ($roleOptions as $value => $label)<option value="{{ $value }}" @selected(($isUserCreation ? old('role', 'dshn') : 'dshn') === $value)>{{ $label }}</option>@endforeach</select><p class="creation-hint" id="newUserRoleHint">Le rôle détermine les écrans et les actions accessibles à ce compte.</p></div>
+                    <div class="form-group"><label class="form-label" for="newUserPassword">Mot de passe</label><input id="newUserPassword" type="password" name="password" class="form-input" autocomplete="new-password" aria-describedby="newPasswordHint" required><p id="newPasswordHint" class="creation-hint">8 caractères minimum.</p></div>
+                    <div class="form-group"><label class="form-label" for="newUserConfirmation">Confirmer le mot de passe</label><input id="newUserConfirmation" type="password" name="password_confirmation" class="form-input" autocomplete="new-password" required></div>
+                </div>
+                <div class="creation-actions"><p>Le compte sera actif dès sa création.</p><button type="submit" class="btn primary">Créer le compte</button></div>
+            </form>
+        </x-form-section>
+    </div>
 
     <div class="card">
         <div class="card-header">
@@ -90,22 +103,6 @@
                     </tr>
                 @endforeach
             </tbody>
-            <tfoot>
-                <tr>
-                    <td><input type="text" name="name" form="add-user" class="form-input" placeholder="Nom" required></td>
-                    <td><input type="email" name="email" form="add-user" class="form-input" placeholder="Email" required></td>
-                    <td>
-                        <select name="role" form="add-user" class="form-select">
-                            @foreach ($roleOptions as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td class="password-cell"><input type="password" name="password" form="add-user" class="form-input" placeholder="Mot de passe" required></td>
-                    <td class="password-cell"><input type="password" name="password_confirmation" form="add-user" class="form-input" placeholder="Confirmer" required></td>
-                    <td><button type="submit" form="add-user" class="btn primary" style="white-space:nowrap;">+ Ajouter</button></td>
-                </tr>
-            </tfoot>
         </table>
         </div>
         <x-empty-state icon="search" title="Aucun résultat." :compact="true" class="js-table-empty" data-target="users-table" style="display:none;" />

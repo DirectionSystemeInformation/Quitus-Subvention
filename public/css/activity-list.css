@@ -1,0 +1,604 @@
+/* ==========================================================================
+   Liste des activités réalisées (espace fédération) : actions à mener,
+   onglets par état, recherche et tableau cliquable.
+   Chargée avant platform.css : sélecteurs qualifiés par .al-page.
+   ========================================================================== */
+
+.al-page .ui-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* --- À faire ------------------------------------------------------------------- */
+
+.al-page .al-todo {
+    margin-bottom: 20px;
+    padding: 18px 20px 14px;
+    background: #fff;
+    border: 1px solid #f1dcad;
+    border-left: 4px solid #d39a1c;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px #163c2b08;
+}
+
+.al-page .al-todo-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-bottom: 10px;
+}
+
+.al-page .al-todo-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 750;
+}
+
+.al-page .al-todo-count {
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: #fdecc8;
+    color: #7a4d00;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.al-page .al-todo-head p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.al-page .al-todo ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.al-page .al-todo-item {
+    display: flex;
+    align-items: center;
+    gap: 12px 14px;
+    padding: 10px 0;
+}
+
+.al-page .al-todo-item + .al-todo-item {
+    border-top: 1px solid #f1ede3;
+}
+
+.al-page .al-todo-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #9aa8a0;
+    box-shadow: 0 0 0 4px #9aa8a022;
+}
+
+.al-page .al-todo-item.is-warning .al-todo-dot { background: #d39a1c; box-shadow: 0 0 0 4px #d39a1c26; }
+.al-page .al-todo-item.is-danger .al-todo-dot { background: #b42318; box-shadow: 0 0 0 4px #b4231822; }
+
+.al-page .al-todo-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.al-page .al-todo-name {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.al-page .al-todo-name:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.al-page .al-todo-body span {
+    color: var(--text-secondary);
+    font-size: 12.5px;
+}
+
+.al-page .al-todo-item.is-danger .al-todo-body span { color: #912018; }
+.al-page .al-todo-item.is-warning .al-todo-body span { color: #7a4d00; }
+
+.al-page .al-todo-item .btn {
+    flex: none;
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+}
+
+.al-page .al-more {
+    display: inline-block;
+    margin-top: 6px;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+/* --- Carte principale : onglets, filtres ---------------------------------------- */
+
+.al-page .al-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px #163c2b08;
+}
+
+.al-page .al-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.al-page .al-tabs {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+}
+
+.al-page .al-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: -1px;
+    padding: 16px 2px 13px;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.al-page .al-tab:hover {
+    color: var(--text-primary);
+}
+
+.al-page .al-tab.is-active {
+    border-bottom-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.al-page .al-tab:focus-visible {
+    outline: none;
+    border-radius: 6px;
+    box-shadow: var(--focus-ring);
+}
+
+.al-page .al-tab-count {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #eef2ef;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.al-page .al-tab.is-active .al-tab-count {
+    background: #e2f1e8;
+    color: var(--color-primary);
+}
+
+.al-page .al-tab.is-alert .al-tab-count {
+    background: #fdecc8;
+    color: #7a4d00;
+    font-weight: 800;
+}
+
+.al-page .al-verse {
+    margin: 0;
+    padding-bottom: 14px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.al-page .al-verse strong {
+    color: var(--color-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.al-page .al-filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 20px;
+}
+
+.al-page .al-search {
+    flex: 1 1 280px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d2ded5;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--text-secondary);
+}
+
+.al-page .al-search:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.al-page .al-search input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    border: 0;
+    outline: none;
+    background: none;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 14px;
+}
+
+/* Le chevron du menu ne recouvre plus le libellé. */
+.al-page .al-filters .al-year {
+    width: auto;
+    min-width: 180px;
+    min-height: 42px;
+    margin: 0;
+    padding: 8px 38px 8px 12px;
+    background-position: right 12px center;
+}
+
+.al-page .al-filters .btn {
+    min-height: 42px;
+}
+
+.al-page .al-reset {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* --- Tableau ------------------------------------------------------------------------ */
+
+.al-page .al-table-wrap {
+    position: relative;
+    overflow-x: auto;
+}
+
+.al-page .al-table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.al-page .al-table th {
+    padding: 10px 16px;
+    background: #f7faf8;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.al-page .al-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef2ef;
+    vertical-align: middle;
+}
+
+.al-page .al-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.al-page .al-table tbody tr[data-href] {
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.al-page .al-table tbody tr[data-href]:hover {
+    background: #f6faf7;
+}
+
+.al-page .al-table .is-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.al-page .al-activity {
+    max-width: 440px;
+}
+
+.al-page .al-name {
+    display: block;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.al-page tr:hover .al-name,
+.al-page .al-name:focus-visible {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.al-page .al-axe {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-top: 4px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+}
+
+.al-page .al-chip {
+    padding: 1px 8px;
+    border: 1px solid #d6e4db;
+    border-radius: 999px;
+    background: #f1f6f3;
+    color: var(--color-primary);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.al-page .al-period {
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.al-page .al-pieces {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: #eef5fb;
+    color: #1f5f8b;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.al-page .al-pieces.is-missing {
+    background: #fff4dc;
+    color: #7a4d00;
+}
+
+.al-page .al-muted {
+    color: var(--text-secondary);
+}
+
+.al-page .al-go {
+    width: 40px;
+    color: #9aa8a0;
+}
+
+.al-page tr:hover .al-go {
+    color: var(--color-primary);
+}
+
+.al-page .al-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 40px 20px 44px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.al-page .al-empty strong {
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.al-page .al-empty p {
+    max-width: 440px;
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.al-page .platform-pagination {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+}
+
+/* --- Petits écrans : chaque activité devient une carte ----------------------------- */
+
+@media (max-width: 760px) {
+    .al-page .al-todo-item {
+        flex-wrap: wrap;
+    }
+
+    .al-page .al-todo-body {
+        flex-basis: calc(100% - 30px);
+    }
+
+    .al-page .al-todo-item .btn {
+        margin-left: 24px;
+    }
+
+    .al-page .al-toolbar {
+        padding: 0 14px;
+    }
+
+    .al-page .al-filters {
+        padding: 14px;
+    }
+
+    .al-page .al-year {
+        flex: 1;
+    }
+
+    .al-page .al-table {
+        min-width: 0;
+    }
+
+    .al-page .al-table thead {
+        display: none;
+    }
+
+    .al-page .al-table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 6px 12px;
+        padding: 14px;
+        border-top: 1px solid var(--border);
+    }
+
+    .al-page .al-table td {
+        padding: 0;
+        border: 0;
+    }
+
+    .al-page .al-activity { grid-column: 1 / -1; max-width: none; }
+    .al-page .al-period { grid-column: 1; }
+    .al-page .al-table .is-amount { grid-column: 2; }
+    .al-page .al-go { display: none; }
+}
+
+/* ==========================================================================
+   File de contrôle DGF (mêmes composants, quelques ajouts)
+   ========================================================================== */
+
+/* « À examiner maintenant » : la file de travail, en vert plutôt qu'en alerte. */
+.al-page .al-todo.is-review {
+    border-color: #cfe5d8;
+    border-left-color: var(--color-primary);
+}
+
+.al-page .al-todo.is-review .al-todo-count {
+    background: #e2f1e8;
+    color: var(--color-primary);
+}
+
+.al-page .al-todo-item.is-ok .al-todo-dot {
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px #08664f1f;
+}
+
+.al-page .al-todo.is-review .al-todo-item.is-warning .al-todo-body span,
+.al-page .al-todo.is-review .al-todo-item.is-danger .al-todo-body span {
+    color: var(--text-secondary);
+}
+
+.al-page .al-clear {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    padding: 14px 18px;
+    background: #edf7f1;
+    border: 1px solid #c9e4d5;
+    border-radius: 12px;
+    color: #0a6149;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.al-page .al-clear .ui-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.al-page .al-fede {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.al-page .al-fede .ui-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--color-primary);
+}
+
+/* Ancienneté d'une soumission : vert, ambre après 7 jours, rouge après 14. */
+.al-page .al-age {
+    display: block;
+    margin-top: 2px;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.al-page .al-age.is-warning { color: #9a6412; }
+.al-page .al-age.is-danger { color: #b42318; }
+
+.al-page .al-todo-head .al-age {
+    display: inline;
+    margin-left: 4px;
+}
+
+/* Sous-filtre par justificatif. */
+.al-page .al-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 20px 14px;
+}
+
+.al-page .al-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid #d6e4db;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.al-page .al-filter-chip span {
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.al-page .al-filter-chip:hover {
+    border-color: #9dc0ad;
+    color: var(--text-primary);
+}
+
+.al-page .al-filter-chip.is-active {
+    border-color: var(--color-primary);
+    background: #e8f4ee;
+    color: var(--color-primary);
+}
+
+.al-page .al-filter-chip.is-missing:not(.is-active) span {
+    color: #9a6412;
+}
+
+@media (max-width: 760px) {
+    .al-page .al-chips {
+        padding: 0 14px 12px;
+    }
+}
+
+.al-page .al-opening { margin-bottom: 16px; font-size: 13px; }

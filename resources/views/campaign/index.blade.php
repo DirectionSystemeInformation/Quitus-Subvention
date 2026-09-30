@@ -7,29 +7,24 @@
 @endpush
 
 @section('content')
-    <div class="page-header">
-        <h1>Campagnes</h1>
-        <p>Suivi du circuit de répartition de la subvention (pondération, arbitrage, délivrance du quitus)</p>
-    </div>
+    <x-page-heading title="Campagnes de subvention" eyebrow="Pilotage et répartition" description="Suivez chaque campagne, de la pondération des fédérations à la délivrance du quitus." />
 
     @if (auth()->user()->isDshn())
-        <div class="card" style="margin-bottom: 24px; max-width: 480px;">
-            <div class="card-header">
-                <h2 class="card-title">Nouvelle campagne</h2>
-            </div>
-            <form method="POST" action="{{ route('campagnes.store') }}" class="form-grid">
+        <div class="creation-ui">
+        <x-form-section step="+" title="Nouvelle campagne" description="Ouvrez un nouveau cycle de répartition des subventions.">
+            <form method="POST" action="{{ route('campagnes.store') }}" class="creation-inline">
                 @csrf
-                <div class="form-group full-width">
-                    <label class="form-label">Année du programme budgétisé (N+1)</label>
-                    <input type="number" name="annee_n1" class="form-input" min="2000" max="2100" value="{{ old('annee_n1', now()->year + 1) }}" required>
+                <div class="form-group">
+                    <label class="form-label" for="campaignYear">Année du programme budgétisé <span class="required-mark">*</span></label>
+                    <input id="campaignYear" type="number" name="annee_n1" class="form-input" min="2000" max="2100" value="{{ old('annee_n1', now()->year + 1) }}" required aria-describedby="campaignYearHint">
+                    <p class="creation-hint" id="campaignYearHint">Année N+1 : celle des activités prévisionnelles à financer.</p>
                     @error('annee_n1')
                         <p class="strength-text" style="color: var(--color-danger, #E5484D); margin-top: 6px;">{{ $message }}</p>
                     @enderror
                 </div>
-                <div class="form-group full-width">
-                    <button type="submit" class="btn primary">Créer la campagne</button>
-                </div>
+                <button type="submit" class="btn primary">Créer la campagne</button>
             </form>
+        </x-form-section>
         </div>
     @endif
 

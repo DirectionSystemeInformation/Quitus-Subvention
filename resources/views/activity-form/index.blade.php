@@ -103,10 +103,12 @@
                         <a href="{{ route('activities.index') }}" class="btn primary">Gérer mes activités</a>
                     @endif
                 @else
-                    @if (! $selectedReport || $selectedReport->status !== 'valide')
+                    @if ((! $selectedReport || $selectedReport->status !== 'valide') && $saisieOuverte)
                         <a href="{{ route(str_replace('_', '-', $type).'.create', ['annee' => $selectedYear]) }}" class="btn primary">
                             {{ $selectedReport?->status === 'brouillon' ? 'Reprendre le brouillon' : ($selectedReport ? 'Modifier' : 'Préparer') }}
                         </a>
+                    @elseif (! $saisieOuverte && (! $selectedReport || $selectedReport->status !== 'valide'))
+                        <p class="doc-closed-note">La saisie du {{ mb_strtolower($shortTitle) }} {{ $selectedYear }} est close : seule l’année {{ \App\Support\PeriodeSaisie::anneeDeDroit($type) }} est ouverte. L’administration peut rouvrir exceptionnellement cet exercice.</p>
                     @endif
                     @if ($selectedReport)
                         <a href="{{ route('activity-form.show', $selectedReport) }}" class="btn">Consulter le programme</a>

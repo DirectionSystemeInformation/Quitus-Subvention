@@ -8,9 +8,14 @@ use App\Models\Campaign;
 use App\Models\CampaignAllocation;
 use App\Models\User;
 use App\Support\PonderationGrille;
+use App\Support\Quitus;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -129,10 +134,15 @@ class CampaignController extends Controller
                 continue;
             }
 
+            // Un critère laissé vide reste vide (null) plutôt que de devenir 0 :
+            // « non évalué » et « évalué à zéro » ne disent pas la même chose.
+            // Les totaux traitent null comme 0.
             $clean = [];
             foreach ($criteres as $slug => $critere) {
-                $valeur = (float) ($scores[$slug] ?? 0);
-                $clean[$slug] = max(0, min((float) $critere['max'], $valeur));
+                $valeur = $scores[$slug] ?? null;
+                $clean[$slug] = ($valeur === null || $valeur === '')
+                    ? null
+                    : max(0, min((float) $critere['max'], (float) $valeur));
             }
 
             $allocation->criteres_scores = $clean;
@@ -711,28 +721,89 @@ class CampaignController extends Controller
         return back()->with('status', "Session d'arbitrage organisée.");
     }
 
-    public function deliverQuitus(Campaign $campaign, User $federation)
+    /**
+     * Préparation du quitus : la DSHN fixe le délai de justification de chaque
+     * activité du programme réaménagé, vérifie l'aperçu puis délivre. Après
+     * délivrance, la page reste consultable en lecture seule.
+     */
+    public function prepareQuitus(Campaign $campaign, User $federation)
+    {
+        abort_unless(Auth::user()->isDshn(), 403);
+        abort_unless($federation->role === 'federation' && $campaign->etape >= 11, 404);
+
+        return view('campaign.quitus', ['quitus' => Quitus::pour($campaign, $federation)]);
+    }
+
+    /** Aperçu du PDF avec les délais saisis, sans rien enregistrer. */
+    public function previewQuitus(Request $request, Campaign $campaign, User $federation)
     {
         abort_unless(Auth::user()->isDshn(), 403);
         abort_unless($federation->role === 'federation', 404);
 
-        $allocation = $campaign->allocations()->where('user_id', $federation->id)->firstOrFail();
+        $quitus = Quitus::pour($campaign, $federation);
+        $delais = (array) $request->input('delais', []);
 
-        $reamenage = $federation->reports()
-            ->where('type', 'programme_reamenage')
-            ->where('year', $campaign->annee_n1)
-            ->first();
-
-        abort_unless($reamenage && $reamenage->status === 'valide', 422, 'Le programme réaménagé de cette fédération n\'est pas encore validé.');
-
-        $allocation->update([
-            'quitus_delivered_at' => now(),
-            'quitus_reference' => 'QUITUS-'.$campaign->annee_n1.'-'.Str::padLeft((string) $federation->id, 4, '0'),
-        ]);
-
-        if ($campaign->allocations()->whereNull('quitus_delivered_at')->doesntExist()) {
-            $campaign->update(['statut' => 'termine']);
+        if (! $quitus->allocation->quitus_delivered_at) {
+            foreach ($quitus->lignes as $ligne) {
+                $saisie = $delais[$ligne->id] ?? null;
+                $ligne->delai_justification = is_string($saisie) && strtotime($saisie) ? Carbon::parse($saisie) : null;
+            }
         }
+
+        return Pdf::loadView('pdf.quitus', ['quitus' => $quitus, 'apercu' => true])
+            ->stream("apercu-quitus-{$campaign->annee_n1}.pdf");
+    }
+
+    public function deliverQuitus(Request $request, Campaign $campaign, User $federation)
+    {
+        abort_unless(Auth::user()->isDshn(), 403);
+        abort_unless($federation->role === 'federation', 404);
+
+        $quitus = Quitus::pour($campaign, $federation);
+
+        abort_unless($quitus->programmeValide(), 422, 'Le programme réaménagé de cette fédération n\'est pas encore validé.');
+
+        if ($quitus->allocation->quitus_delivered_at) {
+            return redirect()->route('campagnes.quitus.prepare', [$campaign, $federation])
+                ->with('status', 'Ce quitus a déjà été délivré.');
+        }
+
+        if ($quitus->lignes->isEmpty()) {
+            throw ValidationException::withMessages(['delais' => "Le programme réaménagé ne contient aucune activité : le quitus ne peut pas être délivré."]);
+        }
+
+        $delais = (array) $request->input('delais', []);
+        $erreurs = [];
+
+        foreach ($quitus->lignes as $index => $ligne) {
+            $numero = $index + 1;
+            $saisie = $delais[$ligne->id] ?? null;
+
+            if (! is_string($saisie) || ! strtotime($saisie)) {
+                $erreurs["delais.{$ligne->id}"] = "Renseignez le délai de justification de l'activité n° {$numero}.";
+            } elseif ($ligne->date && Carbon::parse($saisie)->lt($ligne->date)) {
+                $erreurs["delais.{$ligne->id}"] = "Le délai de justification de l'activité n° {$numero} ne peut pas précéder sa date ({$ligne->date->format('d/m/Y')}).";
+            }
+        }
+
+        if ($erreurs) {
+            throw ValidationException::withMessages($erreurs);
+        }
+
+        DB::transaction(function () use ($quitus, $delais, $campaign, $federation) {
+            foreach ($quitus->lignes as $ligne) {
+                $ligne->update(['delai_justification' => Carbon::parse($delais[$ligne->id])]);
+            }
+
+            $quitus->allocation->update([
+                'quitus_delivered_at' => now(),
+                'quitus_reference' => 'QUITUS-'.$campaign->annee_n1.'-'.Str::padLeft((string) $federation->id, 4, '0'),
+            ]);
+
+            if ($campaign->allocations()->whereNull('quitus_delivered_at')->doesntExist()) {
+                $campaign->update(['statut' => 'termine']);
+            }
+        });
 
         ActivityLog::record(
             'validated',
@@ -741,7 +812,8 @@ class CampaignController extends Controller
             $federation->federation_name
         );
 
-        return back()->with('status', "Quitus délivré à {$federation->federation_name}.");
+        return redirect()->route('campagnes.quitus.prepare', [$campaign, $federation])
+            ->with('status', "Quitus délivré à {$federation->federation_name}. Il est téléchargeable par la DSHN et par la fédération.");
     }
 
     public function downloadQuitus(Campaign $campaign, User $federation)
@@ -749,16 +821,11 @@ class CampaignController extends Controller
         $user = Auth::user();
         abort_unless($user->isDshn() || ($user->isFederation() && $user->id === $federation->id), 403);
 
-        $allocation = $campaign->allocations()->where('user_id', $federation->id)->firstOrFail();
+        $quitus = Quitus::pour($campaign, $federation);
 
-        abort_unless($allocation->quitus_delivered_at, 404);
+        abort_unless($quitus->allocation->quitus_delivered_at, 404);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.quitus', [
-            'campaign' => $campaign,
-            'federation' => $federation,
-            'allocation' => $allocation,
-        ]);
-
-        return $pdf->download("quitus-{$federation->federation_name}-{$campaign->annee_n1}.pdf");
+        return Pdf::loadView('pdf.quitus', ['quitus' => $quitus, 'apercu' => false])
+            ->download('quitus-'.Str::slug($federation->federation_name).'-'.$campaign->annee_n1.'.pdf');
     }
 }
