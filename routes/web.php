@@ -15,17 +15,21 @@ use App\Http\Controllers\Dshn\OuvertureSaisieController;
 use App\Http\Controllers\Dshn\ReportController as DshnReportController;
 use App\Http\Controllers\Dshn\SearchController as DshnSearchController;
 use App\Http\Controllers\Dshn\UserController as DshnUserController;
+use App\Http\Controllers\PortailController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth as AuthFacade;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (AuthFacade::check()) {
-        return redirect()->route(home_route_name(AuthFacade::user()));
+        return redirect()->route(portail_accueil(AuthFacade::user()));
     }
 
     return view('landing');
 })->name('home');
+
+// Choix du portail après connexion : Quitus (subventions) ou Suivi des talents.
+Route::get('/portails', PortailController::class)->middleware('auth')->name('portails');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

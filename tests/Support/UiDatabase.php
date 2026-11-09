@@ -61,5 +61,15 @@ final class UiDatabase
             $table->foreignId('canvas_sous_axe_id')->nullable()->constrained('canvas_sous_axes')->nullOnDelete();
             $table->foreignId('activity_id')->nullable()->constrained('federation_activities')->nullOnDelete();
         });
+
+        // Portail « Suivi des talents » (migrations portables MySQL / SQLite)
+        foreach ([
+            '2026_10_26_200000_create_talent_permission_tables.php',
+            '2026_10_26_200100_create_talent_referentiel_tables.php',
+            '2026_10_26_200200_create_talents_tables.php',
+            '2026_10_26_200300_create_talent_suivi_tables.php',
+        ] as $migration) {
+            (require database_path('migrations/'.$migration))->up();
+        }
     }
 }

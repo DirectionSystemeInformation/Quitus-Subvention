@@ -3,15 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Talents\Federation as FederationTalents;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
+
+    private ?FederationTalents $federationTalentsResolue = null;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +32,10 @@ class User extends Authenticatable
         'arrete_numero',
         'arrete_date',
         'rejection_reason',
+        'talent_federation_id',
+        'telephone',
+        'fonction',
+        'talent_preferences',
     ];
 
     /**
@@ -51,6 +59,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'arrete_date' => 'date',
+            'talent_preferences' => 'array',
         ];
     }
 
@@ -107,6 +116,47 @@ class User extends Authenticatable
     public function activities()
     {
         return $this->hasMany(FederationActivity::class);
+    }
+
+    // ---- Portail « Suivi des talents » ----
+
+    /** Compte complémentaire du suivi des talents (DTN, médecin...) : pas d'accès à Quitus. */
+    public function isComptesTalents(): bool
+    {
+        return $this->role === 'talents';
+    }
+
+    public function aAccesQuitus(): bool
+    {
+        return ! $this->isComptesTalents();
+    }
+
+    public function aAccesTalents(): bool
+    {
+        return $this->isActive() && $this->roles->isNotEmpty();
+    }
+
+    /** Ministère, administrateurs, observateurs nationaux : vision sur toutes les fédérations. */
+    public function aAccesNational(): bool
+    {
+        return $this->can('acces.national');
+    }
+
+    /** Fédération du suivi des talents : la sienne pour un compte fédération, celle de rattachement sinon. */
+    public function federationTalents(): ?FederationTalents
+    {
+        return $this->federationTalentsResolue ??= $this->isFederation()
+            ? FederationTalents::where('user_id', $this->id)->first()
+            : ($this->talent_federation_id ? FederationTalents::find($this->talent_federation_id) : null);
+    }
+
+    /**
+     * Fédération à laquelle limiter les données. 0 = aucune : un compte sans fédération
+     * ni accès national ne voit rien, plutôt que tout.
+     */
+    public function federationCloisonnee(): int
+    {
+        return (int) $this->federationTalents()?->id;
     }
 
     public function sendPasswordResetNotification($token): void

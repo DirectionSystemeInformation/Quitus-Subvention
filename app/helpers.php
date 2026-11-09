@@ -14,7 +14,23 @@ if (! function_exists('home_route_name')) {
             $user->isDshn() => 'dshn.dashboard',
             $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
             $user->isDgf() => 'dgf.activities.index',
+            $user->isComptesTalents() => 'suivi.dashboard',
             default => 'dashboard',
+        };
+    }
+}
+
+if (! function_exists('portail_accueil')) {
+    /**
+     * Where to land after login: the portal chooser when the account can use both
+     * Quitus and the talent-tracking portal, otherwise straight into the only one it can use.
+     */
+    function portail_accueil(\App\Models\User $user): string
+    {
+        return match (true) {
+            $user->aAccesQuitus() && $user->aAccesTalents() => 'portails',
+            $user->aAccesTalents() => 'suivi.dashboard',
+            default => home_route_name($user),
         };
     }
 }

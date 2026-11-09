@@ -20,6 +20,14 @@
                 @endforeach
             </div>
         @endforeach
+        @if ($navigationUser->aAccesTalents())
+            <div class="platform-nav-group">
+                <p class="platform-nav-label">Autre portail</p>
+                <a class="platform-nav-link" href="{{ route('suivi.dashboard') }}">
+                    <x-ui-icon name="users" /><span>Suivi des talents</span>
+                </a>
+            </div>
+        @endif
     </nav>
     <div class="platform-sidebar-footer">
         <a class="platform-account platform-nav-link {{ ($active ?? '') === 'profile' ? 'active' : '' }}" href="{{ route('profile.edit') }}" @if (($active ?? '') === 'profile') aria-current="page" @endif>

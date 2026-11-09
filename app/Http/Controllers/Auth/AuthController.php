@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Services\Talents\AccesTalents;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -51,16 +52,21 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->isComptesTalents() && ! $user->isActive()) {
+            throw ValidationException::withMessages([
+                'identifiant' => "Votre compte du suivi des talents est désactivé. Contactez l'administrateur de la plateforme.",
+            ]);
+        }
+
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->intended(route(match (true) {
-            $user->isAdmin() => 'admin.dashboard',
-            $user->isDshn() => 'dshn.dashboard',
-            $user->isDg(), $user->isComiteArbitrage(), $user->isMinistre() => 'campagnes.index',
-            $user->isDgf() => 'dgf.activities.index',
-            default => 'dashboard',
-        }));
+        // Rôle du portail « Suivi des talents » déduit du rôle Quitus, puis choix du portail
+        // (Quitus ou Suivi des talents) pour les comptes qui ont accès aux deux.
+        AccesTalents::synchroniser($user);
+        $request->session()->put('talents.synchro', $user->role.'|'.$user->status);
+
+        return redirect()->intended(route(portail_accueil($user)));
     }
 
     public function register(Request $request)
