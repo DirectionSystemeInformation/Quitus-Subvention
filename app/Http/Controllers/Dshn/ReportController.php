@@ -66,6 +66,9 @@ class ReportController extends Controller
 
     public function reject(Request $request, Report $report)
     {
+        // Un brouillon appartient encore à la fédération : interdit, comme pour la validation.
+        // Un document déjà validé ou rejeté n'a plus rien à rejeter.
+        abort_if($report->status === 'brouillon', 403);
         abort_unless($report->status === 'soumis', 404);
         $data = $request->validate([
             'rejection_reason' => ['required', 'string', 'max:500'],

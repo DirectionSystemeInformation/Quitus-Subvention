@@ -131,6 +131,15 @@ class DossierWorkflowTest extends TestCase
         $this->assertSame('brouillon', $draft->fresh()->status);
     }
 
+    public function test_dshn_cannot_reject_an_already_validated_document(): void
+    {
+        $report = Report::create(['user_id' => $this->federation->id, 'type' => 'programme_budgetise', 'year' => 2027, 'status' => 'valide']);
+        $this->actingAs($this->user('dshn'))
+            ->post(route('dshn.reports.reject', $report), ['rejection_reason' => 'test'])
+            ->assertNotFound();
+        $this->assertSame('valide', $report->fresh()->status);
+    }
+
     public function test_quitus_download_is_available_only_to_owner_or_dshn_after_delivery(): void
     {
         $campaign = Campaign::create(['annee_n1' => 2027]);
